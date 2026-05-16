@@ -1,0 +1,984 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Listelerim</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<style>
+:root {
+  --bg:        #0e0e0c;
+  --bg2:       #161614;
+  --bg3:       #1e1e1b;
+  --border:    rgba(255,255,255,0.07);
+  --border2:   rgba(255,255,255,0.12);
+  --text:      #f0ede6;
+  --text2:     #8a877f;
+  --text3:     #4a4844;
+  --accent:    #c8f565;
+  --accent-dim:#7aab28;
+  --accent-bg: rgba(200,245,101,0.08);
+  --red:       #e05252;
+  --red-bg:    rgba(224,82,82,0.1);
+  --amber:     #f5c842;
+  --amber-bg:  rgba(245,200,66,0.1);
+  --radius:    14px;
+  --radius-sm: 8px;
+  --radius-xs: 5px;
+  --serif:     'Instrument Serif', Georgia, serif;
+  --sans:      'DM Sans', system-ui, sans-serif;
+  --mono:      'DM Mono', monospace;
+  --transition: .18s cubic-bezier(.4,0,.2,1);
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { font-size: 15px; }
+body { font-family: var(--sans); background: var(--bg); color: var(--text); min-height: 100dvh; -webkit-font-smoothing: antialiased; }
+
+/* ── SCROLLBAR ── */
+::-webkit-scrollbar { width: 5px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 4px; }
+
+/* ── LOGIN SCREEN ── */
+#login-screen {
+  min-height: 100dvh; display: flex; align-items: center; justify-content: center; padding: 2rem;
+  background: radial-gradient(ellipse 60% 50% at 50% 0%, rgba(200,245,101,0.05) 0%, transparent 70%);
+}
+.login-box {
+  width: 100%; max-width: 380px;
+}
+.login-logo {
+  text-align: center; margin-bottom: 2.5rem;
+}
+.login-logo .wordmark {
+  font-family: var(--serif); font-size: 28px; font-style: italic; color: var(--text); letter-spacing: -.5px;
+}
+.login-logo .dot { color: var(--accent); }
+.login-card {
+  background: var(--bg2); border: 1px solid var(--border2); border-radius: var(--radius);
+  padding: 2rem; backdrop-filter: blur(20px);
+}
+.login-card h2 { font-size: 15px; font-weight: 500; color: var(--text2); margin-bottom: 1.5rem; }
+.login-error {
+  background: var(--red-bg); border: 1px solid rgba(224,82,82,0.2); color: var(--red);
+  font-size: 12px; padding: 10px 14px; border-radius: var(--radius-xs); margin-bottom: 1rem; display: none;
+}
+.login-footer { text-align: center; margin-top: 1.25rem; font-size: 12px; color: var(--text3); }
+
+/* ── FORM ELEMENTS ── */
+.form-group { margin-bottom: 1rem; }
+.form-group label {
+  display: block; font-size: 11px; font-weight: 500; color: var(--text2);
+  text-transform: uppercase; letter-spacing: .06em; margin-bottom: 6px;
+}
+.form-group input, .form-group select, .form-group textarea {
+  width: 100%; background: var(--bg3); border: 1px solid var(--border2);
+  border-radius: var(--radius-sm); padding: 10px 13px; font-size: 14px;
+  font-family: var(--sans); color: var(--text); outline: none;
+  transition: border-color var(--transition);
+}
+.form-group input:focus, .form-group select:focus, .form-group textarea:focus {
+  border-color: var(--accent); box-shadow: 0 0 0 3px rgba(200,245,101,0.08);
+}
+.form-group input::placeholder { color: var(--text3); }
+.form-group select option { background: var(--bg3); }
+.form-group textarea { resize: vertical; min-height: 70px; }
+
+/* ── BUTTONS ── */
+.btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 7px;
+  padding: 9px 18px; font-size: 13px; font-family: var(--sans); font-weight: 500;
+  border-radius: var(--radius-sm); border: 1px solid var(--border2);
+  background: var(--bg3); color: var(--text); cursor: pointer;
+  transition: all var(--transition); white-space: nowrap;
+}
+.btn:hover { border-color: var(--border2); background: var(--bg2); color: var(--text); }
+.btn:active { transform: scale(.98); }
+.btn-accent {
+  background: var(--accent); color: #0e0e0c; border-color: var(--accent); font-weight: 600;
+}
+.btn-accent:hover { background: #d4f877; color: #0e0e0c; }
+.btn-ghost { background: transparent; border-color: transparent; color: var(--text2); }
+.btn-ghost:hover { background: var(--bg3); color: var(--text); border-color: var(--border); }
+.btn-danger { color: var(--red); border-color: transparent; background: transparent; }
+.btn-danger:hover { background: var(--red-bg); border-color: rgba(224,82,82,0.2); }
+.btn-sm { padding: 6px 12px; font-size: 12px; }
+.btn-xs { padding: 4px 9px; font-size: 11px; border-radius: var(--radius-xs); }
+.btn-full { width: 100%; }
+.btn-icon {
+  width: 32px; height: 32px; padding: 0; border-radius: 8px;
+  border-color: transparent; background: transparent; color: var(--text3);
+}
+.btn-icon:hover { background: var(--bg3); color: var(--text); border-color: var(--border); }
+
+/* ── APP LAYOUT ── */
+#app-screen { display: none; min-height: 100dvh; }
+
+.sidebar {
+  position: fixed; left: 0; top: 0; bottom: 0; width: 220px;
+  background: var(--bg2); border-right: 1px solid var(--border);
+  display: flex; flex-direction: column; padding: 1.5rem 0; z-index: 10;
+}
+.sidebar-logo {
+  padding: 0 1.25rem 1.5rem; border-bottom: 1px solid var(--border);
+  font-family: var(--serif); font-size: 20px; font-style: italic; color: var(--text);
+}
+.sidebar-logo .dot { color: var(--accent); }
+.sidebar-nav { padding: 1rem 0.75rem; flex: 1; }
+.nav-label {
+  font-size: 10px; font-weight: 600; color: var(--text3); text-transform: uppercase;
+  letter-spacing: .1em; padding: 0 0.5rem; margin-bottom: 6px; margin-top: 1.25rem;
+}
+.nav-label:first-child { margin-top: 0; }
+.nav-item {
+  display: flex; align-items: center; gap: 9px; padding: 8px 10px;
+  border-radius: var(--radius-xs); font-size: 13px; color: var(--text2);
+  cursor: pointer; transition: all var(--transition); border: 1px solid transparent;
+  background: none; width: 100%; text-align: left; font-family: var(--sans);
+}
+.nav-item:hover { background: var(--bg3); color: var(--text); }
+.nav-item.active { background: var(--accent-bg); color: var(--accent); border-color: rgba(200,245,101,0.15); }
+.nav-item .nav-icon { font-size: 16px; flex-shrink: 0; }
+.nav-item .nav-count {
+  margin-left: auto; font-size: 11px; font-family: var(--mono);
+  background: var(--bg3); color: var(--text3); padding: 1px 7px; border-radius: 999px;
+}
+.nav-item.active .nav-count { background: rgba(200,245,101,0.15); color: var(--accent-dim); }
+.sidebar-footer {
+  padding: 1rem 0.75rem 0; border-top: 1px solid var(--border);
+}
+.user-chip {
+  display: flex; align-items: center; gap: 9px; padding: 8px 10px;
+  border-radius: var(--radius-xs);
+}
+.user-avatar {
+  width: 28px; height: 28px; border-radius: 50%; background: var(--accent-bg);
+  border: 1px solid rgba(200,245,101,0.2); display: flex; align-items: center;
+  justify-content: center; font-size: 12px; color: var(--accent); flex-shrink: 0;
+}
+.user-email { font-size: 11px; color: var(--text3); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; flex: 1; }
+
+/* ── MAIN CONTENT ── */
+.main { margin-left: 220px; padding: 2.5rem 2.5rem 4rem; min-height: 100dvh; }
+.page-header { margin-bottom: 2rem; }
+.page-header h1 {
+  font-family: var(--serif); font-size: 32px; font-style: italic;
+  font-weight: 400; color: var(--text); letter-spacing: -.5px; margin-bottom: 4px;
+}
+.page-header p { font-size: 13px; color: var(--text2); }
+
+/* ── STATS ROW ── */
+.stats-row { display: flex; gap: 12px; margin-bottom: 2rem; flex-wrap: wrap; }
+.stat-card {
+  background: var(--bg2); border: 1px solid var(--border); border-radius: var(--radius-sm);
+  padding: 14px 18px; min-width: 110px;
+}
+.stat-card .stat-val { font-size: 24px; font-weight: 300; font-family: var(--mono); color: var(--text); line-height: 1; }
+.stat-card .stat-key { font-size: 11px; color: var(--text3); margin-top: 4px; text-transform: uppercase; letter-spacing: .06em; }
+.stat-card.accent { border-color: rgba(200,245,101,0.2); background: var(--accent-bg); }
+.stat-card.accent .stat-val { color: var(--accent); }
+
+/* ── PROGRESS ── */
+.progress-wrap { margin-bottom: 2rem; }
+.progress-labels { display: flex; justify-content: space-between; font-size: 11px; color: var(--text3); margin-bottom: 6px; }
+.progress-bar { height: 3px; background: var(--bg3); border-radius: 2px; overflow: hidden; }
+.progress-fill { height: 100%; background: linear-gradient(90deg, var(--accent-dim), var(--accent)); border-radius: 2px; transition: width .5s ease; }
+
+/* ── TOOLBAR ── */
+.toolbar { display: flex; align-items: center; gap: 10px; margin-bottom: 1.5rem; flex-wrap: wrap; }
+.filter-pills { display: flex; gap: 6px; flex-wrap: wrap; flex: 1; }
+.pill {
+  padding: 5px 13px; border-radius: 999px; border: 1px solid var(--border);
+  background: transparent; color: var(--text2); font-size: 12px; font-weight: 500;
+  cursor: pointer; transition: all var(--transition); font-family: var(--sans);
+}
+.pill:hover { border-color: var(--border2); color: var(--text); }
+.pill.active { background: var(--accent); color: #0e0e0c; border-color: var(--accent); }
+
+/* ── CARDS GRID ── */
+.cards-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); gap: 16px; }
+.card {
+  background: var(--bg2); border: 1px solid var(--border); border-radius: var(--radius);
+  overflow: hidden; transition: border-color var(--transition), transform var(--transition);
+  position: relative; cursor: default;
+}
+.card:hover { border-color: var(--border2); transform: translateY(-2px); }
+.card.done { opacity: .45; }
+.card-media { position: relative; }
+.card-thumb { width: 100%; height: 126px; object-fit: cover; display: block; background: var(--bg3); }
+.card-thumb-ph {
+  width: 100%; height: 126px; display: flex; align-items: center; justify-content: center;
+  font-size: 32px; background: var(--bg3); color: var(--text3);
+}
+.card-type-badge {
+  position: absolute; top: 8px; left: 8px; padding: 3px 8px; border-radius: var(--radius-xs);
+  font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: .05em;
+  backdrop-filter: blur(8px); background: rgba(14,14,12,.7); color: var(--text2);
+  border: 1px solid var(--border);
+}
+.card-type-badge.yt { color: #ff6b6b; }
+.card-actions-overlay {
+  position: absolute; top: 8px; right: 8px; display: flex; gap: 4px; opacity: 0;
+  transition: opacity var(--transition);
+}
+.card:hover .card-actions-overlay { opacity: 1; }
+.overlay-btn {
+  width: 28px; height: 28px; border-radius: 6px; border: 1px solid rgba(255,255,255,.1);
+  background: rgba(14,14,12,.75); backdrop-filter: blur(8px);
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer; font-size: 14px; color: var(--text2); transition: all var(--transition);
+}
+.overlay-btn:hover { background: var(--red-bg); color: var(--red); border-color: rgba(224,82,82,.2); }
+.card-body { padding: 13px 14px 14px; }
+.card-title {
+  font-size: 13px; font-weight: 500; color: var(--text); line-height: 1.45; margin-bottom: 10px;
+  display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden;
+}
+.card-footer { display: flex; align-items: center; justify-content: space-between; }
+.status-badge {
+  font-size: 11px; font-weight: 500; padding: 3px 9px; border-radius: 999px;
+  display: inline-flex; align-items: center; gap: 4px;
+}
+.status-badge.done { background: rgba(200,245,101,0.12); color: var(--accent-dim); }
+.status-badge.pending { background: var(--amber-bg); color: var(--amber); }
+.check-btn {
+  width: 28px; height: 28px; border-radius: 50%; border: 1.5px solid var(--border2);
+  background: transparent; cursor: pointer; display: flex; align-items: center;
+  justify-content: center; transition: all var(--transition); flex-shrink: 0;
+}
+.check-btn:hover { border-color: var(--accent); background: var(--accent-bg); }
+.check-btn.done { background: var(--accent); border-color: var(--accent); }
+.check-btn svg { width: 13px; height: 13px; transition: stroke var(--transition); }
+
+/* ── CARD LINK ── */
+.card-link { text-decoration: none; display: block; }
+
+/* ── EMPTY STATE ── */
+.empty-state {
+  text-align: center; padding: 5rem 2rem; color: var(--text3);
+  grid-column: 1 / -1;
+}
+.empty-icon { font-size: 40px; margin-bottom: 1rem; opacity: .4; }
+.empty-state p { font-size: 13px; line-height: 1.7; }
+
+/* ── LINKS PAGE ── */
+.links-toolbar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.5rem; }
+.cat-block {
+  background: var(--bg2); border: 1px solid var(--border); border-radius: var(--radius);
+  overflow: hidden; margin-bottom: 12px;
+}
+.cat-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 13px 16px; border-bottom: 1px solid var(--border);
+}
+.cat-name { font-size: 14px; font-weight: 500; display: flex; align-items: center; gap: 8px; }
+.cat-emoji { font-size: 17px; }
+.link-list { padding: 4px 0; }
+.link-row {
+  display: flex; align-items: center; gap: 10px; padding: 9px 16px;
+  transition: background var(--transition);
+}
+.link-row:hover { background: var(--bg3); }
+.link-dot { width: 4px; height: 4px; border-radius: 50%; background: var(--text3); flex-shrink: 0; }
+.link-row a {
+  font-size: 13px; color: var(--text); text-decoration: none; flex: 1;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap; transition: color var(--transition);
+}
+.link-row a:hover { color: var(--accent); }
+.link-domain { font-size: 11px; color: var(--text3); font-family: var(--mono); flex-shrink: 0; }
+.link-del-btn {
+  opacity: 0; background: none; border: none; cursor: pointer; color: var(--text3);
+  font-size: 16px; line-height: 1; padding: 2px 6px; border-radius: 4px; transition: all var(--transition);
+}
+.link-row:hover .link-del-btn { opacity: 1; }
+.link-del-btn:hover { color: var(--red); background: var(--red-bg); }
+.add-link-row {
+  padding: 8px 12px; border-top: 1px solid var(--border); display: flex; gap: 8px;
+}
+.add-link-input {
+  flex: 1; background: var(--bg3); border: 1px solid var(--border);
+  border-radius: var(--radius-xs); padding: 7px 11px; font-size: 12px;
+  font-family: var(--sans); color: var(--text); outline: none; transition: border-color var(--transition);
+}
+.add-link-input:focus { border-color: var(--accent); }
+.add-link-input::placeholder { color: var(--text3); }
+
+/* ── MODAL ── */
+.modal-overlay {
+  position: fixed; inset: 0; background: rgba(0,0,0,.65); backdrop-filter: blur(4px);
+  display: flex; align-items: center; justify-content: center; z-index: 100; padding: 1rem;
+}
+.modal {
+  background: var(--bg2); border: 1px solid var(--border2); border-radius: var(--radius);
+  width: 100%; max-width: 460px; box-shadow: 0 24px 64px rgba(0,0,0,.4);
+  animation: slideUp .2s ease;
+}
+.modal-header {
+  padding: 18px 22px 16px; border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: space-between;
+}
+.modal-header h2 { font-size: 15px; font-weight: 600; }
+.modal-body { padding: 20px 22px; }
+.modal-footer {
+  padding: 14px 22px; border-top: 1px solid var(--border);
+  display: flex; gap: 8px; justify-content: flex-end;
+}
+.type-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 1.25rem; }
+.type-opt {
+  padding: 12px; border: 1.5px solid var(--border); border-radius: var(--radius-sm);
+  cursor: pointer; text-align: center; font-size: 13px; font-weight: 500;
+  background: var(--bg3); color: var(--text2); transition: all var(--transition);
+}
+.type-opt:hover { border-color: var(--border2); color: var(--text); }
+.type-opt.selected { border-color: var(--accent); background: var(--accent-bg); color: var(--accent); }
+.type-opt .type-icon { font-size: 20px; display: block; margin-bottom: 5px; }
+.or-divider {
+  position: relative; text-align: center; font-size: 11px; color: var(--text3);
+  margin: 1rem 0;
+}
+.or-divider::before, .or-divider::after {
+  content: ''; position: absolute; top: 50%; width: 44%; height: 1px; background: var(--border);
+}
+.or-divider::before { left: 0; }
+.or-divider::after { right: 0; }
+.quick-row { display: flex; gap: 8px; }
+.quick-row input { flex: 1; }
+.preview-card {
+  display: none; background: var(--bg3); border: 1px solid var(--border);
+  border-radius: var(--radius-sm); padding: 12px; gap: 12px; margin-top: 10px;
+  align-items: flex-start;
+}
+.preview-card.show { display: flex; }
+.preview-img { width: 60px; height: 45px; border-radius: 6px; object-fit: cover; flex-shrink: 0; background: var(--border); }
+.preview-info strong { font-size: 12px; color: var(--text); display: block; margin-bottom: 2px; }
+.preview-info span { font-size: 11px; color: var(--text3); font-family: var(--mono); }
+
+/* ── TOAST ── */
+.toast {
+  position: fixed; bottom: 1.5rem; right: 1.5rem; background: var(--bg3);
+  border: 1px solid var(--border2); border-radius: var(--radius-sm);
+  padding: 11px 16px; font-size: 13px; color: var(--text);
+  box-shadow: 0 8px 24px rgba(0,0,0,.3); z-index: 200;
+  animation: toastIn .2s ease; display: none;
+}
+.toast.show { display: block; }
+.toast.success { border-color: rgba(200,245,101,0.3); color: var(--accent); }
+.toast.error { border-color: rgba(224,82,82,0.3); color: var(--red); }
+
+/* ── LOADER ── */
+.loader {
+  position: fixed; inset: 0; background: var(--bg); display: flex;
+  align-items: center; justify-content: center; z-index: 300; font-family: var(--serif);
+  font-style: italic; font-size: 18px; color: var(--text3);
+}
+.loader.hidden { display: none; }
+
+/* ── ANIMATIONS ── */
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(16px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes toastIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ── RESPONSIVE ── */
+@media (max-width: 700px) {
+  .sidebar { display: none; }
+  .main { margin-left: 0; padding: 1.25rem 1rem 3rem; }
+  .page-header h1 { font-size: 24px; }
+}
+</style>
+</head>
+<body>
+
+<div class="loader" id="loader">yükleniyor…</div>
+
+<!-- ═══ LOGIN ═══ -->
+<div id="login-screen" style="display:none;">
+  <div class="login-box">
+    <div class="login-logo">
+      <div class="wordmark">Listelerim<span class="dot">.</span></div>
+    </div>
+    <div class="login-card">
+      <h2>Giriş yap</h2>
+      <div class="login-error" id="login-error"></div>
+      <div class="form-group">
+        <label>E-posta</label>
+        <input type="email" id="login-email" placeholder="sen@mail.com" autocomplete="email">
+      </div>
+      <div class="form-group">
+        <label>Şifre</label>
+        <input type="password" id="login-password" placeholder="••••••••" autocomplete="current-password"
+          onkeydown="if(event.key==='Enter')doLogin()">
+      </div>
+      <button class="btn btn-accent btn-full" onclick="doLogin()" id="login-btn">Giriş Yap →</button>
+    </div>
+    <div class="login-footer">Kişisel okuma ve izleme listem.</div>
+  </div>
+</div>
+
+<!-- ═══ APP ═══ -->
+<div id="app-screen">
+  <nav class="sidebar">
+    <div class="sidebar-logo">Listelerim<span class="dot">.</span></div>
+    <div class="sidebar-nav">
+      <div class="nav-label">İçerikler</div>
+      <button class="nav-item active" id="nav-watchlist" onclick="showPage('watchlist')">
+        <span class="nav-icon">📚</span> İzleme Listesi
+        <span class="nav-count" id="nc-watchlist">0</span>
+      </button>
+      <button class="nav-item" id="nav-links" onclick="showPage('links')">
+        <span class="nav-icon">🔗</span> Faydalı Linkler
+        <span class="nav-count" id="nc-links">0</span>
+      </button>
+      <div class="nav-label">Filtre</div>
+      <button class="nav-item" id="nav-pending" onclick="showPage('watchlist');setFilter('pending')">
+        <span class="nav-icon">⏳</span> Bekleyenler
+        <span class="nav-count" id="nc-pending">0</span>
+      </button>
+      <button class="nav-item" id="nav-done" onclick="showPage('watchlist');setFilter('done')">
+        <span class="nav-icon">✓</span> Tamamlananlar
+        <span class="nav-count" id="nc-done">0</span>
+      </button>
+    </div>
+    <div class="sidebar-footer">
+      <div class="user-chip">
+        <div class="user-avatar" id="user-avatar">?</div>
+        <span class="user-email" id="user-email"></span>
+      </div>
+      <button class="btn btn-ghost btn-full btn-sm" onclick="doLogout()" style="margin-top:6px;">Çıkış Yap</button>
+    </div>
+  </nav>
+
+  <main class="main">
+    <!-- WATCHLIST PAGE -->
+    <div id="page-watchlist">
+      <div class="page-header">
+        <h1>İzleme Listesi</h1>
+        <p>Okumak ve izlemek istediğin içerikler.</p>
+      </div>
+      <div class="stats-row" id="stats-row"></div>
+      <div class="progress-wrap" id="progress-wrap" style="display:none;">
+        <div class="progress-labels">
+          <span id="progress-label-l">İlerleme</span>
+          <span id="progress-label-r">0%</span>
+        </div>
+        <div class="progress-bar"><div class="progress-fill" id="progress-fill" style="width:0%"></div></div>
+      </div>
+      <div class="toolbar">
+        <div class="filter-pills">
+          <button class="pill active" data-f="all"     onclick="setFilter('all')">Tümü</button>
+          <button class="pill"        data-f="pending" onclick="setFilter('pending')">Bekliyor</button>
+          <button class="pill"        data-f="done"    onclick="setFilter('done')">Tamamlandı</button>
+          <button class="pill"        data-f="youtube" onclick="setFilter('youtube')">▶ YouTube</button>
+          <button class="pill"        data-f="blog"    onclick="setFilter('blog')">✍ Blog</button>
+        </div>
+        <button class="btn btn-accent btn-sm" onclick="openItemModal()">+ Ekle</button>
+      </div>
+      <div class="cards-grid" id="cards-grid">
+        <div class="empty-state"><div class="empty-icon">📚</div><p>Henüz içerik yok.<br>Sağ üstten ekleyebilirsin.</p></div>
+      </div>
+    </div>
+
+    <!-- LINKS PAGE -->
+    <div id="page-links" style="display:none;">
+      <div class="page-header">
+        <h1>Faydalı Linkler</h1>
+        <p>Kategorilere göre düzenlenmiş linkler.</p>
+      </div>
+      <div class="links-toolbar">
+        <span></span>
+        <div style="display:flex;gap:8px;">
+          <button class="btn btn-sm" onclick="openCatModal()">+ Kategori</button>
+        </div>
+      </div>
+      <div id="cats-container"></div>
+      <div class="empty-state" id="empty-links" style="display:none;">
+        <div class="empty-icon">🔗</div>
+        <p>Henüz kategori yok.<br>Yukarıdan kategori ekleyebilirsin.</p>
+      </div>
+    </div>
+  </main>
+</div>
+
+<!-- ═══ MODAL: ITEM ═══ -->
+<div class="modal-overlay" id="item-modal" style="display:none;" onclick="if(event.target===this)closeItemModal()">
+  <div class="modal">
+    <div class="modal-header">
+      <h2>Yeni İçerik Ekle</h2>
+      <button class="btn btn-icon" onclick="closeItemModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="type-grid">
+        <div class="type-opt selected" id="topt-youtube" onclick="selType('youtube')">
+          <span class="type-icon">▶</span>YouTube
+        </div>
+        <div class="type-opt" id="topt-blog" onclick="selType('blog')">
+          <span class="type-icon">✍</span>Blog / Makale
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Hızlı Ekle — Linki Yapıştır</label>
+        <div class="quick-row">
+          <input type="url" id="qi-url" placeholder="https://..." onkeydown="if(event.key==='Enter')fetchMeta()">
+          <button class="btn btn-sm" onclick="fetchMeta()" id="fetch-btn">Getir</button>
+        </div>
+        <div class="preview-card" id="preview-card">
+          <img class="preview-img" id="pi-img" src="" alt="">
+          <div class="preview-info">
+            <strong id="pi-title"></strong>
+            <span id="pi-domain"></span>
+          </div>
+        </div>
+      </div>
+      <div class="or-divider">veya manuel doldur</div>
+      <div class="form-group">
+        <label>Başlık *</label>
+        <input type="text" id="mi-title" placeholder="İçeriğin başlığı">
+      </div>
+      <div class="form-group">
+        <label>Link *</label>
+        <input type="url" id="mi-url" placeholder="https://...">
+      </div>
+      <div class="form-group">
+        <label>Kapak Görseli URL <span style="color:var(--text3)">(opsiyonel)</span></label>
+        <input type="url" id="mi-img" placeholder="https://...">
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeItemModal()">İptal</button>
+      <button class="btn btn-accent" onclick="saveItem()">Kaydet</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ MODAL: CATEGORY ═══ -->
+<div class="modal-overlay" id="cat-modal" style="display:none;" onclick="if(event.target===this)closeCatModal()">
+  <div class="modal">
+    <div class="modal-header">
+      <h2>Kategori Ekle</h2>
+      <button class="btn btn-icon" onclick="closeCatModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div style="display:flex;gap:12px;">
+        <div class="form-group" style="width:80px;flex-shrink:0;">
+          <label>Emoji</label>
+          <input type="text" id="ci-emoji" placeholder="📌" maxlength="4" style="text-align:center;font-size:20px;">
+        </div>
+        <div class="form-group" style="flex:1;">
+          <label>Kategori Adı *</label>
+          <input type="text" id="ci-name" placeholder="örn. Geliştirici Araçları"
+            onkeydown="if(event.key==='Enter')saveCat()">
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeCatModal()">İptal</button>
+      <button class="btn btn-accent" onclick="saveCat()">Oluştur</button>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<script>
+// ════════════════════════════════════════════
+// CONFIG — injected by GitHub Actions
+// ════════════════════════════════════════════
+const SUPABASE_URL  = '%%SUPABASE_URL%%';
+const SUPABASE_KEY  = '%%SUPABASE_KEY%%';
+
+const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+// ════════════════════════════════════════════
+// STATE
+// ════════════════════════════════════════════
+let items   = [];
+let cats    = [];
+let filter  = 'all';
+let curType = 'youtube';
+let curPage = 'watchlist';
+let userId  = null;
+
+// ════════════════════════════════════════════
+// INIT
+// ════════════════════════════════════════════
+async function init() {
+  const { data: { session } } = await sb.auth.getSession();
+  if (session) {
+    userId = session.user.id;
+    await bootApp(session.user);
+  } else {
+    showLogin();
+  }
+  document.getElementById('loader').classList.add('hidden');
+}
+
+function showLogin() {
+  document.getElementById('login-screen').style.display = 'flex';
+  document.getElementById('app-screen').style.display = 'none';
+}
+
+async function bootApp(user) {
+  document.getElementById('login-screen').style.display = 'none';
+  document.getElementById('app-screen').style.display = 'block';
+  const email = user.email || '';
+  document.getElementById('user-email').textContent = email;
+  document.getElementById('user-avatar').textContent = email[0]?.toUpperCase() || '?';
+  await loadAll();
+  renderAll();
+}
+
+// ════════════════════════════════════════════
+// AUTH
+// ════════════════════════════════════════════
+async function doLogin() {
+  const email = document.getElementById('login-email').value.trim();
+  const pass  = document.getElementById('login-password').value;
+  const btn   = document.getElementById('login-btn');
+  const err   = document.getElementById('login-error');
+  err.style.display = 'none';
+  btn.textContent = 'Giriş yapılıyor…'; btn.disabled = true;
+  const { data, error } = await sb.auth.signInWithPassword({ email, password: pass });
+  btn.textContent = 'Giriş Yap →'; btn.disabled = false;
+  if (error) { err.textContent = 'E-posta veya şifre hatalı.'; err.style.display = 'block'; return; }
+  userId = data.user.id;
+  await bootApp(data.user);
+}
+
+async function doLogout() {
+  await sb.auth.signOut();
+  items = []; cats = [];
+  showLogin();
+}
+
+// ════════════════════════════════════════════
+// DATA — Supabase
+// ════════════════════════════════════════════
+async function loadAll() {
+  const [ir, cr] = await Promise.all([
+    sb.from('items').select('*').eq('user_id', userId).order('created_at', { ascending: false }),
+    sb.from('categories').select('*, links(*)').eq('user_id', userId).order('created_at', { ascending: true }),
+  ]);
+  items = ir.data || [];
+  cats  = (cr.data || []).map(c => ({ ...c, links: c.links || [] }));
+}
+
+async function dbAddItem(item) {
+  const { data, error } = await sb.from('items').insert({ ...item, user_id: userId }).select().single();
+  if (error) throw error;
+  return data;
+}
+async function dbToggleDone(id, done) {
+  await sb.from('items').update({ done }).eq('id', id);
+}
+async function dbDeleteItem(id) {
+  await sb.from('items').delete().eq('id', id);
+}
+async function dbAddCat(cat) {
+  const { data, error } = await sb.from('categories').insert({ ...cat, user_id: userId }).select().single();
+  if (error) throw error;
+  return data;
+}
+async function dbDeleteCat(id) {
+  await sb.from('links').delete().eq('category_id', id);
+  await sb.from('categories').delete().eq('id', id);
+}
+async function dbAddLink(link) {
+  const { data, error } = await sb.from('links').insert(link).select().single();
+  if (error) throw error;
+  return data;
+}
+async function dbDeleteLink(id) {
+  await sb.from('links').delete().eq('id', id);
+}
+
+// ════════════════════════════════════════════
+// NAVIGATION
+// ════════════════════════════════════════════
+function showPage(page) {
+  curPage = page;
+  document.getElementById('page-watchlist').style.display = page === 'watchlist' ? 'block' : 'none';
+  document.getElementById('page-links').style.display     = page === 'links'     ? 'block' : 'none';
+  document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+  document.getElementById('nav-' + page)?.classList.add('active');
+}
+
+// ════════════════════════════════════════════
+// FILTER
+// ════════════════════════════════════════════
+function setFilter(f) {
+  filter = f;
+  document.querySelectorAll('.pill').forEach(p => p.classList.toggle('active', p.dataset.f === f));
+  renderItems();
+}
+
+// ════════════════════════════════════════════
+// RENDER
+// ════════════════════════════════════════════
+function renderAll() { renderStats(); renderItems(); renderLinks(); }
+
+function renderStats() {
+  const total   = items.length;
+  const done    = items.filter(i => i.done).length;
+  const pending = total - done;
+  const pct     = total ? Math.round(done / total * 100) : 0;
+  document.getElementById('nc-watchlist').textContent = total;
+  document.getElementById('nc-pending').textContent   = pending;
+  document.getElementById('nc-done').textContent      = done;
+  document.getElementById('nc-links').textContent     = cats.length;
+  document.getElementById('stats-row').innerHTML = `
+    <div class="stat-card"><div class="stat-val">${total}</div><div class="stat-key">Toplam</div></div>
+    <div class="stat-card"><div class="stat-val">${pending}</div><div class="stat-key">Bekliyor</div></div>
+    <div class="stat-card accent"><div class="stat-val">${done}</div><div class="stat-key">Tamamlandı</div></div>
+    <div class="stat-card"><div class="stat-val">${pct}%</div><div class="stat-key">İlerleme</div></div>`;
+  const pw = document.getElementById('progress-wrap');
+  pw.style.display = total ? 'block' : 'none';
+  document.getElementById('progress-fill').style.width = pct + '%';
+  document.getElementById('progress-label-r').textContent = pct + '%';
+}
+
+function renderItems() {
+  const grid = document.getElementById('cards-grid');
+  let list = items.filter(it => {
+    if (filter === 'pending') return !it.done;
+    if (filter === 'done')    return it.done;
+    if (filter === 'youtube') return it.type === 'youtube';
+    if (filter === 'blog')    return it.type === 'blog';
+    return true;
+  });
+  if (!list.length) {
+    grid.innerHTML = `<div class="empty-state"><div class="empty-icon">📚</div><p>Gösterilecek içerik yok.</p></div>`;
+    return;
+  }
+  grid.innerHTML = list.map(it => `
+    <div class="card ${it.done ? 'done' : ''}" id="c-${it.id}">
+      <div class="card-media">
+        <a class="card-link" href="${esc(it.url)}" target="_blank" rel="noopener">
+          ${it.image_url
+            ? `<img class="card-thumb" src="${esc(it.image_url)}" alt="" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+               <div class="card-thumb-ph" style="display:none">${it.type === 'youtube' ? '▶' : '✍'}</div>`
+            : `<div class="card-thumb-ph">${it.type === 'youtube' ? '▶' : '✍'}</div>`}
+        </a>
+        <div class="card-type-badge ${it.type === 'youtube' ? 'yt' : ''}">${it.type === 'youtube' ? '▶ YouTube' : '✍ Blog'}</div>
+        <div class="card-actions-overlay">
+          <button class="overlay-btn" onclick="deleteItem('${it.id}')" title="Sil">✕</button>
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="card-title">${esc(it.title)}</div>
+        <div class="card-footer">
+          <span class="status-badge ${it.done ? 'done' : 'pending'}">${it.done ? '✓ Tamamlandı' : '⏳ Bekliyor'}</span>
+          <button class="check-btn ${it.done ? 'done' : ''}" onclick="toggleDone('${it.id}',${!it.done})" title="İşaretle">
+            <svg viewBox="0 0 24 24" fill="none" stroke="${it.done ? '#0e0e0c' : '#4a4844'}" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="20 6 9 17 4 12"/>
+            </svg>
+          </button>
+        </div>
+      </div>
+    </div>`).join('');
+}
+
+function renderLinks() {
+  const cont  = document.getElementById('cats-container');
+  const empty = document.getElementById('empty-links');
+  if (!cats.length) { cont.innerHTML = ''; empty.style.display = 'block'; return; }
+  empty.style.display = 'none';
+  cont.innerHTML = cats.map(cat => `
+    <div class="cat-block" id="cat-${cat.id}">
+      <div class="cat-header">
+        <div class="cat-name"><span class="cat-emoji">${cat.emoji || '📌'}</span>${esc(cat.name)}</div>
+        <button class="btn btn-danger btn-xs" onclick="deleteCat('${cat.id}')">Sil</button>
+      </div>
+      <div class="link-list">
+        ${(cat.links || []).map(lk => `
+          <div class="link-row">
+            <div class="link-dot"></div>
+            <a href="${esc(lk.url)}" target="_blank" rel="noopener">${esc(lk.title || getDomain(lk.url))}</a>
+            <span class="link-domain">${getDomain(lk.url)}</span>
+            <button class="link-del-btn" onclick="deleteLink('${cat.id}','${lk.id}')">×</button>
+          </div>`).join('')}
+      </div>
+      <div class="add-link-row">
+        <input class="add-link-input" type="url" placeholder="Link ekle ve Enter'a bas…"
+          id="li-${cat.id}" onkeydown="if(event.key==='Enter')addLink('${cat.id}')">
+        <button class="btn btn-sm" onclick="addLink('${cat.id}')">Ekle</button>
+      </div>
+    </div>`).join('');
+}
+
+// ════════════════════════════════════════════
+// ITEM ACTIONS
+// ════════════════════════════════════════════
+async function toggleDone(id, done) {
+  const it = items.find(i => i.id === id);
+  if (!it) return;
+  it.done = done;
+  renderStats(); renderItems();
+  await dbToggleDone(id, done);
+}
+
+async function deleteItem(id) {
+  if (!confirm('Bu içeriği silmek istediğine emin misin?')) return;
+  items = items.filter(i => i.id !== id);
+  renderStats(); renderItems();
+  await dbDeleteItem(id);
+  toast('İçerik silindi.', 'success');
+}
+
+// ════════════════════════════════════════════
+// CATEGORY ACTIONS
+// ════════════════════════════════════════════
+async function deleteCat(id) {
+  if (!confirm('Bu kategoriyi ve tüm linklerini silmek istediğine emin misin?')) return;
+  cats = cats.filter(c => c.id !== id);
+  renderLinks();
+  await dbDeleteCat(id);
+  toast('Kategori silindi.', 'success');
+}
+
+async function addLink(catId) {
+  const input = document.getElementById('li-' + catId);
+  const url = input.value.trim();
+  if (!url) return;
+  const cat = cats.find(c => c.id === catId);
+  if (!cat) return;
+  const newLink = { url: ensureHttp(url), title: getDomain(url), category_id: catId };
+  const saved = await dbAddLink(newLink);
+  cat.links.push(saved);
+  input.value = '';
+  renderLinks();
+  toast('Link eklendi.', 'success');
+}
+
+async function deleteLink(catId, linkId) {
+  const cat = cats.find(c => c.id === catId);
+  if (!cat) return;
+  cat.links = cat.links.filter(l => l.id !== linkId);
+  renderLinks();
+  await dbDeleteLink(linkId);
+}
+
+// ════════════════════════════════════════════
+// MODAL: ITEM
+// ════════════════════════════════════════════
+function openItemModal() {
+  document.getElementById('item-modal').style.display = 'flex';
+  document.getElementById('qi-url').focus();
+}
+function closeItemModal() {
+  document.getElementById('item-modal').style.display = 'none';
+  ['qi-url','mi-title','mi-url','mi-img'].forEach(id => document.getElementById(id).value = '');
+  document.getElementById('preview-card').classList.remove('show');
+}
+function selType(t) {
+  curType = t;
+  document.getElementById('topt-youtube').classList.toggle('selected', t === 'youtube');
+  document.getElementById('topt-blog').classList.toggle('selected', t === 'blog');
+}
+
+async function fetchMeta() {
+  const raw = document.getElementById('qi-url').value.trim();
+  if (!raw) return;
+  const btn = document.getElementById('fetch-btn');
+  btn.textContent = '…'; btn.disabled = true;
+  try {
+    const url = ensureHttp(raw);
+    const res  = await fetch(`https://api.microlink.io?url=${encodeURIComponent(url)}`);
+    const data = await res.json();
+    const title  = data.data?.title  || getDomain(url);
+    const imgUrl = data.data?.image?.url || data.data?.logo?.url || '';
+    document.getElementById('mi-title').value = title;
+    document.getElementById('mi-url').value   = url;
+    document.getElementById('mi-img').value   = imgUrl;
+    document.getElementById('pi-title').textContent  = title;
+    document.getElementById('pi-domain').textContent = getDomain(url);
+    if (imgUrl) document.getElementById('pi-img').src = imgUrl;
+    document.getElementById('preview-card').classList.add('show');
+    if (url.includes('youtube.com') || url.includes('youtu.be')) selType('youtube');
+    else selType('blog');
+  } catch {
+    document.getElementById('mi-url').value = ensureHttp(raw);
+  }
+  btn.textContent = 'Getir'; btn.disabled = false;
+}
+
+async function saveItem() {
+  const title = document.getElementById('mi-title').value.trim();
+  const url   = document.getElementById('mi-url').value.trim();
+  if (!title || !url) { toast('Başlık ve link zorunlu!', 'error'); return; }
+  const item = { title, url: ensureHttp(url), image_url: document.getElementById('mi-img').value.trim() || null, type: curType, done: false };
+  try {
+    const saved = await dbAddItem(item);
+    items.unshift(saved);
+    renderAll();
+    closeItemModal();
+    toast('İçerik eklendi ✓', 'success');
+  } catch(e) {
+    toast('Hata: ' + e.message, 'error');
+  }
+}
+
+// ════════════════════════════════════════════
+// MODAL: CATEGORY
+// ════════════════════════════════════════════
+function openCatModal() {
+  document.getElementById('cat-modal').style.display = 'flex';
+  document.getElementById('ci-name').focus();
+}
+function closeCatModal() {
+  document.getElementById('cat-modal').style.display = 'none';
+  document.getElementById('ci-name').value  = '';
+  document.getElementById('ci-emoji').value = '';
+}
+async function saveCat() {
+  const name  = document.getElementById('ci-name').value.trim();
+  const emoji = document.getElementById('ci-emoji').value.trim() || '📌';
+  if (!name) { toast('Kategori adı zorunlu!', 'error'); return; }
+  try {
+    const saved = await dbAddCat({ name, emoji });
+    cats.push({ ...saved, links: [] });
+    renderLinks();
+    renderStats();
+    closeCatModal();
+    showPage('links');
+    toast('Kategori oluşturuldu ✓', 'success');
+  } catch(e) {
+    toast('Hata: ' + e.message, 'error');
+  }
+}
+
+// ════════════════════════════════════════════
+// TOAST
+// ════════════════════════════════════════════
+let toastTimer;
+function toast(msg, type = '') {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.className = 'toast show' + (type ? ' ' + type : '');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => el.classList.remove('show'), 2800);
+}
+
+// ════════════════════════════════════════════
+// UTILS
+// ════════════════════════════════════════════
+function esc(s) {
+  return String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+function ensureHttp(u) { return /^https?:\/\//i.test(u) ? u : 'https://' + u; }
+function getDomain(u) { try { return new URL(ensureHttp(u)).hostname.replace(/^www\./, ''); } catch { return u; } }
+
+// ════════════════════════════════════════════
+// START
+// ════════════════════════════════════════════
+init();
+</script>
+</body>
+</html>
