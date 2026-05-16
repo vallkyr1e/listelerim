@@ -1,983 +1,800 @@
 <!DOCTYPE html>
-<html lang="tr">
+<html lang="tr" data-theme="dark">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Listelerim</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <style>
-:root {
-  --bg:        #0e0e0c;
-  --bg2:       #161614;
-  --bg3:       #1e1e1b;
-  --border:    rgba(255,255,255,0.07);
-  --border2:   rgba(255,255,255,0.12);
-  --text:      #f0ede6;
-  --text2:     #8a877f;
-  --text3:     #4a4844;
-  --accent:    #c8f565;
-  --accent-dim:#7aab28;
-  --accent-bg: rgba(200,245,101,0.08);
-  --red:       #e05252;
-  --red-bg:    rgba(224,82,82,0.1);
-  --amber:     #f5c842;
-  --amber-bg:  rgba(245,200,66,0.1);
-  --radius:    14px;
-  --radius-sm: 8px;
-  --radius-xs: 5px;
-  --serif:     'Instrument Serif', Georgia, serif;
-  --sans:      'DM Sans', system-ui, sans-serif;
-  --mono:      'DM Mono', monospace;
-  --transition: .18s cubic-bezier(.4,0,.2,1);
+:root[data-theme="dark"] {
+  --bg:#0e0e0c; --bg2:#161614; --bg3:#1e1e1b; --bg4:#252520;
+  --border:rgba(255,255,255,0.07); --border2:rgba(255,255,255,0.13);
+  --text:#f0ede6; --text2:#8a877f; --text3:#4d4b46;
+  --accent:#c8f565; --accent-dim:#7aab28; --accent-bg:rgba(200,245,101,0.08);
+  --red:#e05252; --red-bg:rgba(224,82,82,0.10);
+  --amber:#f5c842; --amber-bg:rgba(245,200,66,0.10);
+  --shadow:0 4px 24px rgba(0,0,0,0.4); --card-hover:rgba(255,255,255,0.03);
 }
+:root[data-theme="light"] {
+  --bg:#f5f4f0; --bg2:#ffffff; --bg3:#eceae4; --bg4:#e4e2db;
+  --border:rgba(0,0,0,0.08); --border2:rgba(0,0,0,0.14);
+  --text:#1a1916; --text2:#6b6860; --text3:#b0ada6;
+  --accent:#4a7c2f; --accent-dim:#3a6222; --accent-bg:rgba(74,124,47,0.09);
+  --red:#c0392b; --red-bg:rgba(192,57,43,0.08);
+  --amber:#9a6c00; --amber-bg:rgba(154,108,0,0.09);
+  --shadow:0 4px 24px rgba(0,0,0,0.10); --card-hover:rgba(0,0,0,0.02);
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+html{font-size:15px;}
+body{font-family:'DM Sans',system-ui,sans-serif;background:var(--bg);color:var(--text);min-height:100dvh;-webkit-font-smoothing:antialiased;transition:background .25s,color .25s;}
+::-webkit-scrollbar{width:5px;} ::-webkit-scrollbar-track{background:transparent;} ::-webkit-scrollbar-thumb{background:var(--border2);border-radius:4px;}
 
-*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-html { font-size: 15px; }
-body { font-family: var(--sans); background: var(--bg); color: var(--text); min-height: 100dvh; -webkit-font-smoothing: antialiased; }
+/* LOADER */
+#loader{position:fixed;inset:0;background:var(--bg);display:flex;align-items:center;justify-content:center;z-index:500;font-family:'Instrument Serif',serif;font-style:italic;font-size:18px;color:var(--text3);transition:opacity .3s;}
+#loader.out{opacity:0;pointer-events:none;}
 
-/* ── SCROLLBAR ── */
-::-webkit-scrollbar { width: 5px; }
-::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 4px; }
+/* LOGIN */
+#login-screen{display:none;min-height:100dvh;align-items:center;justify-content:center;padding:2rem;background:radial-gradient(ellipse 60% 40% at 50% 0%,rgba(200,245,101,0.06) 0%,transparent 70%);}
+.login-box{width:100%;max-width:360px;}
+.login-logo{text-align:center;margin-bottom:2.25rem;}
+.login-wordmark{font-family:'Instrument Serif',serif;font-size:26px;font-style:italic;color:var(--text);}
+.login-wordmark .dot{color:var(--accent);}
+.login-card{background:var(--bg2);border:1px solid var(--border2);border-radius:16px;padding:1.75rem;}
+.login-subtitle{font-size:13px;color:var(--text2);margin-bottom:1.5rem;}
+.login-error{display:none;background:var(--red-bg);border:1px solid rgba(224,82,82,.2);color:var(--red);font-size:12px;padding:9px 13px;border-radius:7px;margin-bottom:1rem;}
+.login-hint{text-align:center;margin-top:1.25rem;font-size:11px;color:var(--text3);}
 
-/* ── LOGIN SCREEN ── */
-#login-screen {
-  min-height: 100dvh; display: flex; align-items: center; justify-content: center; padding: 2rem;
-  background: radial-gradient(ellipse 60% 50% at 50% 0%, rgba(200,245,101,0.05) 0%, transparent 70%);
-}
-.login-box {
-  width: 100%; max-width: 380px;
-}
-.login-logo {
-  text-align: center; margin-bottom: 2.5rem;
-}
-.login-logo .wordmark {
-  font-family: var(--serif); font-size: 28px; font-style: italic; color: var(--text); letter-spacing: -.5px;
-}
-.login-logo .dot { color: var(--accent); }
-.login-card {
-  background: var(--bg2); border: 1px solid var(--border2); border-radius: var(--radius);
-  padding: 2rem; backdrop-filter: blur(20px);
-}
-.login-card h2 { font-size: 15px; font-weight: 500; color: var(--text2); margin-bottom: 1.5rem; }
-.login-error {
-  background: var(--red-bg); border: 1px solid rgba(224,82,82,0.2); color: var(--red);
-  font-size: 12px; padding: 10px 14px; border-radius: var(--radius-xs); margin-bottom: 1rem; display: none;
-}
-.login-footer { text-align: center; margin-top: 1.25rem; font-size: 12px; color: var(--text3); }
+/* FORM */
+.fg{margin-bottom:.9rem;}
+.fg label{display:block;font-size:11px;font-weight:600;color:var(--text2);text-transform:uppercase;letter-spacing:.06em;margin-bottom:5px;}
+.fg input,.fg select,.fg textarea{width:100%;background:var(--bg3);border:1px solid var(--border2);border-radius:8px;padding:9px 12px;font-size:13.5px;font-family:'DM Sans',sans-serif;color:var(--text);outline:none;transition:border-color .15s,box-shadow .15s;}
+.fg input:focus,.fg select:focus,.fg textarea:focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-bg);}
+.fg input::placeholder,.fg textarea::placeholder{color:var(--text3);}
+.fg textarea{resize:vertical;min-height:65px;}
 
-/* ── FORM ELEMENTS ── */
-.form-group { margin-bottom: 1rem; }
-.form-group label {
-  display: block; font-size: 11px; font-weight: 500; color: var(--text2);
-  text-transform: uppercase; letter-spacing: .06em; margin-bottom: 6px;
-}
-.form-group input, .form-group select, .form-group textarea {
-  width: 100%; background: var(--bg3); border: 1px solid var(--border2);
-  border-radius: var(--radius-sm); padding: 10px 13px; font-size: 14px;
-  font-family: var(--sans); color: var(--text); outline: none;
-  transition: border-color var(--transition);
-}
-.form-group input:focus, .form-group select:focus, .form-group textarea:focus {
-  border-color: var(--accent); box-shadow: 0 0 0 3px rgba(200,245,101,0.08);
-}
-.form-group input::placeholder { color: var(--text3); }
-.form-group select option { background: var(--bg3); }
-.form-group textarea { resize: vertical; min-height: 70px; }
+/* BUTTONS */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:8px 16px;font-size:13px;font-family:'DM Sans',sans-serif;font-weight:500;border-radius:8px;border:1px solid var(--border2);background:var(--bg3);color:var(--text);cursor:pointer;transition:all .15s;white-space:nowrap;}
+.btn:hover{background:var(--bg4);}
+.btn:active{transform:scale(.98);}
+.btn-accent{background:var(--accent);color:#0e0e0c;border-color:var(--accent);font-weight:600;}
+.btn-accent:hover{filter:brightness(1.08);}
+:root[data-theme="light"] .btn-accent{color:#fff;}
+.btn-ghost{background:transparent;border-color:transparent;color:var(--text2);}
+.btn-ghost:hover{background:var(--bg3);color:var(--text);border-color:var(--border);}
+.btn-danger{background:transparent;border-color:transparent;color:var(--red);}
+.btn-danger:hover{background:var(--red-bg);border-color:rgba(224,82,82,.2);}
+.btn-sm{padding:6px 12px;font-size:12px;}
+.btn-xs{padding:4px 9px;font-size:11px;border-radius:6px;}
+.btn-full{width:100%;}
+.btn-icon{width:32px;height:32px;padding:0;border-radius:8px;border-color:transparent;background:transparent;color:var(--text2);}
+.btn-icon:hover{background:var(--bg3);color:var(--text);border-color:var(--border);}
 
-/* ── BUTTONS ── */
-.btn {
-  display: inline-flex; align-items: center; justify-content: center; gap: 7px;
-  padding: 9px 18px; font-size: 13px; font-family: var(--sans); font-weight: 500;
-  border-radius: var(--radius-sm); border: 1px solid var(--border2);
-  background: var(--bg3); color: var(--text); cursor: pointer;
-  transition: all var(--transition); white-space: nowrap;
-}
-.btn:hover { border-color: var(--border2); background: var(--bg2); color: var(--text); }
-.btn:active { transform: scale(.98); }
-.btn-accent {
-  background: var(--accent); color: #0e0e0c; border-color: var(--accent); font-weight: 600;
-}
-.btn-accent:hover { background: #d4f877; color: #0e0e0c; }
-.btn-ghost { background: transparent; border-color: transparent; color: var(--text2); }
-.btn-ghost:hover { background: var(--bg3); color: var(--text); border-color: var(--border); }
-.btn-danger { color: var(--red); border-color: transparent; background: transparent; }
-.btn-danger:hover { background: var(--red-bg); border-color: rgba(224,82,82,0.2); }
-.btn-sm { padding: 6px 12px; font-size: 12px; }
-.btn-xs { padding: 4px 9px; font-size: 11px; border-radius: var(--radius-xs); }
-.btn-full { width: 100%; }
-.btn-icon {
-  width: 32px; height: 32px; padding: 0; border-radius: 8px;
-  border-color: transparent; background: transparent; color: var(--text3);
-}
-.btn-icon:hover { background: var(--bg3); color: var(--text); border-color: var(--border); }
+/* THEME TOGGLE */
+.theme-btn{width:32px;height:32px;border-radius:8px;border:1px solid var(--border2);background:var(--bg3);cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--text2);transition:all .15s;flex-shrink:0;}
+.theme-btn:hover{background:var(--bg4);color:var(--text);}
 
-/* ── APP LAYOUT ── */
-#app-screen { display: none; min-height: 100dvh; }
+/* APP SHELL */
+#app-screen{display:none;}
+.sidebar{position:fixed;left:0;top:0;bottom:0;width:216px;background:var(--bg2);border-right:1px solid var(--border);display:flex;flex-direction:column;z-index:10;transition:background .25s;}
+.sidebar-top{padding:1.25rem 1rem 1rem;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;}
+.sidebar-wordmark{font-family:'Instrument Serif',serif;font-size:19px;font-style:italic;color:var(--text);}
+.sidebar-wordmark .dot{color:var(--accent);}
+.sidebar-nav{padding:.75rem .625rem;flex:1;overflow-y:auto;}
+.nav-lbl{font-size:10px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.09em;padding:0 .5rem;margin:1.1rem 0 .35rem;}
+.nav-lbl:first-child{margin-top:0;}
+.nav-btn{display:flex;align-items:center;gap:9px;width:100%;padding:7px 9px;border-radius:7px;border:1px solid transparent;background:none;font-size:13px;font-family:'DM Sans',sans-serif;font-weight:500;color:var(--text2);cursor:pointer;transition:all .15s;text-align:left;}
+.nav-btn:hover{background:var(--bg3);color:var(--text);}
+.nav-btn.active{background:var(--accent-bg);color:var(--accent);border-color:rgba(200,245,101,0.15);}
+:root[data-theme="light"] .nav-btn.active{border-color:rgba(74,124,47,0.15);}
+.nav-lbl-text{flex:1;}
+.nav-count{font-size:11px;font-family:'DM Mono',monospace;background:var(--bg3);color:var(--text3);padding:1px 7px;border-radius:999px;}
+.nav-btn.active .nav-count{background:var(--accent-bg);color:var(--accent-dim);}
+.sidebar-footer{padding:.75rem .625rem;border-top:1px solid var(--border);}
+.user-row{display:flex;align-items:center;gap:8px;padding:7px 9px;border-radius:7px;}
+.user-av{width:28px;height:28px;border-radius:50%;flex-shrink:0;background:var(--accent-bg);border:1px solid rgba(200,245,101,0.2);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600;color:var(--accent);}
+.user-em{font-size:11px;color:var(--text3);flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.btn-logout{display:flex;align-items:center;gap:7px;width:100%;padding:7px 9px;border-radius:7px;border:1px solid transparent;background:none;font-size:12px;font-family:'DM Sans',sans-serif;color:var(--text2);cursor:pointer;transition:all .15s;margin-top:2px;}
+.btn-logout:hover{background:var(--red-bg);color:var(--red);border-color:rgba(224,82,82,.15);}
 
-.sidebar {
-  position: fixed; left: 0; top: 0; bottom: 0; width: 220px;
-  background: var(--bg2); border-right: 1px solid var(--border);
-  display: flex; flex-direction: column; padding: 1.5rem 0; z-index: 10;
-}
-.sidebar-logo {
-  padding: 0 1.25rem 1.5rem; border-bottom: 1px solid var(--border);
-  font-family: var(--serif); font-size: 20px; font-style: italic; color: var(--text);
-}
-.sidebar-logo .dot { color: var(--accent); }
-.sidebar-nav { padding: 1rem 0.75rem; flex: 1; }
-.nav-label {
-  font-size: 10px; font-weight: 600; color: var(--text3); text-transform: uppercase;
-  letter-spacing: .1em; padding: 0 0.5rem; margin-bottom: 6px; margin-top: 1.25rem;
-}
-.nav-label:first-child { margin-top: 0; }
-.nav-item {
-  display: flex; align-items: center; gap: 9px; padding: 8px 10px;
-  border-radius: var(--radius-xs); font-size: 13px; color: var(--text2);
-  cursor: pointer; transition: all var(--transition); border: 1px solid transparent;
-  background: none; width: 100%; text-align: left; font-family: var(--sans);
-}
-.nav-item:hover { background: var(--bg3); color: var(--text); }
-.nav-item.active { background: var(--accent-bg); color: var(--accent); border-color: rgba(200,245,101,0.15); }
-.nav-item .nav-icon { font-size: 16px; flex-shrink: 0; }
-.nav-item .nav-count {
-  margin-left: auto; font-size: 11px; font-family: var(--mono);
-  background: var(--bg3); color: var(--text3); padding: 1px 7px; border-radius: 999px;
-}
-.nav-item.active .nav-count { background: rgba(200,245,101,0.15); color: var(--accent-dim); }
-.sidebar-footer {
-  padding: 1rem 0.75rem 0; border-top: 1px solid var(--border);
-}
-.user-chip {
-  display: flex; align-items: center; gap: 9px; padding: 8px 10px;
-  border-radius: var(--radius-xs);
-}
-.user-avatar {
-  width: 28px; height: 28px; border-radius: 50%; background: var(--accent-bg);
-  border: 1px solid rgba(200,245,101,0.2); display: flex; align-items: center;
-  justify-content: center; font-size: 12px; color: var(--accent); flex-shrink: 0;
-}
-.user-email { font-size: 11px; color: var(--text3); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; flex: 1; }
+/* MAIN */
+.main{margin-left:216px;padding:2.25rem 2.25rem 4rem;min-height:100dvh;}
+.page-head{margin-bottom:1.75rem;}
+.page-head h1{font-family:'Instrument Serif',serif;font-size:30px;font-style:italic;font-weight:400;letter-spacing:-.3px;margin-bottom:3px;}
+.page-head p{font-size:13px;color:var(--text2);}
 
-/* ── MAIN CONTENT ── */
-.main { margin-left: 220px; padding: 2.5rem 2.5rem 4rem; min-height: 100dvh; }
-.page-header { margin-bottom: 2rem; }
-.page-header h1 {
-  font-family: var(--serif); font-size: 32px; font-style: italic;
-  font-weight: 400; color: var(--text); letter-spacing: -.5px; margin-bottom: 4px;
-}
-.page-header p { font-size: 13px; color: var(--text2); }
+/* STATS */
+.stats-row{display:flex;gap:10px;margin-bottom:1.75rem;flex-wrap:wrap;}
+.stat-card{background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:13px 17px;min-width:100px;transition:background .25s;}
+.stat-val{font-size:22px;font-weight:300;font-family:'DM Mono',monospace;color:var(--text);line-height:1;}
+.stat-key{font-size:10px;color:var(--text3);margin-top:4px;text-transform:uppercase;letter-spacing:.06em;}
+.stat-card.hi{border-color:rgba(200,245,101,.2);background:var(--accent-bg);}
+:root[data-theme="light"] .stat-card.hi{border-color:rgba(74,124,47,.2);}
+.stat-card.hi .stat-val{color:var(--accent);}
 
-/* ── STATS ROW ── */
-.stats-row { display: flex; gap: 12px; margin-bottom: 2rem; flex-wrap: wrap; }
-.stat-card {
-  background: var(--bg2); border: 1px solid var(--border); border-radius: var(--radius-sm);
-  padding: 14px 18px; min-width: 110px;
-}
-.stat-card .stat-val { font-size: 24px; font-weight: 300; font-family: var(--mono); color: var(--text); line-height: 1; }
-.stat-card .stat-key { font-size: 11px; color: var(--text3); margin-top: 4px; text-transform: uppercase; letter-spacing: .06em; }
-.stat-card.accent { border-color: rgba(200,245,101,0.2); background: var(--accent-bg); }
-.stat-card.accent .stat-val { color: var(--accent); }
+/* PROGRESS */
+.prog-wrap{margin-bottom:1.75rem;}
+.prog-labels{display:flex;justify-content:space-between;font-size:11px;color:var(--text3);margin-bottom:5px;}
+.prog-bar{height:2px;background:var(--bg3);border-radius:2px;overflow:hidden;}
+.prog-fill{height:100%;background:linear-gradient(90deg,var(--accent-dim),var(--accent));border-radius:2px;transition:width .5s ease;}
 
-/* ── PROGRESS ── */
-.progress-wrap { margin-bottom: 2rem; }
-.progress-labels { display: flex; justify-content: space-between; font-size: 11px; color: var(--text3); margin-bottom: 6px; }
-.progress-bar { height: 3px; background: var(--bg3); border-radius: 2px; overflow: hidden; }
-.progress-fill { height: 100%; background: linear-gradient(90deg, var(--accent-dim), var(--accent)); border-radius: 2px; transition: width .5s ease; }
+/* TOOLBAR */
+.toolbar{display:flex;align-items:center;gap:10px;margin-bottom:1.5rem;flex-wrap:wrap;}
+.pills{display:flex;gap:6px;flex:1;flex-wrap:wrap;}
+.pill{padding:5px 13px;border-radius:999px;border:1px solid var(--border);background:transparent;color:var(--text2);font-size:12px;font-weight:500;cursor:pointer;transition:all .15s;font-family:'DM Sans',sans-serif;}
+.pill:hover{border-color:var(--border2);color:var(--text);}
+.pill.active{background:var(--accent);color:#0e0e0c;border-color:var(--accent);}
+:root[data-theme="light"] .pill.active{color:#fff;}
 
-/* ── TOOLBAR ── */
-.toolbar { display: flex; align-items: center; gap: 10px; margin-bottom: 1.5rem; flex-wrap: wrap; }
-.filter-pills { display: flex; gap: 6px; flex-wrap: wrap; flex: 1; }
-.pill {
-  padding: 5px 13px; border-radius: 999px; border: 1px solid var(--border);
-  background: transparent; color: var(--text2); font-size: 12px; font-weight: 500;
-  cursor: pointer; transition: all var(--transition); font-family: var(--sans);
-}
-.pill:hover { border-color: var(--border2); color: var(--text); }
-.pill.active { background: var(--accent); color: #0e0e0c; border-color: var(--accent); }
+/* CARDS */
+.cards-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:14px;}
+.card{background:var(--bg2);border:1px solid var(--border);border-radius:14px;overflow:hidden;transition:border-color .2s,transform .2s,box-shadow .2s;position:relative;}
+.card:hover{border-color:var(--border2);transform:translateY(-2px);box-shadow:var(--shadow);}
+.card.done{opacity:.42;}
+.card-media{position:relative;overflow:hidden;}
+.card-thumb{width:100%;height:124px;object-fit:cover;display:block;background:var(--bg3);}
+.card-thumb-ph{width:100%;height:124px;display:flex;align-items:center;justify-content:center;background:var(--bg3);color:var(--text3);}
+.card-tag{position:absolute;top:8px;left:8px;padding:3px 8px;border-radius:5px;font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.05em;backdrop-filter:blur(8px);background:rgba(14,14,12,.72);color:var(--text2);border:1px solid rgba(255,255,255,.08);display:flex;align-items:center;gap:4px;}
+.card-tag.yt{color:#ff7070;}
+:root[data-theme="light"] .card-tag{background:rgba(255,255,255,.82);border-color:var(--border);}
+.card-del{position:absolute;top:8px;right:8px;opacity:0;transition:opacity .15s;width:26px;height:26px;border-radius:6px;border:1px solid rgba(255,255,255,.1);background:rgba(14,14,12,.75);backdrop-filter:blur(8px);display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--text2);}
+:root[data-theme="light"] .card-del{background:rgba(255,255,255,.82);border-color:var(--border);}
+.card-del:hover{color:var(--red);}
+.card:hover .card-del{opacity:1;}
+.card-body{padding:12px 13px 13px;}
+.card-title{font-size:13px;font-weight:500;color:var(--text);line-height:1.45;margin-bottom:5px;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;}
+.card-desc{font-size:11px;color:var(--text3);line-height:1.5;margin-bottom:9px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;}
+.card-footer{display:flex;align-items:center;justify-content:space-between;}
+.status-badge{font-size:11px;font-weight:500;padding:3px 9px;border-radius:999px;display:inline-flex;align-items:center;gap:4px;}
+.status-badge.done{background:var(--accent-bg);color:var(--accent-dim);}
+.status-badge.pending{background:var(--amber-bg);color:var(--amber);}
+.check-btn{width:27px;height:27px;border-radius:50%;border:1.5px solid var(--border2);background:transparent;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .15s;flex-shrink:0;}
+.check-btn:hover{border-color:var(--accent);background:var(--accent-bg);}
+.check-btn.done{background:var(--accent);border-color:var(--accent);}
 
-/* ── CARDS GRID ── */
-.cards-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); gap: 16px; }
-.card {
-  background: var(--bg2); border: 1px solid var(--border); border-radius: var(--radius);
-  overflow: hidden; transition: border-color var(--transition), transform var(--transition);
-  position: relative; cursor: default;
-}
-.card:hover { border-color: var(--border2); transform: translateY(-2px); }
-.card.done { opacity: .45; }
-.card-media { position: relative; }
-.card-thumb { width: 100%; height: 126px; object-fit: cover; display: block; background: var(--bg3); }
-.card-thumb-ph {
-  width: 100%; height: 126px; display: flex; align-items: center; justify-content: center;
-  font-size: 32px; background: var(--bg3); color: var(--text3);
-}
-.card-type-badge {
-  position: absolute; top: 8px; left: 8px; padding: 3px 8px; border-radius: var(--radius-xs);
-  font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: .05em;
-  backdrop-filter: blur(8px); background: rgba(14,14,12,.7); color: var(--text2);
-  border: 1px solid var(--border);
-}
-.card-type-badge.yt { color: #ff6b6b; }
-.card-actions-overlay {
-  position: absolute; top: 8px; right: 8px; display: flex; gap: 4px; opacity: 0;
-  transition: opacity var(--transition);
-}
-.card:hover .card-actions-overlay { opacity: 1; }
-.overlay-btn {
-  width: 28px; height: 28px; border-radius: 6px; border: 1px solid rgba(255,255,255,.1);
-  background: rgba(14,14,12,.75); backdrop-filter: blur(8px);
-  display: flex; align-items: center; justify-content: center;
-  cursor: pointer; font-size: 14px; color: var(--text2); transition: all var(--transition);
-}
-.overlay-btn:hover { background: var(--red-bg); color: var(--red); border-color: rgba(224,82,82,.2); }
-.card-body { padding: 13px 14px 14px; }
-.card-title {
-  font-size: 13px; font-weight: 500; color: var(--text); line-height: 1.45; margin-bottom: 10px;
-  display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden;
-}
-.card-footer { display: flex; align-items: center; justify-content: space-between; }
-.status-badge {
-  font-size: 11px; font-weight: 500; padding: 3px 9px; border-radius: 999px;
-  display: inline-flex; align-items: center; gap: 4px;
-}
-.status-badge.done { background: rgba(200,245,101,0.12); color: var(--accent-dim); }
-.status-badge.pending { background: var(--amber-bg); color: var(--amber); }
-.check-btn {
-  width: 28px; height: 28px; border-radius: 50%; border: 1.5px solid var(--border2);
-  background: transparent; cursor: pointer; display: flex; align-items: center;
-  justify-content: center; transition: all var(--transition); flex-shrink: 0;
-}
-.check-btn:hover { border-color: var(--accent); background: var(--accent-bg); }
-.check-btn.done { background: var(--accent); border-color: var(--accent); }
-.check-btn svg { width: 13px; height: 13px; transition: stroke var(--transition); }
+/* EMPTY */
+.empty{text-align:center;padding:4.5rem 2rem;color:var(--text3);grid-column:1/-1;display:flex;flex-direction:column;align-items:center;gap:10px;}
+.empty p{font-size:13px;line-height:1.7;}
 
-/* ── CARD LINK ── */
-.card-link { text-decoration: none; display: block; }
+/* LINKS */
+.links-bar{display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem;}
+.cat-block{background:var(--bg2);border:1px solid var(--border);border-radius:12px;overflow:hidden;margin-bottom:11px;}
+.cat-head{display:flex;align-items:center;justify-content:space-between;padding:12px 15px;border-bottom:1px solid var(--border);}
+.cat-name{font-size:13.5px;font-weight:600;display:flex;align-items:center;gap:8px;}
+.link-row{display:flex;align-items:center;gap:10px;padding:9px 15px;transition:background .12s;}
+.link-row:hover{background:var(--card-hover);}
+.link-dot{width:4px;height:4px;border-radius:50%;background:var(--text3);flex-shrink:0;}
+.link-row a{font-size:13px;color:var(--text);text-decoration:none;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;transition:color .12s;}
+.link-row a:hover{color:var(--accent);}
+.link-domain{font-size:11px;color:var(--text3);font-family:'DM Mono',monospace;flex-shrink:0;}
+.link-del{opacity:0;background:none;border:none;cursor:pointer;color:var(--text3);font-size:15px;padding:2px 5px;border-radius:4px;transition:all .12s;}
+.link-row:hover .link-del{opacity:1;}
+.link-del:hover{color:var(--red);background:var(--red-bg);}
+.add-link-row{padding:7px 11px;border-top:1px solid var(--border);display:flex;gap:7px;}
+.add-link-input{flex:1;background:var(--bg3);border:1px solid var(--border);border-radius:6px;padding:7px 11px;font-size:12px;font-family:'DM Sans',sans-serif;color:var(--text);outline:none;transition:border-color .15s;}
+.add-link-input:focus{border-color:var(--accent);}
+.add-link-input::placeholder{color:var(--text3);}
 
-/* ── EMPTY STATE ── */
-.empty-state {
-  text-align: center; padding: 5rem 2rem; color: var(--text3);
-  grid-column: 1 / -1;
-}
-.empty-icon { font-size: 40px; margin-bottom: 1rem; opacity: .4; }
-.empty-state p { font-size: 13px; line-height: 1.7; }
+/* MODAL */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.6);backdrop-filter:blur(5px);display:flex;align-items:center;justify-content:center;z-index:100;padding:1rem;}
+.modal{background:var(--bg2);border:1px solid var(--border2);border-radius:16px;width:100%;max-width:450px;box-shadow:0 24px 64px rgba(0,0,0,.4);animation:modalIn .2s ease;}
+.modal-head{padding:17px 20px 15px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;}
+.modal-head h2{font-size:15px;font-weight:600;}
+.modal-body{padding:18px 20px;}
+.modal-foot{padding:13px 20px;border-top:1px solid var(--border);display:flex;gap:8px;justify-content:flex-end;}
+.type-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:1.1rem;}
+.type-opt{padding:11px;border:1.5px solid var(--border);border-radius:9px;cursor:pointer;text-align:center;font-size:13px;font-weight:500;background:var(--bg3);color:var(--text2);transition:all .15s;display:flex;flex-direction:column;align-items:center;gap:6px;}
+.type-opt:hover{border-color:var(--border2);color:var(--text);}
+.type-opt.selected{border-color:var(--accent);background:var(--accent-bg);color:var(--accent);}
+:root[data-theme="light"] .type-opt.selected{color:var(--accent-dim);}
+.or-line{text-align:center;font-size:11px;color:var(--text3);margin:.9rem 0;position:relative;}
+.or-line::before,.or-line::after{content:'';position:absolute;top:50%;width:43%;height:1px;background:var(--border);}
+.or-line::before{left:0;} .or-line::after{right:0;}
+.quick-row{display:flex;gap:7px;align-items:flex-end;}
+.quick-row .fg{flex:1;margin-bottom:0;}
+.preview-card{display:none;background:var(--bg3);border:1px solid var(--border);border-radius:9px;padding:11px;gap:11px;margin-top:9px;align-items:flex-start;}
+.preview-card.show{display:flex;}
+.preview-thumb{width:64px;height:46px;border-radius:6px;object-fit:cover;flex-shrink:0;background:var(--border);}
+.preview-info strong{font-size:12px;color:var(--text);display:block;margin-bottom:2px;}
+.preview-info span{font-size:11px;color:var(--text3);font-family:'DM Mono',monospace;}
 
-/* ── LINKS PAGE ── */
-.links-toolbar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.5rem; }
-.cat-block {
-  background: var(--bg2); border: 1px solid var(--border); border-radius: var(--radius);
-  overflow: hidden; margin-bottom: 12px;
-}
-.cat-header {
-  display: flex; align-items: center; justify-content: space-between;
-  padding: 13px 16px; border-bottom: 1px solid var(--border);
-}
-.cat-name { font-size: 14px; font-weight: 500; display: flex; align-items: center; gap: 8px; }
-.cat-emoji { font-size: 17px; }
-.link-list { padding: 4px 0; }
-.link-row {
-  display: flex; align-items: center; gap: 10px; padding: 9px 16px;
-  transition: background var(--transition);
-}
-.link-row:hover { background: var(--bg3); }
-.link-dot { width: 4px; height: 4px; border-radius: 50%; background: var(--text3); flex-shrink: 0; }
-.link-row a {
-  font-size: 13px; color: var(--text); text-decoration: none; flex: 1;
-  overflow: hidden; text-overflow: ellipsis; white-space: nowrap; transition: color var(--transition);
-}
-.link-row a:hover { color: var(--accent); }
-.link-domain { font-size: 11px; color: var(--text3); font-family: var(--mono); flex-shrink: 0; }
-.link-del-btn {
-  opacity: 0; background: none; border: none; cursor: pointer; color: var(--text3);
-  font-size: 16px; line-height: 1; padding: 2px 6px; border-radius: 4px; transition: all var(--transition);
-}
-.link-row:hover .link-del-btn { opacity: 1; }
-.link-del-btn:hover { color: var(--red); background: var(--red-bg); }
-.add-link-row {
-  padding: 8px 12px; border-top: 1px solid var(--border); display: flex; gap: 8px;
-}
-.add-link-input {
-  flex: 1; background: var(--bg3); border: 1px solid var(--border);
-  border-radius: var(--radius-xs); padding: 7px 11px; font-size: 12px;
-  font-family: var(--sans); color: var(--text); outline: none; transition: border-color var(--transition);
-}
-.add-link-input:focus { border-color: var(--accent); }
-.add-link-input::placeholder { color: var(--text3); }
+/* TOAST */
+.toast{position:fixed;bottom:1.5rem;right:1.5rem;background:var(--bg3);border:1px solid var(--border2);border-radius:9px;padding:10px 15px;font-size:13px;color:var(--text);box-shadow:var(--shadow);z-index:300;opacity:0;transform:translateY(8px);transition:opacity .2s,transform .2s;pointer-events:none;display:flex;align-items:center;gap:8px;}
+.toast.show{opacity:1;transform:translateY(0);}
+.toast.ok{border-color:rgba(200,245,101,.25);}
+.toast.err{border-color:rgba(224,82,82,.25);}
 
-/* ── MODAL ── */
-.modal-overlay {
-  position: fixed; inset: 0; background: rgba(0,0,0,.65); backdrop-filter: blur(4px);
-  display: flex; align-items: center; justify-content: center; z-index: 100; padding: 1rem;
-}
-.modal {
-  background: var(--bg2); border: 1px solid var(--border2); border-radius: var(--radius);
-  width: 100%; max-width: 460px; box-shadow: 0 24px 64px rgba(0,0,0,.4);
-  animation: slideUp .2s ease;
-}
-.modal-header {
-  padding: 18px 22px 16px; border-bottom: 1px solid var(--border);
-  display: flex; align-items: center; justify-content: space-between;
-}
-.modal-header h2 { font-size: 15px; font-weight: 600; }
-.modal-body { padding: 20px 22px; }
-.modal-footer {
-  padding: 14px 22px; border-top: 1px solid var(--border);
-  display: flex; gap: 8px; justify-content: flex-end;
-}
-.type-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 1.25rem; }
-.type-opt {
-  padding: 12px; border: 1.5px solid var(--border); border-radius: var(--radius-sm);
-  cursor: pointer; text-align: center; font-size: 13px; font-weight: 500;
-  background: var(--bg3); color: var(--text2); transition: all var(--transition);
-}
-.type-opt:hover { border-color: var(--border2); color: var(--text); }
-.type-opt.selected { border-color: var(--accent); background: var(--accent-bg); color: var(--accent); }
-.type-opt .type-icon { font-size: 20px; display: block; margin-bottom: 5px; }
-.or-divider {
-  position: relative; text-align: center; font-size: 11px; color: var(--text3);
-  margin: 1rem 0;
-}
-.or-divider::before, .or-divider::after {
-  content: ''; position: absolute; top: 50%; width: 44%; height: 1px; background: var(--border);
-}
-.or-divider::before { left: 0; }
-.or-divider::after { right: 0; }
-.quick-row { display: flex; gap: 8px; }
-.quick-row input { flex: 1; }
-.preview-card {
-  display: none; background: var(--bg3); border: 1px solid var(--border);
-  border-radius: var(--radius-sm); padding: 12px; gap: 12px; margin-top: 10px;
-  align-items: flex-start;
-}
-.preview-card.show { display: flex; }
-.preview-img { width: 60px; height: 45px; border-radius: 6px; object-fit: cover; flex-shrink: 0; background: var(--border); }
-.preview-info strong { font-size: 12px; color: var(--text); display: block; margin-bottom: 2px; }
-.preview-info span { font-size: 11px; color: var(--text3); font-family: var(--mono); }
-
-/* ── TOAST ── */
-.toast {
-  position: fixed; bottom: 1.5rem; right: 1.5rem; background: var(--bg3);
-  border: 1px solid var(--border2); border-radius: var(--radius-sm);
-  padding: 11px 16px; font-size: 13px; color: var(--text);
-  box-shadow: 0 8px 24px rgba(0,0,0,.3); z-index: 200;
-  animation: toastIn .2s ease; display: none;
-}
-.toast.show { display: block; }
-.toast.success { border-color: rgba(200,245,101,0.3); color: var(--accent); }
-.toast.error { border-color: rgba(224,82,82,0.3); color: var(--red); }
-
-/* ── LOADER ── */
-.loader {
-  position: fixed; inset: 0; background: var(--bg); display: flex;
-  align-items: center; justify-content: center; z-index: 300; font-family: var(--serif);
-  font-style: italic; font-size: 18px; color: var(--text3);
-}
-.loader.hidden { display: none; }
-
-/* ── ANIMATIONS ── */
-@keyframes slideUp {
-  from { opacity: 0; transform: translateY(16px); }
-  to   { opacity: 1; transform: translateY(0); }
-}
-@keyframes toastIn {
-  from { opacity: 0; transform: translateY(8px); }
-  to   { opacity: 1; transform: translateY(0); }
-}
-
-/* ── RESPONSIVE ── */
-@media (max-width: 700px) {
-  .sidebar { display: none; }
-  .main { margin-left: 0; padding: 1.25rem 1rem 3rem; }
-  .page-header h1 { font-size: 24px; }
-}
+@keyframes modalIn{from{opacity:0;transform:translateY(14px);}to{opacity:1;transform:translateY(0);}}
+@media(max-width:680px){.sidebar{display:none;}.main{margin-left:0;padding:1.25rem 1rem 3rem;}.page-head h1{font-size:22px;}}
 </style>
 </head>
 <body>
 
-<div class="loader" id="loader">yükleniyor…</div>
+<div id="loader">yükleniyor…</div>
 
-<!-- ═══ LOGIN ═══ -->
-<div id="login-screen" style="display:none;">
+<!-- LOGIN -->
+<div id="login-screen">
   <div class="login-box">
-    <div class="login-logo">
-      <div class="wordmark">Listelerim<span class="dot">.</span></div>
-    </div>
+    <div class="login-logo"><div class="login-wordmark">Listelerim<span class="dot">.</span></div></div>
     <div class="login-card">
-      <h2>Giriş yap</h2>
+      <p class="login-subtitle">Kişisel okuma ve izleme listesi</p>
       <div class="login-error" id="login-error"></div>
-      <div class="form-group">
-        <label>E-posta</label>
-        <input type="email" id="login-email" placeholder="sen@mail.com" autocomplete="email">
-      </div>
-      <div class="form-group">
-        <label>Şifre</label>
-        <input type="password" id="login-password" placeholder="••••••••" autocomplete="current-password"
-          onkeydown="if(event.key==='Enter')doLogin()">
-      </div>
-      <button class="btn btn-accent btn-full" onclick="doLogin()" id="login-btn">Giriş Yap →</button>
+      <div class="fg"><label>E-posta</label><input type="email" id="l-email" placeholder="sen@mail.com" autocomplete="email"></div>
+      <div class="fg"><label>Şifre</label><input type="password" id="l-pass" placeholder="••••••••" autocomplete="current-password" onkeydown="if(event.key==='Enter')doLogin()"></div>
+      <button class="btn btn-accent btn-full" onclick="doLogin()" id="login-btn" style="margin-top:.25rem;">
+        Giriş Yap
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+      </button>
     </div>
-    <div class="login-footer">Kişisel okuma ve izleme listem.</div>
+    <div class="login-hint">Veriler güvenle Supabase'de saklanır.</div>
   </div>
 </div>
 
-<!-- ═══ APP ═══ -->
+<!-- APP -->
 <div id="app-screen">
   <nav class="sidebar">
-    <div class="sidebar-logo">Listelerim<span class="dot">.</span></div>
+    <div class="sidebar-top">
+      <div class="sidebar-wordmark">Listelerim<span class="dot">.</span></div>
+      <button class="theme-btn" onclick="toggleTheme()" id="theme-btn" title="Tema değiştir"></button>
+    </div>
     <div class="sidebar-nav">
-      <div class="nav-label">İçerikler</div>
-      <button class="nav-item active" id="nav-watchlist" onclick="showPage('watchlist')">
-        <span class="nav-icon">📚</span> İzleme Listesi
-        <span class="nav-count" id="nc-watchlist">0</span>
+      <div class="nav-lbl">İçerikler</div>
+      <button class="nav-btn active" id="nav-watchlist" onclick="showPage('watchlist')">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>
+        <span class="nav-lbl-text">İzleme Listesi</span><span class="nav-count" id="nc-all">0</span>
       </button>
-      <button class="nav-item" id="nav-links" onclick="showPage('links')">
-        <span class="nav-icon">🔗</span> Faydalı Linkler
-        <span class="nav-count" id="nc-links">0</span>
+      <button class="nav-btn" id="nav-links" onclick="showPage('links')">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+        <span class="nav-lbl-text">Faydalı Linkler</span><span class="nav-count" id="nc-links">0</span>
       </button>
-      <div class="nav-label">Filtre</div>
-      <button class="nav-item" id="nav-pending" onclick="showPage('watchlist');setFilter('pending')">
-        <span class="nav-icon">⏳</span> Bekleyenler
-        <span class="nav-count" id="nc-pending">0</span>
+      <div class="nav-lbl">Durum</div>
+      <button class="nav-btn" id="nav-pending" onclick="showPage('watchlist');setFilter('pending')">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+        <span class="nav-lbl-text">Bekleyenler</span><span class="nav-count" id="nc-pending">0</span>
       </button>
-      <button class="nav-item" id="nav-done" onclick="showPage('watchlist');setFilter('done')">
-        <span class="nav-icon">✓</span> Tamamlananlar
-        <span class="nav-count" id="nc-done">0</span>
+      <button class="nav-btn" id="nav-done" onclick="showPage('watchlist');setFilter('done')">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+        <span class="nav-lbl-text">Tamamlananlar</span><span class="nav-count" id="nc-done">0</span>
       </button>
     </div>
     <div class="sidebar-footer">
-      <div class="user-chip">
-        <div class="user-avatar" id="user-avatar">?</div>
-        <span class="user-email" id="user-email"></span>
+      <div class="user-row">
+        <div class="user-av" id="user-av">?</div>
+        <span class="user-em" id="user-em">–</span>
       </div>
-      <button class="btn btn-ghost btn-full btn-sm" onclick="doLogout()" style="margin-top:6px;">Çıkış Yap</button>
+      <button class="btn-logout" onclick="doLogout()">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+        Çıkış Yap
+      </button>
     </div>
   </nav>
 
   <main class="main">
-    <!-- WATCHLIST PAGE -->
+    <!-- WATCHLIST -->
     <div id="page-watchlist">
-      <div class="page-header">
-        <h1>İzleme Listesi</h1>
-        <p>Okumak ve izlemek istediğin içerikler.</p>
-      </div>
+      <div class="page-head"><h1>İzleme Listesi</h1><p>Okumak ve izlemek istediğin içerikler.</p></div>
       <div class="stats-row" id="stats-row"></div>
-      <div class="progress-wrap" id="progress-wrap" style="display:none;">
-        <div class="progress-labels">
-          <span id="progress-label-l">İlerleme</span>
-          <span id="progress-label-r">0%</span>
-        </div>
-        <div class="progress-bar"><div class="progress-fill" id="progress-fill" style="width:0%"></div></div>
+      <div class="prog-wrap" id="prog-wrap" style="display:none">
+        <div class="prog-labels"><span>İlerleme</span><span id="prog-pct">0%</span></div>
+        <div class="prog-bar"><div class="prog-fill" id="prog-fill" style="width:0%"></div></div>
       </div>
       <div class="toolbar">
-        <div class="filter-pills">
+        <div class="pills">
           <button class="pill active" data-f="all"     onclick="setFilter('all')">Tümü</button>
           <button class="pill"        data-f="pending" onclick="setFilter('pending')">Bekliyor</button>
           <button class="pill"        data-f="done"    onclick="setFilter('done')">Tamamlandı</button>
-          <button class="pill"        data-f="youtube" onclick="setFilter('youtube')">▶ YouTube</button>
-          <button class="pill"        data-f="blog"    onclick="setFilter('blog')">✍ Blog</button>
+          <button class="pill"        data-f="youtube" onclick="setFilter('youtube')">YouTube</button>
+          <button class="pill"        data-f="blog"    onclick="setFilter('blog')">Blog</button>
         </div>
-        <button class="btn btn-accent btn-sm" onclick="openItemModal()">+ Ekle</button>
+        <button class="btn btn-accent btn-sm" onclick="openItemModal()">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          Ekle
+        </button>
       </div>
-      <div class="cards-grid" id="cards-grid">
-        <div class="empty-state"><div class="empty-icon">📚</div><p>Henüz içerik yok.<br>Sağ üstten ekleyebilirsin.</p></div>
-      </div>
+      <div class="cards-grid" id="cards-grid"></div>
     </div>
 
-    <!-- LINKS PAGE -->
-    <div id="page-links" style="display:none;">
-      <div class="page-header">
-        <h1>Faydalı Linkler</h1>
-        <p>Kategorilere göre düzenlenmiş linkler.</p>
-      </div>
-      <div class="links-toolbar">
+    <!-- LINKS -->
+    <div id="page-links" style="display:none">
+      <div class="page-head"><h1>Faydalı Linkler</h1><p>Kategorilere göre düzenlenmiş linkler.</p></div>
+      <div class="links-bar">
         <span></span>
-        <div style="display:flex;gap:8px;">
-          <button class="btn btn-sm" onclick="openCatModal()">+ Kategori</button>
-        </div>
+        <button class="btn btn-sm" onclick="openCatModal()">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          Kategori Ekle
+        </button>
       </div>
       <div id="cats-container"></div>
-      <div class="empty-state" id="empty-links" style="display:none;">
-        <div class="empty-icon">🔗</div>
+      <div class="empty" id="empty-links" style="display:none">
+        <svg width="38" height="38" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="opacity:.3"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
         <p>Henüz kategori yok.<br>Yukarıdan kategori ekleyebilirsin.</p>
       </div>
     </div>
   </main>
 </div>
 
-<!-- ═══ MODAL: ITEM ═══ -->
-<div class="modal-overlay" id="item-modal" style="display:none;" onclick="if(event.target===this)closeItemModal()">
+<!-- MODAL: ITEM -->
+<div class="modal-overlay" id="item-modal" style="display:none" onclick="if(event.target===this)closeItemModal()">
   <div class="modal">
-    <div class="modal-header">
+    <div class="modal-head">
       <h2>Yeni İçerik Ekle</h2>
-      <button class="btn btn-icon" onclick="closeItemModal()">✕</button>
+      <button class="btn btn-icon" onclick="closeItemModal()"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
     </div>
     <div class="modal-body">
       <div class="type-grid">
         <div class="type-opt selected" id="topt-youtube" onclick="selType('youtube')">
-          <span class="type-icon">▶</span>YouTube
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M22.54 6.42a2.78 2.78 0 0 0-1.95-1.96C18.88 4 12 4 12 4s-6.88 0-8.59.46a2.78 2.78 0 0 0-1.95 1.96A29 29 0 0 0 1 12a29 29 0 0 0 .46 5.58A2.78 2.78 0 0 0 3.41 19.6C5.12 20 12 20 12 20s6.88 0 8.59-.46a2.78 2.78 0 0 0 1.95-1.95A29 29 0 0 0 23 12a29 29 0 0 0-.46-5.58z"/><polygon points="9.75 15.02 15.5 12 9.75 8.98 9.75 15.02"/></svg>
+          YouTube
         </div>
         <div class="type-opt" id="topt-blog" onclick="selType('blog')">
-          <span class="type-icon">✍</span>Blog / Makale
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+          Blog / Makale
         </div>
       </div>
-      <div class="form-group">
+      <div class="fg">
         <label>Hızlı Ekle — Linki Yapıştır</label>
         <div class="quick-row">
-          <input type="url" id="qi-url" placeholder="https://..." onkeydown="if(event.key==='Enter')fetchMeta()">
-          <button class="btn btn-sm" onclick="fetchMeta()" id="fetch-btn">Getir</button>
+          <div class="fg"><input type="url" id="qi-url" placeholder="https://..." onkeydown="if(event.key==='Enter')fetchMeta()"></div>
+          <button class="btn btn-sm" onclick="fetchMeta()" id="fetch-btn" style="flex-shrink:0;height:37px;">Getir</button>
         </div>
         <div class="preview-card" id="preview-card">
-          <img class="preview-img" id="pi-img" src="" alt="">
-          <div class="preview-info">
-            <strong id="pi-title"></strong>
-            <span id="pi-domain"></span>
-          </div>
+          <img class="preview-thumb" id="pi-img" src="" alt="">
+          <div class="preview-info"><strong id="pi-title"></strong><span id="pi-domain"></span></div>
         </div>
       </div>
-      <div class="or-divider">veya manuel doldur</div>
-      <div class="form-group">
-        <label>Başlık *</label>
-        <input type="text" id="mi-title" placeholder="İçeriğin başlığı">
-      </div>
-      <div class="form-group">
-        <label>Link *</label>
-        <input type="url" id="mi-url" placeholder="https://...">
-      </div>
-      <div class="form-group">
-        <label>Kapak Görseli URL <span style="color:var(--text3)">(opsiyonel)</span></label>
-        <input type="url" id="mi-img" placeholder="https://...">
-      </div>
+      <div class="or-line">veya manuel doldur</div>
+      <div class="fg"><label>Başlık *</label><input type="text" id="mi-title" placeholder="İçeriğin başlığı"></div>
+      <div class="fg"><label>Link *</label><input type="url" id="mi-url" placeholder="https://..."></div>
+      <div class="fg"><label>Açıklama <span style="color:var(--text3);font-weight:400;text-transform:none;font-size:11px;">(otomatik gelir)</span></label><textarea id="mi-desc" placeholder="Video veya makale açıklaması…"></textarea></div>
+      <div class="fg"><label>Kapak Görseli URL <span style="color:var(--text3);font-weight:400;text-transform:none;font-size:11px;">(otomatik gelir)</span></label><input type="url" id="mi-img" placeholder="https://..."></div>
     </div>
-    <div class="modal-footer">
+    <div class="modal-foot">
       <button class="btn btn-ghost" onclick="closeItemModal()">İptal</button>
       <button class="btn btn-accent" onclick="saveItem()">Kaydet</button>
     </div>
   </div>
 </div>
 
-<!-- ═══ MODAL: CATEGORY ═══ -->
-<div class="modal-overlay" id="cat-modal" style="display:none;" onclick="if(event.target===this)closeCatModal()">
+<!-- MODAL: CATEGORY -->
+<div class="modal-overlay" id="cat-modal" style="display:none" onclick="if(event.target===this)closeCatModal()">
   <div class="modal">
-    <div class="modal-header">
+    <div class="modal-head">
       <h2>Kategori Ekle</h2>
-      <button class="btn btn-icon" onclick="closeCatModal()">✕</button>
+      <button class="btn btn-icon" onclick="closeCatModal()"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
     </div>
     <div class="modal-body">
-      <div style="display:flex;gap:12px;">
-        <div class="form-group" style="width:80px;flex-shrink:0;">
-          <label>Emoji</label>
-          <input type="text" id="ci-emoji" placeholder="📌" maxlength="4" style="text-align:center;font-size:20px;">
-        </div>
-        <div class="form-group" style="flex:1;">
-          <label>Kategori Adı *</label>
-          <input type="text" id="ci-name" placeholder="örn. Geliştirici Araçları"
-            onkeydown="if(event.key==='Enter')saveCat()">
-        </div>
+      <div style="display:flex;gap:12px;align-items:flex-end;">
+        <div class="fg" style="width:72px;flex-shrink:0;margin-bottom:0;"><label>İkon</label><input type="text" id="ci-emoji" placeholder="📌" maxlength="4" style="text-align:center;font-size:18px;"></div>
+        <div class="fg" style="flex:1;margin-bottom:0;"><label>Kategori Adı *</label><input type="text" id="ci-name" placeholder="örn. Geliştirici Araçları" onkeydown="if(event.key==='Enter')saveCat()"></div>
       </div>
     </div>
-    <div class="modal-footer">
+    <div class="modal-foot">
       <button class="btn btn-ghost" onclick="closeCatModal()">İptal</button>
       <button class="btn btn-accent" onclick="saveCat()">Oluştur</button>
     </div>
   </div>
 </div>
 
-<!-- TOAST -->
 <div class="toast" id="toast"></div>
 
 <script>
-// ════════════════════════════════════════════
-// CONFIG — injected by GitHub Actions
-// ════════════════════════════════════════════
-const SUPABASE_URL  = '%%SUPABASE_URL%%';
-const SUPABASE_KEY  = '%%SUPABASE_KEY%%';
+'use strict';
+const SUPABASE_URL = '%%SUPABASE_URL%%';
+const SUPABASE_KEY = '%%SUPABASE_KEY%%';
+const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY, {
+  auth: { persistSession: true, storageKey: 'listelerim-auth' }
+});
 
-const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+// ── STATE ────────────────────────────────────────────────────────────
+let S = mkState();
+function mkState() { return { items:[], cats:[], filter:'all', type:'youtube', page:'watchlist', uid:null }; }
 
-// ════════════════════════════════════════════
-// STATE
-// ════════════════════════════════════════════
-let items   = [];
-let cats    = [];
-let filter  = 'all';
-let curType = 'youtube';
-let curPage = 'watchlist';
-let userId  = null;
-
-// ════════════════════════════════════════════
-// INIT
-// ════════════════════════════════════════════
-async function init() {
-  const { data: { session } } = await sb.auth.getSession();
-  if (session) {
-    userId = session.user.id;
-    await bootApp(session.user);
-  } else {
-    showLogin();
-  }
-  document.getElementById('loader').classList.add('hidden');
+// ── THEME ────────────────────────────────────────────────────────────
+const TK = 'listelerim-theme';
+function initTheme() {
+  const saved = localStorage.getItem(TK);
+  const pref  = saved || (window.matchMedia('(prefers-color-scheme:light)').matches ? 'light' : 'dark');
+  applyTheme(pref, false);
+}
+function applyTheme(t, save=true) {
+  document.documentElement.setAttribute('data-theme', t);
+  if (save) localStorage.setItem(TK, t);
+  const btn = document.getElementById('theme-btn');
+  if (!btn) return;
+  btn.innerHTML = t === 'dark'
+    ? `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>`
+    : `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>`;
+}
+function toggleTheme() {
+  applyTheme(document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark');
 }
 
+// ── INIT ─────────────────────────────────────────────────────────────
+async function init() {
+  initTheme();
+  try {
+    const { data:{ session } } = await sb.auth.getSession();
+    if (session?.user) { S.uid = session.user.id; await bootApp(session.user); }
+    else showLogin();
+  } catch(e) { showLogin(); }
+  fadeLoader();
+}
+function fadeLoader() {
+  const l = document.getElementById('loader');
+  l.classList.add('out');
+  setTimeout(() => l.style.display = 'none', 320);
+}
+
+// ── AUTH ─────────────────────────────────────────────────────────────
 function showLogin() {
   document.getElementById('login-screen').style.display = 'flex';
-  document.getElementById('app-screen').style.display = 'none';
+  document.getElementById('app-screen').style.display   = 'none';
+}
+function showApp() {
+  document.getElementById('login-screen').style.display = 'none';
+  document.getElementById('app-screen').style.display   = 'block';
 }
 
 async function bootApp(user) {
-  document.getElementById('login-screen').style.display = 'none';
-  document.getElementById('app-screen').style.display = 'block';
-  const email = user.email || '';
-  document.getElementById('user-email').textContent = email;
-  document.getElementById('user-avatar').textContent = email[0]?.toUpperCase() || '?';
+  // ★ Full state reset — prevents ANY previous user's data leaking through
+  S = mkState();
+  S.uid = user.id;
+  // Clear any stale non-auth localStorage (belt-and-suspenders)
+  Object.keys(localStorage)
+    .filter(k => k !== TK && !k.startsWith('listelerim-auth'))
+    .forEach(k => localStorage.removeItem(k));
+  const em = String(user.email || '');
+  document.getElementById('user-em').textContent = em;
+  document.getElementById('user-av').textContent = em[0]?.toUpperCase() || '?';
+  showApp();
   await loadAll();
   renderAll();
 }
 
-// ════════════════════════════════════════════
-// AUTH
-// ════════════════════════════════════════════
 async function doLogin() {
-  const email = document.getElementById('login-email').value.trim();
-  const pass  = document.getElementById('login-password').value;
+  const email = document.getElementById('l-email').value.trim();
+  const pass  = document.getElementById('l-pass').value;
   const btn   = document.getElementById('login-btn');
   const err   = document.getElementById('login-error');
   err.style.display = 'none';
+  if (!email || !pass) { err.textContent='E-posta ve şifre zorunlu.'; err.style.display='block'; return; }
   btn.textContent = 'Giriş yapılıyor…'; btn.disabled = true;
   const { data, error } = await sb.auth.signInWithPassword({ email, password: pass });
-  btn.textContent = 'Giriş Yap →'; btn.disabled = false;
-  if (error) { err.textContent = 'E-posta veya şifre hatalı.'; err.style.display = 'block'; return; }
-  userId = data.user.id;
+  btn.innerHTML = 'Giriş Yap <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>';
+  btn.disabled = false;
+  if (error) { err.textContent='E-posta veya şifre hatalı.'; err.style.display='block'; return; }
+  // ★ Reset state before boot — prevents bleed from any previous session
+  S = mkState();
   await bootApp(data.user);
 }
 
 async function doLogout() {
-  await sb.auth.signOut();
-  items = []; cats = [];
+  // ★ 1. Wipe state immediately
+  S = mkState();
+  // ★ 2. Clear DOM before any await — no flash of stale data
+  ['cards-grid','cats-container','stats-row'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.innerHTML = '';
+  });
+  // ★ 3. Show login right away
   showLogin();
+  // ★ 4. Sign out from Supabase (invalidates session token server-side)
+  await sb.auth.signOut();
+  // ★ 5. Clear form
+  document.getElementById('l-email').value = '';
+  document.getElementById('l-pass').value  = '';
+  document.getElementById('login-error').style.display = 'none';
 }
 
-// ════════════════════════════════════════════
-// DATA — Supabase
-// ════════════════════════════════════════════
+// ── DATA ─────────────────────────────────────────────────────────────
 async function loadAll() {
+  if (!S.uid) return;
   const [ir, cr] = await Promise.all([
-    sb.from('items').select('*').eq('user_id', userId).order('created_at', { ascending: false }),
-    sb.from('categories').select('*, links(*)').eq('user_id', userId).order('created_at', { ascending: true }),
+    sb.from('items').select('*').eq('user_id', S.uid).order('created_at',{ ascending:false }),
+    sb.from('categories').select('*, links(*)').eq('user_id', S.uid).order('created_at',{ ascending:true }),
   ]);
-  items = ir.data || [];
-  cats  = (cr.data || []).map(c => ({ ...c, links: c.links || [] }));
+  S.items = ir.data || [];
+  S.cats  = (cr.data || []).map(c => ({ ...c, links: c.links || [] }));
 }
 
-async function dbAddItem(item) {
-  const { data, error } = await sb.from('items').insert({ ...item, user_id: userId }).select().single();
+// ── DB (always enforces user_id — defense-in-depth on top of RLS) ───
+async function dbAdd(table, obj) {
+  const { data, error } = await sb.from(table).insert({ ...obj, user_id: S.uid }).select().single();
+  if (error) throw error; return data;
+}
+async function dbUpdate(table, id, obj) {
+  const { error } = await sb.from(table).update(obj).eq('id', id).eq('user_id', S.uid);
   if (error) throw error;
-  return data;
 }
-async function dbToggleDone(id, done) {
-  await sb.from('items').update({ done }).eq('id', id);
-}
-async function dbDeleteItem(id) {
-  await sb.from('items').delete().eq('id', id);
-}
-async function dbAddCat(cat) {
-  const { data, error } = await sb.from('categories').insert({ ...cat, user_id: userId }).select().single();
+async function dbDelete(table, id) {
+  const { error } = await sb.from(table).delete().eq('id', id).eq('user_id', S.uid);
   if (error) throw error;
-  return data;
 }
-async function dbDeleteCat(id) {
-  await sb.from('links').delete().eq('category_id', id);
-  await sb.from('categories').delete().eq('id', id);
-}
-async function dbAddLink(link) {
-  const { data, error } = await sb.from('links').insert(link).select().single();
-  if (error) throw error;
-  return data;
+async function dbAddLink(obj) {
+  const { data, error } = await sb.from('links').insert(obj).select().single();
+  if (error) throw error; return data;
 }
 async function dbDeleteLink(id) {
-  await sb.from('links').delete().eq('id', id);
+  const { error } = await sb.from('links').delete().eq('id', id);
+  if (error) throw error;
+}
+async function dbDeleteCatFull(catId) {
+  await sb.from('links').delete().eq('category_id', catId);
+  await sb.from('categories').delete().eq('id', catId).eq('user_id', S.uid);
 }
 
-// ════════════════════════════════════════════
-// NAVIGATION
-// ════════════════════════════════════════════
+// ── NAV ──────────────────────────────────────────────────────────────
 function showPage(page) {
-  curPage = page;
-  document.getElementById('page-watchlist').style.display = page === 'watchlist' ? 'block' : 'none';
-  document.getElementById('page-links').style.display     = page === 'links'     ? 'block' : 'none';
-  document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
-  document.getElementById('nav-' + page)?.classList.add('active');
+  S.page = page;
+  document.getElementById('page-watchlist').style.display = page==='watchlist' ? 'block' : 'none';
+  document.getElementById('page-links').style.display     = page==='links'     ? 'block' : 'none';
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('nav-'+page)?.classList.add('active');
 }
-
-// ════════════════════════════════════════════
-// FILTER
-// ════════════════════════════════════════════
 function setFilter(f) {
-  filter = f;
+  S.filter = f;
   document.querySelectorAll('.pill').forEach(p => p.classList.toggle('active', p.dataset.f === f));
   renderItems();
 }
 
-// ════════════════════════════════════════════
-// RENDER
-// ════════════════════════════════════════════
+// ── RENDER ───────────────────────────────────────────────────────────
 function renderAll() { renderStats(); renderItems(); renderLinks(); }
-
 function renderStats() {
-  const total   = items.length;
-  const done    = items.filter(i => i.done).length;
-  const pending = total - done;
-  const pct     = total ? Math.round(done / total * 100) : 0;
-  document.getElementById('nc-watchlist').textContent = total;
-  document.getElementById('nc-pending').textContent   = pending;
-  document.getElementById('nc-done').textContent      = done;
-  document.getElementById('nc-links').textContent     = cats.length;
-  document.getElementById('stats-row').innerHTML = `
-    <div class="stat-card"><div class="stat-val">${total}</div><div class="stat-key">Toplam</div></div>
-    <div class="stat-card"><div class="stat-val">${pending}</div><div class="stat-key">Bekliyor</div></div>
-    <div class="stat-card accent"><div class="stat-val">${done}</div><div class="stat-key">Tamamlandı</div></div>
-    <div class="stat-card"><div class="stat-val">${pct}%</div><div class="stat-key">İlerleme</div></div>`;
-  const pw = document.getElementById('progress-wrap');
+  const total=S.items.length, done=S.items.filter(i=>i.done).length, pct=total?Math.round(done/total*100):0;
+  document.getElementById('nc-all').textContent     = total;
+  document.getElementById('nc-pending').textContent = total-done;
+  document.getElementById('nc-done').textContent    = done;
+  document.getElementById('nc-links').textContent   = S.cats.length;
+  document.getElementById('stats-row').innerHTML =
+    `<div class="stat-card"><div class="stat-val">${total}</div><div class="stat-key">Toplam</div></div>
+     <div class="stat-card"><div class="stat-val">${total-done}</div><div class="stat-key">Bekliyor</div></div>
+     <div class="stat-card hi"><div class="stat-val">${done}</div><div class="stat-key">Tamamlandı</div></div>
+     <div class="stat-card"><div class="stat-val">${pct}%</div><div class="stat-key">İlerleme</div></div>`;
+  const pw = document.getElementById('prog-wrap');
   pw.style.display = total ? 'block' : 'none';
-  document.getElementById('progress-fill').style.width = pct + '%';
-  document.getElementById('progress-label-r').textContent = pct + '%';
+  document.getElementById('prog-fill').style.width = pct+'%';
+  document.getElementById('prog-pct').textContent  = pct+'%';
 }
-
 function renderItems() {
   const grid = document.getElementById('cards-grid');
-  let list = items.filter(it => {
-    if (filter === 'pending') return !it.done;
-    if (filter === 'done')    return it.done;
-    if (filter === 'youtube') return it.type === 'youtube';
-    if (filter === 'blog')    return it.type === 'blog';
+  const list = S.items.filter(it => {
+    if (S.filter==='pending') return !it.done;
+    if (S.filter==='done')    return it.done;
+    if (S.filter==='youtube') return it.type==='youtube';
+    if (S.filter==='blog')    return it.type==='blog';
     return true;
   });
   if (!list.length) {
-    grid.innerHTML = `<div class="empty-state"><div class="empty-icon">📚</div><p>Gösterilecek içerik yok.</p></div>`;
+    grid.innerHTML=`<div class="empty"><svg width="38" height="38" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="opacity:.3"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg><p>Gösterilecek içerik yok.<br>Sağ üstten ekleyebilirsin.</p></div>`;
     return;
   }
-  grid.innerHTML = list.map(it => `
-    <div class="card ${it.done ? 'done' : ''}" id="c-${it.id}">
-      <div class="card-media">
-        <a class="card-link" href="${esc(it.url)}" target="_blank" rel="noopener">
-          ${it.image_url
-            ? `<img class="card-thumb" src="${esc(it.image_url)}" alt="" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
-               <div class="card-thumb-ph" style="display:none">${it.type === 'youtube' ? '▶' : '✍'}</div>`
-            : `<div class="card-thumb-ph">${it.type === 'youtube' ? '▶' : '✍'}</div>`}
-        </a>
-        <div class="card-type-badge ${it.type === 'youtube' ? 'yt' : ''}">${it.type === 'youtube' ? '▶ YouTube' : '✍ Blog'}</div>
-        <div class="card-actions-overlay">
-          <button class="overlay-btn" onclick="deleteItem('${it.id}')" title="Sil">✕</button>
-        </div>
+  grid.innerHTML = list.map(it => cardHTML(it)).join('');
+}
+
+const SVG_CHECK = `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>`;
+const SVG_CLOCK = `<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>`;
+function ytIconSVG(s) { return `<svg width="${s}" height="${s}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M22.54 6.42a2.78 2.78 0 0 0-1.95-1.96C18.88 4 12 4 12 4s-6.88 0-8.59.46a2.78 2.78 0 0 0-1.95 1.96A29 29 0 0 0 1 12a29 29 0 0 0 .46 5.58A2.78 2.78 0 0 0 3.41 19.6C5.12 20 12 20 12 20s6.88 0 8.59-.46a2.78 2.78 0 0 0 1.95-1.95A29 29 0 0 0 23 12a29 29 0 0 0-.46-5.58z"/><polygon points="9.75 15.02 15.5 12 9.75 8.98 9.75 15.02"/></svg>`; }
+function blogIconSVG(s) { return `<svg width="${s}" height="${s}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>`; }
+
+function cardHTML(it) {
+  const isYT = it.type === 'youtube';
+  // For YouTube: try maxres, fallback to hq via onerror
+  const ytId = isYT ? getYouTubeID(it.url) : null;
+  let thumbEl;
+  if (it.image_url) {
+    const fallbackSrc = ytId ? `https://img.youtube.com/vi/${ytId}/hqdefault.jpg` : '';
+    const onerr = fallbackSrc
+      ? `onerror="if(this.dataset.tried){this.style.display='none';this.nextElementSibling.style.display='flex';}else{this.dataset.tried=1;this.src='${fallbackSrc}'}"`
+      : `onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"`;
+    thumbEl = `<img class="card-thumb" src="${esc(it.image_url)}" alt="" ${onerr} loading="lazy">
+               <div class="card-thumb-ph" style="display:none">${isYT?ytIconSVG(28):blogIconSVG(28)}</div>`;
+  } else {
+    thumbEl = `<div class="card-thumb-ph">${isYT?ytIconSVG(28):blogIconSVG(28)}</div>`;
+  }
+  const descEl = it.description ? `<div class="card-desc">${esc(it.description)}</div>` : '';
+  const checkStroke = it.done ? '#0e0e0c' : 'var(--text3)';
+  return `<div class="card ${it.done?'done':''}" id="c-${it.id}">
+    <div class="card-media">
+      <a href="${esc(it.url)}" target="_blank" rel="noopener noreferrer">${thumbEl}</a>
+      <div class="card-tag ${isYT?'yt':''}">${isYT?ytIconSVG(11):blogIconSVG(11)}${isYT?'YouTube':'Blog'}</div>
+      <button class="card-del" onclick="deleteItem('${it.id}')" title="Sil"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+    </div>
+    <div class="card-body">
+      <div class="card-title">${esc(it.title)}</div>
+      ${descEl}
+      <div class="card-footer">
+        <span class="status-badge ${it.done?'done':'pending'}">${it.done?SVG_CHECK+' Tamamlandı':SVG_CLOCK+' Bekliyor'}</span>
+        <button class="check-btn ${it.done?'done':''}" onclick="toggleDone('${it.id}',${!it.done})" title="${it.done?'Geri al':'Tamamlandı işaretle'}">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="${checkStroke}" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+        </button>
       </div>
-      <div class="card-body">
-        <div class="card-title">${esc(it.title)}</div>
-        <div class="card-footer">
-          <span class="status-badge ${it.done ? 'done' : 'pending'}">${it.done ? '✓ Tamamlandı' : '⏳ Bekliyor'}</span>
-          <button class="check-btn ${it.done ? 'done' : ''}" onclick="toggleDone('${it.id}',${!it.done})" title="İşaretle">
-            <svg viewBox="0 0 24 24" fill="none" stroke="${it.done ? '#0e0e0c' : '#4a4844'}" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-              <polyline points="20 6 9 17 4 12"/>
-            </svg>
-          </button>
-        </div>
-      </div>
-    </div>`).join('');
+    </div>
+  </div>`;
 }
 
 function renderLinks() {
   const cont  = document.getElementById('cats-container');
   const empty = document.getElementById('empty-links');
-  if (!cats.length) { cont.innerHTML = ''; empty.style.display = 'block'; return; }
+  if (!S.cats.length) { cont.innerHTML=''; empty.style.display='block'; return; }
   empty.style.display = 'none';
-  cont.innerHTML = cats.map(cat => `
+  cont.innerHTML = S.cats.map(cat => `
     <div class="cat-block" id="cat-${cat.id}">
-      <div class="cat-header">
-        <div class="cat-name"><span class="cat-emoji">${cat.emoji || '📌'}</span>${esc(cat.name)}</div>
-        <button class="btn btn-danger btn-xs" onclick="deleteCat('${cat.id}')">Sil</button>
+      <div class="cat-head">
+        <div class="cat-name"><span>${cat.emoji||'📌'}</span>${esc(cat.name)}</div>
+        <button class="btn btn-danger btn-xs" onclick="deleteCat('${cat.id}')"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>Sil</button>
       </div>
-      <div class="link-list">
-        ${(cat.links || []).map(lk => `
-          <div class="link-row">
-            <div class="link-dot"></div>
-            <a href="${esc(lk.url)}" target="_blank" rel="noopener">${esc(lk.title || getDomain(lk.url))}</a>
-            <span class="link-domain">${getDomain(lk.url)}</span>
-            <button class="link-del-btn" onclick="deleteLink('${cat.id}','${lk.id}')">×</button>
-          </div>`).join('')}
-      </div>
+      <div class="link-list">${(cat.links||[]).map(lk=>`
+        <div class="link-row">
+          <div class="link-dot"></div>
+          <a href="${esc(lk.url)}" target="_blank" rel="noopener noreferrer">${esc(lk.title||getDomain(lk.url))}</a>
+          <span class="link-domain">${getDomain(lk.url)}</span>
+          <button class="link-del" onclick="deleteLink('${cat.id}','${lk.id}')">×</button>
+        </div>`).join('')}</div>
       <div class="add-link-row">
-        <input class="add-link-input" type="url" placeholder="Link ekle ve Enter'a bas…"
-          id="li-${cat.id}" onkeydown="if(event.key==='Enter')addLink('${cat.id}')">
+        <input class="add-link-input" type="url" placeholder="Link ekle ve Enter'a bas…" id="li-${cat.id}" onkeydown="if(event.key==='Enter')addLink('${cat.id}')">
         <button class="btn btn-sm" onclick="addLink('${cat.id}')">Ekle</button>
       </div>
     </div>`).join('');
 }
 
-// ════════════════════════════════════════════
-// ITEM ACTIONS
-// ════════════════════════════════════════════
+// ── ACTIONS ──────────────────────────────────────────────────────────
 async function toggleDone(id, done) {
-  const it = items.find(i => i.id === id);
-  if (!it) return;
-  it.done = done;
-  renderStats(); renderItems();
-  await dbToggleDone(id, done);
+  const it = S.items.find(i=>i.id===id); if (!it) return;
+  it.done = done; renderStats(); renderItems();
+  try { await dbUpdate('items', id, { done }); }
+  catch(e) { it.done=!done; renderStats(); renderItems(); toast('Güncelleme başarısız.','err'); }
 }
-
 async function deleteItem(id) {
   if (!confirm('Bu içeriği silmek istediğine emin misin?')) return;
-  items = items.filter(i => i.id !== id);
-  renderStats(); renderItems();
-  await dbDeleteItem(id);
-  toast('İçerik silindi.', 'success');
+  S.items = S.items.filter(i=>i.id!==id); renderStats(); renderItems();
+  try { await dbDelete('items', id); toast('İçerik silindi.','ok'); }
+  catch(e) { await loadAll(); renderAll(); toast('Silinemedi.','err'); }
 }
-
-// ════════════════════════════════════════════
-// CATEGORY ACTIONS
-// ════════════════════════════════════════════
 async function deleteCat(id) {
   if (!confirm('Bu kategoriyi ve tüm linklerini silmek istediğine emin misin?')) return;
-  cats = cats.filter(c => c.id !== id);
-  renderLinks();
-  await dbDeleteCat(id);
-  toast('Kategori silindi.', 'success');
+  S.cats = S.cats.filter(c=>c.id!==id); renderLinks(); renderStats();
+  try { await dbDeleteCatFull(id); toast('Kategori silindi.','ok'); }
+  catch(e) { await loadAll(); renderAll(); toast('Silinemedi.','err'); }
 }
-
 async function addLink(catId) {
-  const input = document.getElementById('li-' + catId);
-  const url = input.value.trim();
-  if (!url) return;
-  const cat = cats.find(c => c.id === catId);
-  if (!cat) return;
-  const newLink = { url: ensureHttp(url), title: getDomain(url), category_id: catId };
-  const saved = await dbAddLink(newLink);
-  cat.links.push(saved);
+  const input = document.getElementById('li-'+catId);
+  const url = (input?.value||'').trim(); if (!url) return;
+  const cat = S.cats.find(c=>c.id===catId); if (!cat) return;
+  const obj = { url:ensureHttp(url), title:getDomain(url), category_id:catId };
   input.value = '';
-  renderLinks();
-  toast('Link eklendi.', 'success');
+  try { const saved=await dbAddLink(obj); cat.links.push(saved); renderLinks(); toast('Link eklendi.','ok'); }
+  catch(e) { toast('Eklenemedi: '+e.message,'err'); }
 }
-
 async function deleteLink(catId, linkId) {
-  const cat = cats.find(c => c.id === catId);
-  if (!cat) return;
-  cat.links = cat.links.filter(l => l.id !== linkId);
-  renderLinks();
-  await dbDeleteLink(linkId);
+  const cat = S.cats.find(c=>c.id===catId); if (!cat) return;
+  cat.links = cat.links.filter(l=>l.id!==linkId); renderLinks();
+  try { await dbDeleteLink(linkId); }
+  catch(e) { await loadAll(); renderLinks(); toast('Silinemedi.','err'); }
 }
 
-// ════════════════════════════════════════════
-// MODAL: ITEM
-// ════════════════════════════════════════════
-function openItemModal() {
-  document.getElementById('item-modal').style.display = 'flex';
-  document.getElementById('qi-url').focus();
-}
+// ── MODAL: ITEM ───────────────────────────────────────────────────────
+function openItemModal() { document.getElementById('item-modal').style.display='flex'; document.getElementById('qi-url').focus(); }
 function closeItemModal() {
-  document.getElementById('item-modal').style.display = 'none';
-  ['qi-url','mi-title','mi-url','mi-img'].forEach(id => document.getElementById(id).value = '');
+  document.getElementById('item-modal').style.display='none';
+  ['qi-url','mi-title','mi-url','mi-desc','mi-img'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
   document.getElementById('preview-card').classList.remove('show');
 }
 function selType(t) {
-  curType = t;
-  document.getElementById('topt-youtube').classList.toggle('selected', t === 'youtube');
-  document.getElementById('topt-blog').classList.toggle('selected', t === 'blog');
+  S.type = t;
+  document.getElementById('topt-youtube').classList.toggle('selected', t==='youtube');
+  document.getElementById('topt-blog').classList.toggle('selected', t==='blog');
+}
+
+// YouTube ID extraction
+function getYouTubeID(url) {
+  const re = /(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|shorts\/|u\/\w\/|watch\?v=|watch\?.+&v=))([^#&?]{11})/;
+  const m = (url||'').match(re);
+  return m && m[1].length===11 ? m[1] : null;
 }
 
 async function fetchMeta() {
-  const raw = document.getElementById('qi-url').value.trim();
-  if (!raw) return;
+  const raw = document.getElementById('qi-url').value.trim(); if (!raw) return;
+  const url = ensureHttp(raw);
   const btn = document.getElementById('fetch-btn');
-  btn.textContent = '…'; btn.disabled = true;
-  try {
-    const url = ensureHttp(raw);
-    const res  = await fetch(`https://api.microlink.io?url=${encodeURIComponent(url)}`);
-    const data = await res.json();
-    const title  = data.data?.title  || getDomain(url);
-    const imgUrl = data.data?.image?.url || data.data?.logo?.url || '';
-    document.getElementById('mi-title').value = title;
-    document.getElementById('mi-url').value   = url;
-    document.getElementById('mi-img').value   = imgUrl;
-    document.getElementById('pi-title').textContent  = title;
-    document.getElementById('pi-domain').textContent = getDomain(url);
-    if (imgUrl) document.getElementById('pi-img').src = imgUrl;
-    document.getElementById('preview-card').classList.add('show');
-    if (url.includes('youtube.com') || url.includes('youtu.be')) selType('youtube');
-    else selType('blog');
-  } catch {
-    document.getElementById('mi-url').value = ensureHttp(raw);
+  btn.textContent='…'; btn.disabled=true;
+  const ytId = getYouTubeID(url);
+  if (ytId) {
+    selType('youtube');
+    // maxresdefault for storage; hqdefault as fallback
+    const maxRes = `https://img.youtube.com/vi/${ytId}/maxresdefault.jpg`;
+    const hqRes  = `https://img.youtube.com/vi/${ytId}/hqdefault.jpg`;
+    try {
+      const res  = await fetch(`https://noembed.com/embed?url=${encodeURIComponent(url)}`);
+      const data = await res.json();
+      const title = data.title || `YouTube (${ytId})`;
+      const desc  = data.description || '';
+      document.getElementById('mi-title').value = title;
+      document.getElementById('mi-url').value   = url;
+      document.getElementById('mi-desc').value  = desc;
+      document.getElementById('mi-img').value   = maxRes;
+      const pimg = document.getElementById('pi-img');
+      pimg.onerror = () => { pimg.src=hqRes; pimg.onerror=null; };
+      pimg.src = maxRes;
+      document.getElementById('pi-title').textContent  = title;
+      document.getElementById('pi-domain').textContent = 'youtube.com';
+      document.getElementById('preview-card').classList.add('show');
+    } catch(e) {
+      document.getElementById('mi-url').value = url;
+      document.getElementById('mi-img').value = hqRes;
+    }
+  } else {
+    selType('blog');
+    try {
+      const res  = await fetch(`https://api.microlink.io?url=${encodeURIComponent(url)}`);
+      const data = await res.json();
+      const title  = data.data?.title  || getDomain(url);
+      const desc   = data.data?.description || '';
+      const imgUrl = data.data?.image?.url || data.data?.screenshot?.url || '';
+      document.getElementById('mi-title').value = title;
+      document.getElementById('mi-url').value   = url;
+      document.getElementById('mi-desc').value  = desc;
+      document.getElementById('mi-img').value   = imgUrl;
+      if (imgUrl) document.getElementById('pi-img').src = imgUrl;
+      document.getElementById('pi-title').textContent  = title;
+      document.getElementById('pi-domain').textContent = getDomain(url);
+      document.getElementById('preview-card').classList.add('show');
+    } catch(e) { document.getElementById('mi-url').value = url; }
   }
-  btn.textContent = 'Getir'; btn.disabled = false;
+  btn.textContent='Getir'; btn.disabled=false;
 }
 
 async function saveItem() {
   const title = document.getElementById('mi-title').value.trim();
   const url   = document.getElementById('mi-url').value.trim();
-  if (!title || !url) { toast('Başlık ve link zorunlu!', 'error'); return; }
-  const item = { title, url: ensureHttp(url), image_url: document.getElementById('mi-img').value.trim() || null, type: curType, done: false };
+  if (!title||!url) { toast('Başlık ve link zorunlu!','err'); return; }
+  const ytId = getYouTubeID(url);
+  let imgUrl = document.getElementById('mi-img').value.trim()||null;
+  // Always store hqdefault as safe fallback for YT (maxres may 404 on some videos)
+  if (ytId && !imgUrl) imgUrl = `https://img.youtube.com/vi/${ytId}/hqdefault.jpg`;
+  const obj = { title, url:ensureHttp(url), image_url:imgUrl,
+    description:document.getElementById('mi-desc').value.trim()||null,
+    type:S.type, done:false };
   try {
-    const saved = await dbAddItem(item);
-    items.unshift(saved);
-    renderAll();
-    closeItemModal();
-    toast('İçerik eklendi ✓', 'success');
-  } catch(e) {
-    toast('Hata: ' + e.message, 'error');
-  }
+    const saved = await dbAdd('items', obj);
+    S.items.unshift(saved); renderAll(); closeItemModal(); toast('İçerik eklendi.','ok');
+  } catch(e) { toast('Hata: '+e.message,'err'); }
 }
 
-// ════════════════════════════════════════════
-// MODAL: CATEGORY
-// ════════════════════════════════════════════
-function openCatModal() {
-  document.getElementById('cat-modal').style.display = 'flex';
-  document.getElementById('ci-name').focus();
-}
-function closeCatModal() {
-  document.getElementById('cat-modal').style.display = 'none';
-  document.getElementById('ci-name').value  = '';
-  document.getElementById('ci-emoji').value = '';
-}
+// ── MODAL: CAT ────────────────────────────────────────────────────────
+function openCatModal() { document.getElementById('cat-modal').style.display='flex'; setTimeout(()=>document.getElementById('ci-name').focus(),50); }
+function closeCatModal() { document.getElementById('cat-modal').style.display='none'; document.getElementById('ci-name').value=''; document.getElementById('ci-emoji').value=''; }
 async function saveCat() {
-  const name  = document.getElementById('ci-name').value.trim();
-  const emoji = document.getElementById('ci-emoji').value.trim() || '📌';
-  if (!name) { toast('Kategori adı zorunlu!', 'error'); return; }
+  const name=document.getElementById('ci-name').value.trim();
+  const emoji=document.getElementById('ci-emoji').value.trim()||'📌';
+  if (!name) { toast('Kategori adı zorunlu!','err'); return; }
   try {
-    const saved = await dbAddCat({ name, emoji });
-    cats.push({ ...saved, links: [] });
-    renderLinks();
-    renderStats();
-    closeCatModal();
-    showPage('links');
-    toast('Kategori oluşturuldu ✓', 'success');
-  } catch(e) {
-    toast('Hata: ' + e.message, 'error');
-  }
+    const saved=await dbAdd('categories',{name,emoji});
+    S.cats.push({...saved,links:[]}); renderLinks(); renderStats();
+    closeCatModal(); showPage('links'); toast('Kategori oluşturuldu.','ok');
+  } catch(e) { toast('Hata: '+e.message,'err'); }
 }
 
-// ════════════════════════════════════════════
-// TOAST
-// ════════════════════════════════════════════
-let toastTimer;
-function toast(msg, type = '') {
-  const el = document.getElementById('toast');
-  el.textContent = msg;
-  el.className = 'toast show' + (type ? ' ' + type : '');
-  clearTimeout(toastTimer);
-  toastTimer = setTimeout(() => el.classList.remove('show'), 2800);
+// ── TOAST ─────────────────────────────────────────────────────────────
+let toastT;
+function toast(msg, type='') {
+  const el=document.getElementById('toast');
+  const icon = type==='ok'
+    ? `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>`
+    : type==='err'
+    ? `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--red)" stroke-width="2.5" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>`
+    : '';
+  el.innerHTML = icon + esc(msg);
+  el.className = 'toast show' + (type?' '+type:'');
+  clearTimeout(toastT);
+  toastT = setTimeout(()=>el.classList.remove('show'), 2800);
 }
 
-// ════════════════════════════════════════════
-// UTILS
-// ════════════════════════════════════════════
-function esc(s) {
-  return String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
-}
-function ensureHttp(u) { return /^https?:\/\//i.test(u) ? u : 'https://' + u; }
-function getDomain(u) { try { return new URL(ensureHttp(u)).hostname.replace(/^www\./, ''); } catch { return u; } }
+// ── UTILS ─────────────────────────────────────────────────────────────
+function esc(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;'); }
+function ensureHttp(u) { return /^https?:\/\//i.test(u)?u:'https://'+u; }
+function getDomain(u) { try { return new URL(ensureHttp(u)).hostname.replace(/^www\./,''); } catch { return u; } }
 
-// ════════════════════════════════════════════
-// START
-// ════════════════════════════════════════════
 init();
 </script>
 </body>
