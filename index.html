@@ -1,679 +1,2426 @@
 <!DOCTYPE html>
 <html lang="tr" data-theme="dark">
+
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Listelerim</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
-<style>
-:root[data-theme="dark"]{
-  --bg:#0e0e0c;--bg2:#161614;--bg3:#1e1e1b;--bg4:#252520;
-  --border:rgba(255,255,255,0.07);--border2:rgba(255,255,255,0.13);
-  --text:#f0ede6;--text2:#8a877f;--text3:#4d4b46;
-  --accent:#c8f565;--accent-dim:#7aab28;--accent-bg:rgba(200,245,101,0.08);
-  --red:#e05252;--red-bg:rgba(224,82,82,0.10);
-  --amber:#f5c842;--amber-bg:rgba(245,200,66,0.10);
-  --blue:#6ab4f5;--blue-bg:rgba(106,180,245,0.10);
-  --shadow:0 4px 24px rgba(0,0,0,0.4);--card-hover:rgba(255,255,255,0.03);
-}
-:root[data-theme="light"]{
-  --bg:#f5f4f0;--bg2:#ffffff;--bg3:#eceae4;--bg4:#e4e2db;
-  --border:rgba(0,0,0,0.08);--border2:rgba(0,0,0,0.14);
-  --text:#1a1916;--text2:#6b6860;--text3:#b0ada6;
-  --accent:#4a7c2f;--accent-dim:#3a6222;--accent-bg:rgba(74,124,47,0.09);
-  --red:#c0392b;--red-bg:rgba(192,57,43,0.08);
-  --amber:#9a6c00;--amber-bg:rgba(154,108,0,0.09);
-  --blue:#185fa5;--blue-bg:rgba(24,95,165,0.08);
-  --shadow:0 4px 24px rgba(0,0,0,0.10);--card-hover:rgba(0,0,0,0.02);
-}
-*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
-html{font-size:15px;}
-body{font-family:'DM Sans',system-ui,sans-serif;background:var(--bg);color:var(--text);min-height:100dvh;-webkit-font-smoothing:antialiased;transition:background .25s,color .25s;}
-::-webkit-scrollbar{width:5px;}::-webkit-scrollbar-track{background:transparent;}::-webkit-scrollbar-thumb{background:var(--border2);border-radius:4px;}
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Listelerim</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link
+    href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600&family=DM+Mono:wght@400;500&display=swap"
+    rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+  <style>
+    :root[data-theme="dark"] {
+      --bg: #0e0e0c;
+      --bg2: #161614;
+      --bg3: #1e1e1b;
+      --bg4: #252520;
+      --border: rgba(255, 255, 255, 0.07);
+      --border2: rgba(255, 255, 255, 0.13);
+      --text: #f0ede6;
+      --text2: #8a877f;
+      --text3: #4d4b46;
+      --accent: #c8f565;
+      --accent-dim: #7aab28;
+      --accent-bg: rgba(200, 245, 101, 0.08);
+      --red: #e05252;
+      --red-bg: rgba(224, 82, 82, 0.10);
+      --amber: #f5c842;
+      --amber-bg: rgba(245, 200, 66, 0.10);
+      --blue: #6ab4f5;
+      --blue-bg: rgba(106, 180, 245, 0.10);
+      --shadow: 0 4px 24px rgba(0, 0, 0, 0.4);
+      --card-hover: rgba(255, 255, 255, 0.03);
+    }
 
-#loader{position:fixed;inset:0;background:var(--bg);display:flex;align-items:center;justify-content:center;z-index:500;font-family:'Instrument Serif',serif;font-style:italic;font-size:18px;color:var(--text3);transition:opacity .3s;}
-#loader.out{opacity:0;pointer-events:none;}
+    :root[data-theme="light"] {
+      --bg: #f5f4f0;
+      --bg2: #ffffff;
+      --bg3: #eceae4;
+      --bg4: #e4e2db;
+      --border: rgba(0, 0, 0, 0.08);
+      --border2: rgba(0, 0, 0, 0.14);
+      --text: #1a1916;
+      --text2: #6b6860;
+      --text3: #b0ada6;
+      --accent: #4a7c2f;
+      --accent-dim: #3a6222;
+      --accent-bg: rgba(74, 124, 47, 0.09);
+      --red: #c0392b;
+      --red-bg: rgba(192, 57, 43, 0.08);
+      --amber: #9a6c00;
+      --amber-bg: rgba(154, 108, 0, 0.09);
+      --blue: #185fa5;
+      --blue-bg: rgba(24, 95, 165, 0.08);
+      --shadow: 0 4px 24px rgba(0, 0, 0, 0.10);
+      --card-hover: rgba(0, 0, 0, 0.02);
+    }
 
-/* LOGIN */
-#login-screen{display:none;min-height:100dvh;align-items:center;justify-content:center;padding:2rem;background:radial-gradient(ellipse 60% 40% at 50% 0%,rgba(200,245,101,0.06) 0%,transparent 70%);}
-.login-box{width:100%;max-width:360px;}
-.login-logo{text-align:center;margin-bottom:2.25rem;}
-.login-wordmark{font-family:'Instrument Serif',serif;font-size:26px;font-style:italic;color:var(--text);}
-.login-wordmark .dot{color:var(--accent);}
-.login-card{background:var(--bg2);border:1px solid var(--border2);border-radius:16px;padding:1.75rem;}
-.login-subtitle{font-size:13px;color:var(--text2);margin-bottom:1.5rem;}
-.login-error{display:none;background:var(--red-bg);border:1px solid rgba(224,82,82,.2);color:var(--red);font-size:12px;padding:9px 13px;border-radius:7px;margin-bottom:1rem;}
-.login-hint{text-align:center;margin-top:1.25rem;font-size:11px;color:var(--text3);}
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
 
-/* FORM */
-.fg{margin-bottom:.9rem;}
-.fg label{display:block;font-size:11px;font-weight:600;color:var(--text2);text-transform:uppercase;letter-spacing:.06em;margin-bottom:5px;}
-.fg input,.fg select,.fg textarea{width:100%;background:var(--bg3);border:1px solid var(--border2);border-radius:8px;padding:9px 12px;font-size:13.5px;font-family:'DM Sans',sans-serif;color:var(--text);outline:none;transition:border-color .15s,box-shadow .15s;}
-.fg input:focus,.fg select:focus,.fg textarea:focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-bg);}
-.fg input::placeholder,.fg textarea::placeholder{color:var(--text3);}
-.fg textarea{resize:vertical;min-height:55px;}
+    html {
+      font-size: 15px;
+    }
 
-/* BUTTONS */
-.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:8px 16px;font-size:13px;font-family:'DM Sans',sans-serif;font-weight:500;border-radius:8px;border:1px solid var(--border2);background:var(--bg3);color:var(--text);cursor:pointer;transition:all .15s;white-space:nowrap;}
-.btn:hover{background:var(--bg4);}
-.btn:active{transform:scale(.98);}
-.btn-accent{background:var(--accent);color:#0e0e0c;border-color:var(--accent);font-weight:600;}
-.btn-accent:hover{filter:brightness(1.08);}
-:root[data-theme="light"] .btn-accent{color:#fff;}
-.btn-ghost{background:transparent;border-color:transparent;color:var(--text2);}
-.btn-ghost:hover{background:var(--bg3);color:var(--text);border-color:var(--border);}
-.btn-danger{background:transparent;border-color:transparent;color:var(--red);}
-.btn-danger:hover{background:var(--red-bg);border-color:rgba(224,82,82,.2);}
-.btn-ok{background:transparent;border-color:transparent;color:var(--accent-dim);}
-.btn-ok:hover{background:var(--accent-bg);border-color:rgba(200,245,101,.2);}
-.btn-sm{padding:6px 12px;font-size:12px;}
-.btn-xs{padding:4px 9px;font-size:11px;border-radius:6px;}
-.btn-full{width:100%;}
-.btn-icon{width:32px;height:32px;padding:0;border-radius:8px;border-color:transparent;background:transparent;color:var(--text2);}
-.btn-icon:hover{background:var(--bg3);color:var(--text);border-color:var(--border);}
-.theme-btn{width:32px;height:32px;border-radius:8px;border:1px solid var(--border2);background:var(--bg3);cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--text2);transition:all .15s;flex-shrink:0;}
-.theme-btn:hover{background:var(--bg4);color:var(--text);}
+    body {
+      font-family: 'DM Sans', system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100dvh;
+      -webkit-font-smoothing: antialiased;
+      transition: background .25s, color .25s;
+    }
 
-/* APP SHELL */
-#app-screen{display:none;}
-.sidebar{position:fixed;left:0;top:0;bottom:0;width:216px;background:var(--bg2);border-right:1px solid var(--border);display:flex;flex-direction:column;z-index:10;transition:background .25s;}
-.sidebar-top{padding:1.25rem 1rem 1rem;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;}
-.sidebar-wordmark{font-family:'Instrument Serif',serif;font-size:19px;font-style:italic;color:var(--text);}
-.sidebar-wordmark .dot{color:var(--accent);}
-.sidebar-nav{padding:.75rem .625rem;flex:1;overflow-y:auto;}
-.nav-lbl{font-size:10px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.09em;padding:0 .5rem;margin:1.1rem 0 .35rem;}
-.nav-lbl:first-child{margin-top:0;}
-.nav-btn{display:flex;align-items:center;gap:9px;width:100%;padding:7px 9px;border-radius:7px;border:1px solid transparent;background:none;font-size:13px;font-family:'DM Sans',sans-serif;font-weight:500;color:var(--text2);cursor:pointer;transition:all .15s;text-align:left;}
-.nav-btn:hover{background:var(--bg3);color:var(--text);}
-.nav-btn.active{background:var(--accent-bg);color:var(--accent);border-color:rgba(200,245,101,0.15);}
-:root[data-theme="light"] .nav-btn.active{border-color:rgba(74,124,47,0.15);}
-.nav-lbl-text{flex:1;}
-.nav-count{font-size:11px;font-family:'DM Mono',monospace;background:var(--bg3);color:var(--text3);padding:1px 7px;border-radius:999px;}
-.nav-btn.active .nav-count{background:var(--accent-bg);color:var(--accent-dim);}
-.nav-badge{font-size:10px;font-family:'DM Mono',monospace;background:var(--red-bg);color:var(--red);padding:1px 7px;border-radius:999px;display:none;}
-.nav-badge.show{display:block;}
-.sidebar-footer{padding:.75rem .625rem;border-top:1px solid var(--border);}
-.user-row{display:flex;align-items:center;gap:8px;padding:7px 9px;border-radius:7px;}
-.user-av{width:28px;height:28px;border-radius:50%;flex-shrink:0;background:var(--accent-bg);border:1px solid rgba(200,245,101,0.2);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600;color:var(--accent);}
-.user-em{font-size:11px;color:var(--text3);flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
-.btn-logout{display:flex;align-items:center;gap:7px;width:100%;padding:7px 9px;border-radius:7px;border:1px solid transparent;background:none;font-size:12px;font-family:'DM Sans',sans-serif;color:var(--text2);cursor:pointer;transition:all .15s;margin-top:2px;}
-.btn-logout:hover{background:var(--red-bg);color:var(--red);border-color:rgba(224,82,82,.15);}
+    ::-webkit-scrollbar {
+      width: 5px;
+    }
 
-/* MAIN */
-.main{margin-left:216px;padding:2.25rem 2.25rem 4rem;min-height:100dvh;}
-.page-head{margin-bottom:1.75rem;display:flex;align-items:flex-start;justify-content:space-between;gap:1rem;flex-wrap:wrap;}
-.page-head-left h1{font-family:'Instrument Serif',serif;font-size:30px;font-style:italic;font-weight:400;letter-spacing:-.3px;margin-bottom:3px;}
-.page-head-left p{font-size:13px;color:var(--text2);}
+    ::-webkit-scrollbar-track {
+      background: transparent;
+    }
 
-/* STATS */
-.stats-row{display:flex;gap:10px;margin-bottom:1.75rem;flex-wrap:wrap;}
-.stat-card{background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:13px 17px;min-width:100px;transition:background .25s;}
-.stat-val{font-size:22px;font-weight:300;font-family:'DM Mono',monospace;color:var(--text);line-height:1;}
-.stat-key{font-size:10px;color:var(--text3);margin-top:4px;text-transform:uppercase;letter-spacing:.06em;}
-.stat-card.hi{border-color:rgba(200,245,101,.2);background:var(--accent-bg);}
-:root[data-theme="light"] .stat-card.hi{border-color:rgba(74,124,47,.2);}
-.stat-card.hi .stat-val{color:var(--accent);}
+    ::-webkit-scrollbar-thumb {
+      background: var(--border2);
+      border-radius: 4px;
+    }
 
-/* PROGRESS */
-.prog-wrap{margin-bottom:1.75rem;}
-.prog-labels{display:flex;justify-content:space-between;font-size:11px;color:var(--text3);margin-bottom:5px;}
-.prog-bar{height:2px;background:var(--bg3);border-radius:2px;overflow:hidden;}
-.prog-fill{height:100%;background:linear-gradient(90deg,var(--accent-dim),var(--accent));border-radius:2px;transition:width .5s ease;}
+    #loader {
+      position: fixed;
+      inset: 0;
+      background: var(--bg);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 500;
+      font-family: 'Instrument Serif', serif;
+      font-style: italic;
+      font-size: 18px;
+      color: var(--text3);
+      transition: opacity .3s;
+    }
 
-/* TOOLBAR */
-.toolbar{display:flex;align-items:center;gap:10px;margin-bottom:1.5rem;flex-wrap:wrap;}
-.pills{display:flex;gap:6px;flex:1;flex-wrap:wrap;}
-.pill{padding:5px 13px;border-radius:999px;border:1px solid var(--border);background:transparent;color:var(--text2);font-size:12px;font-weight:500;cursor:pointer;transition:all .15s;font-family:'DM Sans',sans-serif;}
-.pill:hover{border-color:var(--border2);color:var(--text);}
-.pill.active{background:var(--accent);color:#0e0e0c;border-color:var(--accent);}
-:root[data-theme="light"] .pill.active{color:#fff;}
+    #loader.out {
+      opacity: 0;
+      pointer-events: none;
+    }
 
-/* CARDS */
-.cards-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:14px;}
-.card{background:var(--bg2);border:1px solid var(--border);border-radius:14px;overflow:hidden;transition:border-color .2s,transform .2s,box-shadow .2s;position:relative;}
-.card:hover{border-color:var(--border2);transform:translateY(-2px);box-shadow:var(--shadow);}
-.card.done{opacity:.42;}
-.card-media{position:relative;overflow:hidden;}
-.card-thumb{width:100%;height:124px;object-fit:cover;display:block;background:var(--bg3);}
-.card-thumb-ph{width:100%;height:124px;display:flex;align-items:center;justify-content:center;background:var(--bg3);color:var(--text3);}
-.card-tag{position:absolute;top:8px;left:8px;padding:3px 8px;border-radius:5px;font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.05em;backdrop-filter:blur(8px);background:rgba(14,14,12,.72);color:var(--text2);border:1px solid rgba(255,255,255,.08);display:flex;align-items:center;gap:4px;}
-.card-tag.yt{color:#ff7070;}
-:root[data-theme="light"] .card-tag{background:rgba(255,255,255,.82);border-color:var(--border);}
-.card-del{position:absolute;top:8px;right:8px;opacity:0;transition:opacity .15s;width:26px;height:26px;border-radius:6px;border:1px solid rgba(255,255,255,.1);background:rgba(14,14,12,.75);backdrop-filter:blur(8px);display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--text2);}
-:root[data-theme="light"] .card-del{background:rgba(255,255,255,.82);border-color:var(--border);}
-.card-del:hover{color:var(--red);}
-.card:hover .card-del{opacity:1;}
-.card-body{padding:12px 13px 13px;}
-.card-title{font-size:13px;font-weight:500;color:var(--text);line-height:1.45;margin-bottom:9px;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;}
-.card-footer{display:flex;align-items:center;justify-content:space-between;}
-.status-badge{font-size:11px;font-weight:500;padding:3px 9px;border-radius:999px;display:inline-flex;align-items:center;gap:4px;}
-.status-badge.done{background:var(--accent-bg);color:var(--accent-dim);}
-.status-badge.pending{background:var(--amber-bg);color:var(--amber);}
-.check-btn{width:27px;height:27px;border-radius:50%;border:1.5px solid var(--border2);background:transparent;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .15s;flex-shrink:0;}
-.check-btn:hover{border-color:var(--accent);background:var(--accent-bg);}
-.check-btn.done{background:var(--accent);border-color:var(--accent);}
+    /* LOGIN */
+    #login-screen {
+      display: none;
+      min-height: 100dvh;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem;
+      background: radial-gradient(ellipse 60% 40% at 50% 0%, rgba(200, 245, 101, 0.06) 0%, transparent 70%);
+    }
 
-/* EMPTY */
-.empty{text-align:center;padding:4.5rem 2rem;color:var(--text3);grid-column:1/-1;display:flex;flex-direction:column;align-items:center;gap:10px;}
-.empty p{font-size:13px;line-height:1.7;}
+    .login-box {
+      width: 100%;
+      max-width: 360px;
+    }
 
-/* LINKS */
-.links-bar{display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem;}
-.cat-block{background:var(--bg2);border:1px solid var(--border);border-radius:12px;overflow:hidden;margin-bottom:11px;}
-.cat-head{display:flex;align-items:center;justify-content:space-between;padding:12px 15px;border-bottom:1px solid var(--border);}
-.cat-name{font-size:13.5px;font-weight:600;display:flex;align-items:center;gap:8px;}
-.link-row{display:flex;align-items:center;gap:10px;padding:9px 15px;transition:background .12s;}
-.link-row:hover{background:var(--card-hover);}
-.link-dot{width:4px;height:4px;border-radius:50%;background:var(--text3);flex-shrink:0;}
-.link-row a{font-size:13px;color:var(--text);text-decoration:none;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;transition:color .12s;}
-.link-row a:hover{color:var(--accent);}
-.link-domain{font-size:11px;color:var(--text3);font-family:'DM Mono',monospace;flex-shrink:0;}
-.link-del{opacity:0;background:none;border:none;cursor:pointer;color:var(--text3);font-size:15px;padding:2px 5px;border-radius:4px;transition:all .12s;}
-.link-row:hover .link-del{opacity:1;}
-.link-del:hover{color:var(--red);background:var(--red-bg);}
-.add-link-row{padding:7px 11px;border-top:1px solid var(--border);display:flex;gap:7px;}
-.add-link-input{flex:1;background:var(--bg3);border:1px solid var(--border);border-radius:6px;padding:7px 11px;font-size:12px;font-family:'DM Sans',sans-serif;color:var(--text);outline:none;transition:border-color .15s;}
-.add-link-input:focus{border-color:var(--accent);}
-.add-link-input::placeholder{color:var(--text3);}
+    .login-logo {
+      text-align: center;
+      margin-bottom: 2.25rem;
+    }
 
-/* RSS PAGE */
-.rss-toolbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem;gap:12px;flex-wrap:wrap;}
-.rss-feeds-list{display:flex;flex-direction:column;gap:8px;margin-bottom:2rem;}
-.rss-feed-row{background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:12px 15px;display:flex;align-items:center;gap:12px;}
-.rss-feed-info{flex:1;min-width:0;}
-.rss-feed-title{font-size:13px;font-weight:500;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-.rss-feed-url{font-size:11px;color:var(--text3);font-family:'DM Mono',monospace;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-.rss-feed-meta{font-size:11px;color:var(--text3);flex-shrink:0;text-align:right;}
+    .login-wordmark {
+      font-family: 'Instrument Serif', serif;
+      font-size: 26px;
+      font-style: italic;
+      color: var(--text);
+    }
 
-/* RSS INBOX */
-.rss-section-label{font-size:11px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.07em;margin-bottom:.75rem;}
-.rss-items-list{display:flex;flex-direction:column;gap:8px;}
-.rss-item{background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:14px 16px;transition:border-color .15s;}
-.rss-item:hover{border-color:var(--border2);}
-.rss-item-head{display:flex;align-items:flex-start;gap:10px;margin-bottom:8px;}
-.rss-item-source{font-size:10px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;white-space:nowrap;flex-shrink:0;padding-top:2px;}
-.rss-item-title{font-size:13px;font-weight:500;color:var(--text);line-height:1.45;flex:1;}
-.rss-item-title a{color:inherit;text-decoration:none;}
-.rss-item-title a:hover{color:var(--accent);}
-.rss-item-footer{display:flex;align-items:center;justify-content:space-between;gap:8px;}
-.rss-item-date{font-size:11px;color:var(--text3);font-family:'DM Mono',monospace;}
-.rss-item-actions{display:flex;gap:6px;}
-.checking-indicator{display:none;align-items:center;gap:8px;font-size:12px;color:var(--text2);}
-.checking-indicator.show{display:flex;}
-@keyframes spin{to{transform:rotate(360deg);}}
-.spin{animation:spin .8s linear infinite;display:inline-block;}
+    .login-wordmark .dot {
+      color: var(--accent);
+    }
 
-/* MODAL */
-.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.6);backdrop-filter:blur(5px);display:flex;align-items:center;justify-content:center;z-index:100;padding:1rem;}
-.modal{background:var(--bg2);border:1px solid var(--border2);border-radius:16px;width:100%;max-width:450px;box-shadow:0 24px 64px rgba(0,0,0,.4);animation:modalIn .2s ease;}
-.modal-head{padding:17px 20px 15px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;}
-.modal-head h2{font-size:15px;font-weight:600;}
-.modal-body{padding:18px 20px;}
-.modal-foot{padding:13px 20px;border-top:1px solid var(--border);display:flex;gap:8px;justify-content:flex-end;}
-.type-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:1.1rem;}
-.type-opt{padding:11px;border:1.5px solid var(--border);border-radius:9px;cursor:pointer;text-align:center;font-size:13px;font-weight:500;background:var(--bg3);color:var(--text2);transition:all .15s;display:flex;flex-direction:column;align-items:center;gap:6px;}
-.type-opt:hover{border-color:var(--border2);color:var(--text);}
-.type-opt.selected{border-color:var(--accent);background:var(--accent-bg);color:var(--accent);}
-:root[data-theme="light"] .type-opt.selected{color:var(--accent-dim);}
-.or-line{text-align:center;font-size:11px;color:var(--text3);margin:.9rem 0;position:relative;}
-.or-line::before,.or-line::after{content:'';position:absolute;top:50%;width:43%;height:1px;background:var(--border);}
-.or-line::before{left:0;}.or-line::after{right:0;}
-.quick-row{display:flex;gap:7px;align-items:flex-end;}
-.quick-row .fg{flex:1;margin-bottom:0;}
-.preview-card{display:none;background:var(--bg3);border:1px solid var(--border);border-radius:9px;padding:11px;gap:11px;margin-top:9px;align-items:flex-start;}
-.preview-card.show{display:flex;}
-.preview-thumb{width:64px;height:46px;border-radius:6px;object-fit:cover;flex-shrink:0;background:var(--border);}
-.preview-info strong{font-size:12px;color:var(--text);display:block;margin-bottom:2px;}
-.preview-info span{font-size:11px;color:var(--text3);font-family:'DM Mono',monospace;}
+    .login-card {
+      background: var(--bg2);
+      border: 1px solid var(--border2);
+      border-radius: 16px;
+      padding: 1.75rem;
+    }
 
-/* TOAST */
-.toast{position:fixed;bottom:1.5rem;right:1.5rem;background:var(--bg3);border:1px solid var(--border2);border-radius:9px;padding:10px 15px;font-size:13px;color:var(--text);box-shadow:var(--shadow);z-index:300;opacity:0;transform:translateY(8px);transition:opacity .2s,transform .2s;pointer-events:none;display:flex;align-items:center;gap:8px;}
-.toast.show{opacity:1;transform:translateY(0);}
-.toast.ok{border-color:rgba(200,245,101,.25);}
-.toast.err{border-color:rgba(224,82,82,.25);}
+    .login-subtitle {
+      font-size: 13px;
+      color: var(--text2);
+      margin-bottom: 1.5rem;
+    }
 
-@keyframes modalIn{from{opacity:0;transform:translateY(14px);}to{opacity:1;transform:translateY(0);}}
-@media(max-width:680px){.sidebar{display:none;}.main{margin-left:0;padding:1.25rem 1rem 3rem;}.page-head-left h1{font-size:22px;}}
-</style>
+    .login-error {
+      display: none;
+      background: var(--red-bg);
+      border: 1px solid rgba(224, 82, 82, .2);
+      color: var(--red);
+      font-size: 12px;
+      padding: 9px 13px;
+      border-radius: 7px;
+      margin-bottom: 1rem;
+    }
+
+    .login-hint {
+      text-align: center;
+      margin-top: 1.25rem;
+      font-size: 11px;
+      color: var(--text3);
+    }
+
+    /* FORM */
+    .fg {
+      margin-bottom: .9rem;
+    }
+
+    .fg label {
+      display: block;
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--text2);
+      text-transform: uppercase;
+      letter-spacing: .06em;
+      margin-bottom: 5px;
+    }
+
+    .fg input,
+    .fg select,
+    .fg textarea {
+      width: 100%;
+      background: var(--bg3);
+      border: 1px solid var(--border2);
+      border-radius: 8px;
+      padding: 9px 12px;
+      font-size: 13.5px;
+      font-family: 'DM Sans', sans-serif;
+      color: var(--text);
+      outline: none;
+      transition: border-color .15s, box-shadow .15s;
+    }
+
+    .fg input:focus,
+    .fg select:focus,
+    .fg textarea:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px var(--accent-bg);
+    }
+
+    .fg input::placeholder,
+    .fg textarea::placeholder {
+      color: var(--text3);
+    }
+
+    .fg textarea {
+      resize: vertical;
+      min-height: 55px;
+    }
+
+    /* BUTTONS */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      padding: 8px 16px;
+      font-size: 13px;
+      font-family: 'DM Sans', sans-serif;
+      font-weight: 500;
+      border-radius: 8px;
+      border: 1px solid var(--border2);
+      background: var(--bg3);
+      color: var(--text);
+      cursor: pointer;
+      transition: all .15s;
+      white-space: nowrap;
+    }
+
+    .btn:hover {
+      background: var(--bg4);
+    }
+
+    .btn:active {
+      transform: scale(.98);
+    }
+
+    .btn-accent {
+      background: var(--accent);
+      color: #0e0e0c;
+      border-color: var(--accent);
+      font-weight: 600;
+    }
+
+    .btn-accent:hover {
+      filter: brightness(1.08);
+    }
+
+    :root[data-theme="light"] .btn-accent {
+      color: #fff;
+    }
+
+    .btn-ghost {
+      background: transparent;
+      border-color: transparent;
+      color: var(--text2);
+    }
+
+    .btn-ghost:hover {
+      background: var(--bg3);
+      color: var(--text);
+      border-color: var(--border);
+    }
+
+    .btn-danger {
+      background: transparent;
+      border-color: transparent;
+      color: var(--red);
+    }
+
+    .btn-danger:hover {
+      background: var(--red-bg);
+      border-color: rgba(224, 82, 82, .2);
+    }
+
+    .btn-ok {
+      background: transparent;
+      border-color: transparent;
+      color: var(--accent-dim);
+    }
+
+    .btn-ok:hover {
+      background: var(--accent-bg);
+      border-color: rgba(200, 245, 101, .2);
+    }
+
+    .btn-sm {
+      padding: 6px 12px;
+      font-size: 12px;
+    }
+
+    .btn-xs {
+      padding: 4px 9px;
+      font-size: 11px;
+      border-radius: 6px;
+    }
+
+    .btn-full {
+      width: 100%;
+    }
+
+    .btn-icon {
+      width: 32px;
+      height: 32px;
+      padding: 0;
+      border-radius: 8px;
+      border-color: transparent;
+      background: transparent;
+      color: var(--text2);
+    }
+
+    .btn-icon:hover {
+      background: var(--bg3);
+      color: var(--text);
+      border-color: var(--border);
+    }
+
+    .theme-btn {
+      width: 32px;
+      height: 32px;
+      border-radius: 8px;
+      border: 1px solid var(--border2);
+      background: var(--bg3);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--text2);
+      transition: all .15s;
+      flex-shrink: 0;
+    }
+
+    .theme-btn:hover {
+      background: var(--bg4);
+      color: var(--text);
+    }
+
+    /* APP SHELL */
+    #app-screen {
+      display: none;
+    }
+
+    .sidebar {
+      position: fixed;
+      left: 0;
+      top: 0;
+      bottom: 0;
+      width: 216px;
+      background: var(--bg2);
+      border-right: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      z-index: 10;
+      transition: background .25s;
+    }
+
+    .sidebar-top {
+      padding: 1.25rem 1rem 1rem;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .sidebar-wordmark {
+      font-family: 'Instrument Serif', serif;
+      font-size: 19px;
+      font-style: italic;
+      color: var(--text);
+    }
+
+    .sidebar-wordmark .dot {
+      color: var(--accent);
+    }
+
+    .sidebar-nav {
+      padding: .75rem .625rem;
+      flex: 1;
+      overflow-y: auto;
+    }
+
+    .nav-lbl {
+      font-size: 10px;
+      font-weight: 600;
+      color: var(--text3);
+      text-transform: uppercase;
+      letter-spacing: .09em;
+      padding: 0 .5rem;
+      margin: 1.1rem 0 .35rem;
+    }
+
+    .nav-lbl:first-child {
+      margin-top: 0;
+    }
+
+    .nav-btn {
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      width: 100%;
+      padding: 7px 9px;
+      border-radius: 7px;
+      border: 1px solid transparent;
+      background: none;
+      font-size: 13px;
+      font-family: 'DM Sans', sans-serif;
+      font-weight: 500;
+      color: var(--text2);
+      cursor: pointer;
+      transition: all .15s;
+      text-align: left;
+    }
+
+    .nav-btn:hover {
+      background: var(--bg3);
+      color: var(--text);
+    }
+
+    .nav-btn.active {
+      background: var(--accent-bg);
+      color: var(--accent);
+      border-color: rgba(200, 245, 101, 0.15);
+    }
+
+    :root[data-theme="light"] .nav-btn.active {
+      border-color: rgba(74, 124, 47, 0.15);
+    }
+
+    .nav-lbl-text {
+      flex: 1;
+    }
+
+    .nav-count {
+      font-size: 11px;
+      font-family: 'DM Mono', monospace;
+      background: var(--bg3);
+      color: var(--text3);
+      padding: 1px 7px;
+      border-radius: 999px;
+    }
+
+    .nav-btn.active .nav-count {
+      background: var(--accent-bg);
+      color: var(--accent-dim);
+    }
+
+    .nav-badge {
+      font-size: 10px;
+      font-family: 'DM Mono', monospace;
+      background: var(--red-bg);
+      color: var(--red);
+      padding: 1px 7px;
+      border-radius: 999px;
+      display: none;
+    }
+
+    .nav-badge.show {
+      display: block;
+    }
+
+    .sidebar-footer {
+      padding: .75rem .625rem;
+      border-top: 1px solid var(--border);
+    }
+
+    .user-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 7px 9px;
+      border-radius: 7px;
+    }
+
+    .user-av {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      flex-shrink: 0;
+      background: var(--accent-bg);
+      border: 1px solid rgba(200, 245, 101, 0.2);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--accent);
+    }
+
+    .user-em {
+      font-size: 11px;
+      color: var(--text3);
+      flex: 1;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .btn-logout {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      width: 100%;
+      padding: 7px 9px;
+      border-radius: 7px;
+      border: 1px solid transparent;
+      background: none;
+      font-size: 12px;
+      font-family: 'DM Sans', sans-serif;
+      color: var(--text2);
+      cursor: pointer;
+      transition: all .15s;
+      margin-top: 2px;
+    }
+
+    .btn-logout:hover {
+      background: var(--red-bg);
+      color: var(--red);
+      border-color: rgba(224, 82, 82, .15);
+    }
+
+    /* MAIN */
+    .main {
+      margin-left: 216px;
+      padding: 2.25rem 2.25rem 4rem;
+      min-height: 100dvh;
+    }
+
+    .page-head {
+      margin-bottom: 1.75rem;
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+
+    .page-head-left h1 {
+      font-family: 'Instrument Serif', serif;
+      font-size: 30px;
+      font-style: italic;
+      font-weight: 400;
+      letter-spacing: -.3px;
+      margin-bottom: 3px;
+    }
+
+    .page-head-left p {
+      font-size: 13px;
+      color: var(--text2);
+    }
+
+    /* STATS */
+    .stats-row {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 1.75rem;
+      flex-wrap: wrap;
+    }
+
+    .stat-card {
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 13px 17px;
+      min-width: 100px;
+      transition: background .25s;
+    }
+
+    .stat-val {
+      font-size: 22px;
+      font-weight: 300;
+      font-family: 'DM Mono', monospace;
+      color: var(--text);
+      line-height: 1;
+    }
+
+    .stat-key {
+      font-size: 10px;
+      color: var(--text3);
+      margin-top: 4px;
+      text-transform: uppercase;
+      letter-spacing: .06em;
+    }
+
+    .stat-card.hi {
+      border-color: rgba(200, 245, 101, .2);
+      background: var(--accent-bg);
+    }
+
+    :root[data-theme="light"] .stat-card.hi {
+      border-color: rgba(74, 124, 47, .2);
+    }
+
+    .stat-card.hi .stat-val {
+      color: var(--accent);
+    }
+
+    /* PROGRESS */
+    .prog-wrap {
+      margin-bottom: 1.75rem;
+    }
+
+    .prog-labels {
+      display: flex;
+      justify-content: space-between;
+      font-size: 11px;
+      color: var(--text3);
+      margin-bottom: 5px;
+    }
+
+    .prog-bar {
+      height: 2px;
+      background: var(--bg3);
+      border-radius: 2px;
+      overflow: hidden;
+    }
+
+    .prog-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--accent-dim), var(--accent));
+      border-radius: 2px;
+      transition: width .5s ease;
+    }
+
+    /* TOOLBAR */
+    .toolbar {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 1.5rem;
+      flex-wrap: wrap;
+    }
+
+    .pills {
+      display: flex;
+      gap: 6px;
+      flex: 1;
+      flex-wrap: wrap;
+    }
+
+    .pill {
+      padding: 5px 13px;
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      background: transparent;
+      color: var(--text2);
+      font-size: 12px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all .15s;
+      font-family: 'DM Sans', sans-serif;
+    }
+
+    .pill:hover {
+      border-color: var(--border2);
+      color: var(--text);
+    }
+
+    .pill.active {
+      background: var(--accent);
+      color: #0e0e0c;
+      border-color: var(--accent);
+    }
+
+    :root[data-theme="light"] .pill.active {
+      color: #fff;
+    }
+
+    /* CARDS */
+    .cards-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
+      gap: 14px;
+    }
+
+    .card {
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      overflow: hidden;
+      transition: border-color .2s, transform .2s, box-shadow .2s;
+      position: relative;
+    }
+
+    .card:hover {
+      border-color: var(--border2);
+      transform: translateY(-2px);
+      box-shadow: var(--shadow);
+    }
+
+    .card.done {
+      opacity: .42;
+    }
+
+    .card-media {
+      position: relative;
+      overflow: hidden;
+    }
+
+    .card-thumb {
+      width: 100%;
+      height: 124px;
+      object-fit: cover;
+      display: block;
+      background: var(--bg3);
+    }
+
+    .card-thumb-ph {
+      width: 100%;
+      height: 124px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: var(--bg3);
+      color: var(--text3);
+    }
+
+    .card-tag {
+      position: absolute;
+      top: 8px;
+      left: 8px;
+      padding: 3px 8px;
+      border-radius: 5px;
+      font-size: 10px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: .05em;
+      backdrop-filter: blur(8px);
+      background: rgba(14, 14, 12, .72);
+      color: var(--text2);
+      border: 1px solid rgba(255, 255, 255, .08);
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .card-tag.yt {
+      color: #ff7070;
+    }
+
+    :root[data-theme="light"] .card-tag {
+      background: rgba(255, 255, 255, .82);
+      border-color: var(--border);
+    }
+
+    .card-del {
+      position: absolute;
+      top: 8px;
+      right: 8px;
+      opacity: 0;
+      transition: opacity .15s;
+      width: 26px;
+      height: 26px;
+      border-radius: 6px;
+      border: 1px solid rgba(255, 255, 255, .1);
+      background: rgba(14, 14, 12, .75);
+      backdrop-filter: blur(8px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      color: var(--text2);
+    }
+
+    :root[data-theme="light"] .card-del {
+      background: rgba(255, 255, 255, .82);
+      border-color: var(--border);
+    }
+
+    .card-del:hover {
+      color: var(--red);
+    }
+
+    .card:hover .card-del {
+      opacity: 1;
+    }
+
+    .card-body {
+      padding: 12px 13px 13px;
+    }
+
+    .card-title {
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--text);
+      line-height: 1.45;
+      margin-bottom: 9px;
+      display: -webkit-box;
+      -webkit-line-clamp: 3;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+
+    .card-footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .status-badge {
+      font-size: 11px;
+      font-weight: 500;
+      padding: 3px 9px;
+      border-radius: 999px;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .status-badge.done {
+      background: var(--accent-bg);
+      color: var(--accent-dim);
+    }
+
+    .status-badge.pending {
+      background: var(--amber-bg);
+      color: var(--amber);
+    }
+
+    .check-btn {
+      width: 27px;
+      height: 27px;
+      border-radius: 50%;
+      border: 1.5px solid var(--border2);
+      background: transparent;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all .15s;
+      flex-shrink: 0;
+    }
+
+    .check-btn:hover {
+      border-color: var(--accent);
+      background: var(--accent-bg);
+    }
+
+    .check-btn.done {
+      background: var(--accent);
+      border-color: var(--accent);
+    }
+
+    /* EMPTY */
+    .empty {
+      text-align: center;
+      padding: 4.5rem 2rem;
+      color: var(--text3);
+      grid-column: 1/-1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .empty p {
+      font-size: 13px;
+      line-height: 1.7;
+    }
+
+    /* LINKS */
+    .links-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 1.5rem;
+    }
+
+    .cat-block {
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      overflow: hidden;
+      margin-bottom: 11px;
+    }
+
+    .cat-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 15px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .cat-name {
+      font-size: 13.5px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .link-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 9px 15px;
+      transition: background .12s;
+    }
+
+    .link-row:hover {
+      background: var(--card-hover);
+    }
+
+    .link-dot {
+      width: 4px;
+      height: 4px;
+      border-radius: 50%;
+      background: var(--text3);
+      flex-shrink: 0;
+    }
+
+    .link-row a {
+      font-size: 13px;
+      color: var(--text);
+      text-decoration: none;
+      flex: 1;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      transition: color .12s;
+    }
+
+    .link-row a:hover {
+      color: var(--accent);
+    }
+
+    .link-domain {
+      font-size: 11px;
+      color: var(--text3);
+      font-family: 'DM Mono', monospace;
+      flex-shrink: 0;
+    }
+
+    .link-del {
+      opacity: 0;
+      background: none;
+      border: none;
+      cursor: pointer;
+      color: var(--text3);
+      font-size: 15px;
+      padding: 2px 5px;
+      border-radius: 4px;
+      transition: all .12s;
+    }
+
+    .link-row:hover .link-del {
+      opacity: 1;
+    }
+
+    .link-del:hover {
+      color: var(--red);
+      background: var(--red-bg);
+    }
+
+    .add-link-row {
+      padding: 7px 11px;
+      border-top: 1px solid var(--border);
+      display: flex;
+      gap: 7px;
+    }
+
+    .add-link-input {
+      flex: 1;
+      background: var(--bg3);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 7px 11px;
+      font-size: 12px;
+      font-family: 'DM Sans', sans-serif;
+      color: var(--text);
+      outline: none;
+      transition: border-color .15s;
+    }
+
+    .add-link-input:focus {
+      border-color: var(--accent);
+    }
+
+    .add-link-input::placeholder {
+      color: var(--text3);
+    }
+
+    /* RSS PAGE */
+    .rss-toolbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 1.5rem;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .rss-feeds-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      margin-bottom: 2rem;
+    }
+
+    .rss-feed-row {
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 12px 15px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .rss-feed-info {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .rss-feed-title {
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--text);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .rss-feed-url {
+      font-size: 11px;
+      color: var(--text3);
+      font-family: 'DM Mono', monospace;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .rss-feed-meta {
+      font-size: 11px;
+      color: var(--text3);
+      flex-shrink: 0;
+      text-align: right;
+    }
+
+    /* RSS INBOX */
+    .rss-section-label {
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--text3);
+      text-transform: uppercase;
+      letter-spacing: .07em;
+      margin-bottom: .75rem;
+    }
+
+    .rss-items-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .rss-item {
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 14px 16px;
+      transition: border-color .15s;
+    }
+
+    .rss-item:hover {
+      border-color: var(--border2);
+    }
+
+    .rss-item-head {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      margin-bottom: 8px;
+    }
+
+    .rss-item-source {
+      font-size: 10px;
+      font-weight: 600;
+      color: var(--text3);
+      text-transform: uppercase;
+      letter-spacing: .06em;
+      white-space: nowrap;
+      flex-shrink: 0;
+      padding-top: 2px;
+    }
+
+    .rss-item-title {
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--text);
+      line-height: 1.45;
+      flex: 1;
+    }
+
+    .rss-item-title a {
+      color: inherit;
+      text-decoration: none;
+    }
+
+    .rss-item-title a:hover {
+      color: var(--accent);
+    }
+
+    .rss-item-footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+    }
+
+    .rss-item-date {
+      font-size: 11px;
+      color: var(--text3);
+      font-family: 'DM Mono', monospace;
+    }
+
+    .rss-item-actions {
+      display: flex;
+      gap: 6px;
+    }
+
+    .checking-indicator {
+      display: none;
+      align-items: center;
+      gap: 8px;
+      font-size: 12px;
+      color: var(--text2);
+    }
+
+    .checking-indicator.show {
+      display: flex;
+    }
+
+    @keyframes spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+
+    .spin {
+      animation: spin .8s linear infinite;
+      display: inline-block;
+    }
+
+    /* MODAL */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, .6);
+      backdrop-filter: blur(5px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 100;
+      padding: 1rem;
+    }
+
+    .modal {
+      background: var(--bg2);
+      border: 1px solid var(--border2);
+      border-radius: 16px;
+      width: 100%;
+      max-width: 450px;
+      box-shadow: 0 24px 64px rgba(0, 0, 0, .4);
+      animation: modalIn .2s ease;
+    }
+
+    .modal-head {
+      padding: 17px 20px 15px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .modal-head h2 {
+      font-size: 15px;
+      font-weight: 600;
+    }
+
+    .modal-body {
+      padding: 18px 20px;
+    }
+
+    .modal-foot {
+      padding: 13px 20px;
+      border-top: 1px solid var(--border);
+      display: flex;
+      gap: 8px;
+      justify-content: flex-end;
+    }
+
+    .type-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      margin-bottom: 1.1rem;
+    }
+
+    .type-opt {
+      padding: 11px;
+      border: 1.5px solid var(--border);
+      border-radius: 9px;
+      cursor: pointer;
+      text-align: center;
+      font-size: 13px;
+      font-weight: 500;
+      background: var(--bg3);
+      color: var(--text2);
+      transition: all .15s;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .type-opt:hover {
+      border-color: var(--border2);
+      color: var(--text);
+    }
+
+    .type-opt.selected {
+      border-color: var(--accent);
+      background: var(--accent-bg);
+      color: var(--accent);
+    }
+
+    :root[data-theme="light"] .type-opt.selected {
+      color: var(--accent-dim);
+    }
+
+    .or-line {
+      text-align: center;
+      font-size: 11px;
+      color: var(--text3);
+      margin: .9rem 0;
+      position: relative;
+    }
+
+    .or-line::before,
+    .or-line::after {
+      content: '';
+      position: absolute;
+      top: 50%;
+      width: 43%;
+      height: 1px;
+      background: var(--border);
+    }
+
+    .or-line::before {
+      left: 0;
+    }
+
+    .or-line::after {
+      right: 0;
+    }
+
+    .quick-row {
+      display: flex;
+      gap: 7px;
+      align-items: flex-end;
+    }
+
+    .quick-row .fg {
+      flex: 1;
+      margin-bottom: 0;
+    }
+
+    .preview-card {
+      display: none;
+      background: var(--bg3);
+      border: 1px solid var(--border);
+      border-radius: 9px;
+      padding: 11px;
+      gap: 11px;
+      margin-top: 9px;
+      align-items: flex-start;
+    }
+
+    .preview-card.show {
+      display: flex;
+    }
+
+    .preview-thumb {
+      width: 64px;
+      height: 46px;
+      border-radius: 6px;
+      object-fit: cover;
+      flex-shrink: 0;
+      background: var(--border);
+    }
+
+    .preview-info strong {
+      font-size: 12px;
+      color: var(--text);
+      display: block;
+      margin-bottom: 2px;
+    }
+
+    .preview-info span {
+      font-size: 11px;
+      color: var(--text3);
+      font-family: 'DM Mono', monospace;
+    }
+
+    /* TOAST */
+    .toast {
+      position: fixed;
+      bottom: 1.5rem;
+      right: 1.5rem;
+      background: var(--bg3);
+      border: 1px solid var(--border2);
+      border-radius: 9px;
+      padding: 10px 15px;
+      font-size: 13px;
+      color: var(--text);
+      box-shadow: var(--shadow);
+      z-index: 300;
+      opacity: 0;
+      transform: translateY(8px);
+      transition: opacity .2s, transform .2s;
+      pointer-events: none;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .toast.show {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .toast.ok {
+      border-color: rgba(200, 245, 101, .25);
+    }
+
+    .toast.err {
+      border-color: rgba(224, 82, 82, .25);
+    }
+
+    @keyframes modalIn {
+      from {
+        opacity: 0;
+        transform: translateY(14px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    /* LEARNING PATHS */
+    .lp-setup {
+      background: var(--amber-bg);
+      border: 1px solid rgba(245, 200, 66, .25);
+      border-radius: 10px;
+      padding: 12px 15px;
+      margin-bottom: 1.25rem;
+      font-size: 12.5px;
+      color: var(--text2);
+      line-height: 1.6;
+    }
+
+    .lp-setup summary {
+      cursor: pointer;
+      color: var(--amber);
+      font-weight: 600;
+    }
+
+    .lp-setup pre {
+      margin-top: 10px;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 11px;
+      overflow: auto;
+      font-family: 'DM Mono', monospace;
+      font-size: 11px;
+      color: var(--text);
+      line-height: 1.55;
+      white-space: pre;
+    }
+
+    .lp-path {
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      overflow: hidden;
+      margin-bottom: 16px;
+    }
+
+    .lp-path-head {
+      padding: 16px 18px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .lp-path-top {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+    }
+
+    .lp-path-icon {
+      font-size: 22px;
+      line-height: 1;
+      flex-shrink: 0;
+      margin-top: 2px;
+    }
+
+    .lp-path-meta {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .lp-path-title {
+      font-family: 'Instrument Serif', serif;
+      font-style: italic;
+      font-size: 21px;
+      color: var(--text);
+    }
+
+    .lp-path-desc {
+      font-size: 12.5px;
+      color: var(--text2);
+      line-height: 1.55;
+      margin-top: 4px;
+    }
+
+    .lp-path-actions {
+      display: flex;
+      gap: 4px;
+      flex-shrink: 0;
+      align-items: center;
+    }
+
+    .lp-prog {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-top: 13px;
+    }
+
+    .lp-prog-bar {
+      flex: 1;
+      height: 5px;
+      background: var(--bg3);
+      border-radius: 3px;
+      overflow: hidden;
+    }
+
+    .lp-prog-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--accent-dim), var(--accent));
+      border-radius: 3px;
+      transition: width .5s ease;
+    }
+
+    .lp-prog-pct {
+      font-family: 'DM Mono', monospace;
+      font-size: 11px;
+      color: var(--text2);
+      flex-shrink: 0;
+    }
+
+    .lp-steps {
+      padding: 8px;
+    }
+
+    .lp-step {
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      margin-bottom: 8px;
+      background: var(--bg);
+      overflow: hidden;
+    }
+
+    .lp-step:last-child {
+      margin-bottom: 0;
+    }
+
+    .lp-step-head {
+      display: flex;
+      align-items: center;
+      gap: 11px;
+      padding: 12px 13px;
+      cursor: pointer;
+      user-select: none;
+    }
+
+    .lp-step-head:hover {
+      background: var(--card-hover);
+    }
+
+    .lp-step-num {
+      width: 25px;
+      height: 25px;
+      border-radius: 7px;
+      background: var(--bg3);
+      color: var(--text2);
+      font-family: 'DM Mono', monospace;
+      font-size: 12px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .lp-step.complete .lp-step-num {
+      background: var(--accent);
+      color: #0e0e0c;
+    }
+
+    .lp-step-info {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .lp-step-title {
+      font-size: 13.5px;
+      font-weight: 600;
+      color: var(--text);
+      line-height: 1.4;
+    }
+
+    .lp-step-sub {
+      font-size: 11px;
+      color: var(--text3);
+      font-family: 'DM Mono', monospace;
+      margin-top: 2px;
+    }
+
+    .lp-step-ctrls {
+      display: flex;
+      gap: 2px;
+      flex-shrink: 0;
+      opacity: 0;
+      transition: opacity .12s;
+    }
+
+    .lp-step-head:hover .lp-step-ctrls {
+      opacity: 1;
+    }
+
+    .lp-step-chev {
+      color: var(--text3);
+      transition: transform .2s;
+      flex-shrink: 0;
+      display: flex;
+    }
+
+    .lp-step.open .lp-step-chev {
+      transform: rotate(90deg);
+    }
+
+    .lp-step-body {
+      display: none;
+      padding: 2px 13px 13px;
+      border-top: 1px solid var(--border);
+    }
+
+    .lp-step.open .lp-step-body {
+      display: block;
+    }
+
+    .lp-step-desc {
+      font-size: 12.5px;
+      color: var(--text2);
+      line-height: 1.65;
+      margin: 12px 2px;
+    }
+
+    .lp-divider {
+      font-size: 10px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: .07em;
+      color: var(--text3);
+      margin: 15px 0 7px;
+      display: flex;
+      align-items: center;
+      gap: 9px;
+    }
+
+    .lp-divider::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: var(--border);
+    }
+
+    .lp-cards {
+      grid-template-columns: repeat(auto-fill, minmax(188px, 1fr));
+      margin-top: 2px;
+    }
+
+    .lp-card .card-title {
+      -webkit-line-clamp: 2;
+      margin-bottom: 9px;
+      min-height: 2.3em;
+    }
+
+    .lp-title-link {
+      color: inherit;
+      text-decoration: none;
+    }
+
+    .lp-title-link:hover {
+      color: var(--accent);
+    }
+
+    .lp-card.done {
+      opacity: .5;
+    }
+
+    .lp-card.done .lp-title-link {
+      text-decoration: line-through;
+      color: var(--text3);
+    }
+
+    .lp-card.lp-child .card-media::after {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 0;
+      bottom: 0;
+      width: 3px;
+      background: var(--blue);
+      opacity: .55;
+      pointer-events: none;
+      z-index: 1;
+    }
+
+    .lp-card-tools {
+      position: absolute;
+      top: 8px;
+      right: 8px;
+      display: flex;
+      gap: 5px;
+      opacity: 0;
+      transition: opacity .15s;
+      z-index: 2;
+    }
+
+    .card:hover .lp-card-tools {
+      opacity: 1;
+    }
+
+    .lp-tool {
+      width: 26px;
+      height: 26px;
+      border-radius: 6px;
+      border: 1px solid rgba(255, 255, 255, .1);
+      background: rgba(14, 14, 12, .75);
+      backdrop-filter: blur(8px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      color: var(--text2);
+      transition: color .12s;
+    }
+
+    .lp-tool:hover {
+      color: var(--text);
+    }
+
+    .lp-tool.del:hover {
+      color: var(--red);
+    }
+
+    :root[data-theme="light"] .lp-tool {
+      background: rgba(255, 255, 255, .85);
+      border-color: var(--border);
+    }
+
+    .lp-foot-left {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      flex-wrap: wrap;
+      min-width: 0;
+    }
+
+    .lp-pl-toggle,
+    .lp-pl-load {
+      display: inline-flex;
+      align-items: center;
+      gap: 3px;
+      white-space: nowrap;
+    }
+
+    .lp-badge {
+      font-size: 9px;
+      font-weight: 700;
+      letter-spacing: .04em;
+      padding: 3px 6px;
+      border-radius: 5px;
+      flex-shrink: 0;
+      font-family: 'DM Mono', monospace;
+    }
+
+    .lp-badge.tr {
+      background: var(--accent-bg);
+      color: var(--accent-dim);
+    }
+
+    .lp-badge.en {
+      background: var(--blue-bg);
+      color: var(--blue);
+    }
+
+    .lp-res-note {
+      font-size: 11px;
+      color: var(--text3);
+      line-height: 1.5;
+      margin-bottom: 9px;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+
+    .lp-res-btn {
+      width: 26px;
+      height: 26px;
+      border-radius: 6px;
+      border: none;
+      background: transparent;
+      color: var(--text3);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all .12s;
+    }
+
+    .lp-res-btn:hover {
+      background: var(--bg3);
+      color: var(--text);
+    }
+
+    .lp-res-btn.del:hover {
+      color: var(--red);
+      background: var(--red-bg);
+    }
+
+    .lp-add-res {
+      margin-top: 10px;
+    }
+
+    .lp-empty {
+      padding: 3.5rem 2rem;
+      text-align: center;
+      color: var(--text3);
+      font-size: 13px;
+      line-height: 1.7;
+    }
+
+    @media(max-width:680px) {
+
+      .lp-card-tools,
+      .lp-step-ctrls {
+        opacity: 1;
+      }
+    }
+
+    @media(max-width:680px) {
+      .sidebar {
+        display: none;
+      }
+
+      .main {
+        margin-left: 0;
+        padding: 1.25rem 1rem 3rem;
+      }
+
+      .page-head-left h1 {
+        font-size: 22px;
+      }
+    }
+  </style>
 </head>
+
 <body>
-<div id="loader">yükleniyor…</div>
+  <div id="loader">yükleniyor…</div>
 
-<!-- LOGIN -->
-<div id="login-screen">
-  <div class="login-box">
-    <div class="login-logo"><div class="login-wordmark">Listelerim<span class="dot">.</span></div></div>
-    <div class="login-card">
-      <p class="login-subtitle">Kişisel okuma ve izleme listesi</p>
-      <div class="login-error" id="login-error"></div>
-      <div class="fg"><label>E-posta</label><input type="email" id="l-email" placeholder="sen@mail.com" autocomplete="email"></div>
-      <div class="fg"><label>Şifre</label><input type="password" id="l-pass" placeholder="••••••••" autocomplete="current-password" onkeydown="if(event.key==='Enter')doLogin()"></div>
-      <button class="btn btn-accent btn-full" onclick="doLogin()" id="login-btn" style="margin-top:.25rem;">
-        Giriş Yap
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-      </button>
-    </div>
-    <div class="login-hint">Veriler güvenle Supabase'de saklanır.</div>
-  </div>
-</div>
-
-<!-- APP -->
-<div id="app-screen">
-  <nav class="sidebar">
-    <div class="sidebar-top">
-      <div class="sidebar-wordmark">Listelerim<span class="dot">.</span></div>
-      <button class="theme-btn" onclick="toggleTheme()" id="theme-btn" title="Tema değiştir"></button>
-    </div>
-    <div class="sidebar-nav">
-      <div class="nav-lbl">İçerikler</div>
-      <button class="nav-btn active" id="nav-watchlist" onclick="showPage('watchlist')">
-        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>
-        <span class="nav-lbl-text">İzleme Listesi</span><span class="nav-count" id="nc-all">0</span>
-      </button>
-      <button class="nav-btn" id="nav-links" onclick="showPage('links')">
-        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
-        <span class="nav-lbl-text">Faydalı Linkler</span><span class="nav-count" id="nc-links">0</span>
-      </button>
-      <button class="nav-btn" id="nav-rss" onclick="showPage('rss')">
-        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 11a9 9 0 0 1 9 9"/><path d="M4 4a16 16 0 0 1 16 16"/><circle cx="5" cy="19" r="1"/></svg>
-        <span class="nav-lbl-text">RSS Takip</span>
-        <span class="nav-badge" id="rss-badge">0</span>
-      </button>
-      <div class="nav-lbl">Durum</div>
-      <button class="nav-btn" id="nav-pending" onclick="showPage('watchlist');setFilter('pending')">
-        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-        <span class="nav-lbl-text">Bekleyenler</span><span class="nav-count" id="nc-pending">0</span>
-      </button>
-      <button class="nav-btn" id="nav-done" onclick="showPage('watchlist');setFilter('done')">
-        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
-        <span class="nav-lbl-text">Tamamlananlar</span><span class="nav-count" id="nc-done">0</span>
-      </button>
-    </div>
-    <div class="sidebar-footer">
-      <div class="user-row">
-        <div class="user-av" id="user-av">?</div>
-        <span class="user-em" id="user-em">–</span>
+  <!-- LOGIN -->
+  <div id="login-screen">
+    <div class="login-box">
+      <div class="login-logo">
+        <div class="login-wordmark">Listelerim<span class="dot">.</span></div>
       </div>
-      <button class="btn-logout" onclick="doLogout()">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
-        Çıkış Yap
-      </button>
-    </div>
-  </nav>
-
-  <main class="main">
-    <!-- WATCHLIST -->
-    <div id="page-watchlist">
-      <div class="page-head">
-        <div class="page-head-left"><h1>İzleme Listesi</h1><p>Okumak ve izlemek istediğin içerikler.</p></div>
-        <button class="btn btn-accent btn-sm" onclick="openItemModal()">
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Ekle
+      <div class="login-card">
+        <p class="login-subtitle">Kişisel okuma ve izleme listesi</p>
+        <div class="login-error" id="login-error"></div>
+        <div class="fg"><label>E-posta</label><input type="email" id="l-email" placeholder="sen@mail.com"
+            autocomplete="email"></div>
+        <div class="fg"><label>Şifre</label><input type="password" id="l-pass" placeholder="••••••••"
+            autocomplete="current-password" onkeydown="if(event.key==='Enter')doLogin()"></div>
+        <button class="btn btn-accent btn-full" onclick="doLogin()" id="login-btn" style="margin-top:.25rem;">
+          Giriş Yap
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+            stroke-linecap="round" stroke-linejoin="round">
+            <path d="M5 12h14M12 5l7 7-7 7" />
+          </svg>
         </button>
       </div>
-      <div class="stats-row" id="stats-row"></div>
-      <div class="prog-wrap" id="prog-wrap" style="display:none">
-        <div class="prog-labels"><span>İlerleme</span><span id="prog-pct">0%</span></div>
-        <div class="prog-bar"><div class="prog-fill" id="prog-fill" style="width:0%"></div></div>
-      </div>
-      <div class="toolbar">
-        <div class="pills">
-          <button class="pill active" data-f="all"     onclick="setFilter('all')">Tümü</button>
-          <button class="pill"        data-f="pending" onclick="setFilter('pending')">Bekliyor</button>
-          <button class="pill"        data-f="done"    onclick="setFilter('done')">Tamamlandı</button>
-          <button class="pill"        data-f="youtube" onclick="setFilter('youtube')">YouTube</button>
-          <button class="pill"        data-f="blog"    onclick="setFilter('blog')">Blog</button>
-        </div>
-      </div>
-      <div class="cards-grid" id="cards-grid"></div>
+      <div class="login-hint">Veriler güvenle Supabase'de saklanır.</div>
     </div>
+  </div>
 
-    <!-- LINKS -->
-    <div id="page-links" style="display:none">
-      <div class="page-head">
-        <div class="page-head-left"><h1>Faydalı Linkler</h1><p>Kategorilere göre düzenlenmiş linkler.</p></div>
-        <button class="btn btn-sm" onclick="openCatModal()">
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Kategori Ekle
+  <!-- APP -->
+  <div id="app-screen">
+    <nav class="sidebar">
+      <div class="sidebar-top">
+        <div class="sidebar-wordmark">Listelerim<span class="dot">.</span></div>
+        <button class="theme-btn" onclick="toggleTheme()" id="theme-btn" title="Tema değiştir"></button>
+      </div>
+      <div class="sidebar-nav">
+        <div class="nav-lbl">İçerikler</div>
+        <button class="nav-btn active" id="nav-watchlist" onclick="showPage('watchlist')">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round">
+            <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z" />
+          </svg>
+          <span class="nav-lbl-text">İzleme Listesi</span><span class="nav-count" id="nc-all">0</span>
+        </button>
+        <button class="nav-btn" id="nav-learning" onclick="showPage('learning')">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="6" cy="19" r="3" />
+            <path d="M9 19h8.5a3.5 3.5 0 0 0 0-7h-11a3.5 3.5 0 0 1 0-7H15" />
+            <circle cx="18" cy="5" r="3" />
+          </svg>
+          <span class="nav-lbl-text">Öğrenme Yolları</span><span class="nav-count" id="nc-learning">0</span>
+        </button>
+        <button class="nav-btn" id="nav-links" onclick="showPage('links')">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round">
+            <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" />
+            <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" />
+          </svg>
+          <span class="nav-lbl-text">Faydalı Linkler</span><span class="nav-count" id="nc-links">0</span>
+        </button>
+        <button class="nav-btn" id="nav-rss" onclick="showPage('rss')">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round">
+            <path d="M4 11a9 9 0 0 1 9 9" />
+            <path d="M4 4a16 16 0 0 1 16 16" />
+            <circle cx="5" cy="19" r="1" />
+          </svg>
+          <span class="nav-lbl-text">RSS Takip</span>
+          <span class="nav-badge" id="rss-badge">0</span>
+        </button>
+        <div class="nav-lbl">Durum</div>
+        <button class="nav-btn" id="nav-pending" onclick="showPage('watchlist');setFilter('pending')">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10" />
+            <polyline points="12 6 12 12 16 14" />
+          </svg>
+          <span class="nav-lbl-text">Bekleyenler</span><span class="nav-count" id="nc-pending">0</span>
+        </button>
+        <button class="nav-btn" id="nav-done" onclick="showPage('watchlist');setFilter('done')">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round">
+            <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
+            <polyline points="22 4 12 14.01 9 11.01" />
+          </svg>
+          <span class="nav-lbl-text">Tamamlananlar</span><span class="nav-count" id="nc-done">0</span>
         </button>
       </div>
-      <div id="cats-container"></div>
-      <div class="empty" id="empty-links" style="display:none">
-        <svg width="38" height="38" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="opacity:.3"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
-        <p>Henüz kategori yok.</p>
+      <div class="sidebar-footer">
+        <div class="user-row">
+          <div class="user-av" id="user-av">?</div>
+          <span class="user-em" id="user-em">–</span>
+        </div>
+        <button class="btn-logout" onclick="doLogout()">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round">
+            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+            <polyline points="16 17 21 12 16 7" />
+            <line x1="21" y1="12" x2="9" y2="12" />
+          </svg>
+          Çıkış Yap
+        </button>
       </div>
-    </div>
+    </nav>
 
-    <!-- RSS PAGE -->
-    <div id="page-rss" style="display:none">
-      <div class="page-head">
-        <div class="page-head-left"><h1>RSS Takip</h1><p>Feed'leri manuel kontrol et, beğendiklerini listeye ekle.</p></div>
-        <div style="display:flex;gap:8px;align-items:center;">
-          <div class="checking-indicator" id="checking-indicator">
-            <span class="spin"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg></span>
-            Kontrol ediliyor…
+    <main class="main">
+      <!-- WATCHLIST -->
+      <div id="page-watchlist">
+        <div class="page-head">
+          <div class="page-head-left">
+            <h1>İzleme Listesi</h1>
+            <p>Okumak ve izlemek istediğin içerikler.</p>
           </div>
-          <button class="btn btn-sm" onclick="checkAllFeeds()" id="check-btn">
-            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-.08-4"/></svg>
-            Yenilikleri Kontrol Et
+          <button class="btn btn-accent btn-sm" onclick="openItemModal()">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+              stroke-linecap="round">
+              <line x1="12" y1="5" x2="12" y2="19" />
+              <line x1="5" y1="12" x2="19" y2="12" />
+            </svg>Ekle
           </button>
-          <button class="btn btn-sm" onclick="openFeedModal()">
-            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-            Feed Ekle
+        </div>
+        <div class="stats-row" id="stats-row"></div>
+        <div class="prog-wrap" id="prog-wrap" style="display:none">
+          <div class="prog-labels"><span>İlerleme</span><span id="prog-pct">0%</span></div>
+          <div class="prog-bar">
+            <div class="prog-fill" id="prog-fill" style="width:0%"></div>
+          </div>
+        </div>
+        <div class="toolbar">
+          <div class="pills">
+            <button class="pill active" data-f="all" onclick="setFilter('all')">Tümü</button>
+            <button class="pill" data-f="pending" onclick="setFilter('pending')">Bekliyor</button>
+            <button class="pill" data-f="done" onclick="setFilter('done')">Tamamlandı</button>
+            <button class="pill" data-f="youtube" onclick="setFilter('youtube')">YouTube</button>
+            <button class="pill" data-f="blog" onclick="setFilter('blog')">Blog</button>
+          </div>
+        </div>
+        <div class="cards-grid" id="cards-grid"></div>
+      </div>
+
+      <!-- LINKS -->
+      <div id="page-links" style="display:none">
+        <div class="page-head">
+          <div class="page-head-left">
+            <h1>Faydalı Linkler</h1>
+            <p>Kategorilere göre düzenlenmiş linkler.</p>
+          </div>
+          <button class="btn btn-sm" onclick="openCatModal()">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+              stroke-linecap="round">
+              <line x1="12" y1="5" x2="12" y2="19" />
+              <line x1="5" y1="12" x2="19" y2="12" />
+            </svg>Kategori Ekle
           </button>
         </div>
-      </div>
-
-      <!-- FEEDS LIST -->
-      <div style="margin-bottom:1.5rem;">
-        <div class="rss-section-label">Takip Edilen Feedler</div>
-        <div class="rss-feeds-list" id="rss-feeds-list"></div>
-        <div class="empty" id="empty-feeds" style="display:none;padding:2rem;">
-          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" style="opacity:.3"><path d="M4 11a9 9 0 0 1 9 9"/><path d="M4 4a16 16 0 0 1 16 16"/><circle cx="5" cy="19" r="1"/></svg>
-          <p>Henüz feed eklenmedi.</p>
+        <div id="cats-container"></div>
+        <div class="empty" id="empty-links" style="display:none">
+          <svg width="38" height="38" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"
+            stroke-linecap="round" stroke-linejoin="round" style="opacity:.3">
+            <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" />
+            <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" />
+          </svg>
+          <p>Henüz kategori yok.</p>
         </div>
       </div>
 
-      <!-- INBOX -->
-      <div id="rss-inbox-section" style="display:none">
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.75rem;">
-          <div class="rss-section-label" style="margin:0;">Gelen Kutusu <span id="inbox-count-label" style="font-weight:400;color:var(--text3);"></span></div>
-          <button class="btn btn-xs btn-ghost" onclick="dismissAllInbox()">Tümünü reddet</button>
-        </div>
-        <div class="rss-items-list" id="rss-inbox-list"></div>
-      </div>
-    </div>
-  </main>
-</div>
-
-<!-- MODAL: ITEM -->
-<div class="modal-overlay" id="item-modal" style="display:none" onclick="if(event.target===this)closeItemModal()">
-  <div class="modal">
-    <div class="modal-head"><h2>Yeni İçerik Ekle</h2><button class="btn btn-icon" onclick="closeItemModal()"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button></div>
-    <div class="modal-body">
-      <div class="type-grid">
-        <div class="type-opt selected" id="topt-youtube" onclick="selType('youtube')">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M22.54 6.42a2.78 2.78 0 0 0-1.95-1.96C18.88 4 12 4 12 4s-6.88 0-8.59.46a2.78 2.78 0 0 0-1.95 1.96A29 29 0 0 0 1 12a29 29 0 0 0 .46 5.58A2.78 2.78 0 0 0 3.41 19.6C5.12 20 12 20 12 20s6.88 0 8.59-.46a2.78 2.78 0 0 0 1.95-1.95A29 29 0 0 0 23 12a29 29 0 0 0-.46-5.58z"/><polygon points="9.75 15.02 15.5 12 9.75 8.98 9.75 15.02"/></svg>YouTube
-        </div>
-        <div class="type-opt" id="topt-blog" onclick="selType('blog')">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>Blog / Makale
-        </div>
-      </div>
-      <div class="fg">
-        <label>Hızlı Ekle — Linki Yapıştır</label>
-        <div class="quick-row">
-          <div class="fg"><input type="url" id="qi-url" placeholder="https://..." onkeydown="if(event.key==='Enter')fetchMeta()"></div>
-          <button class="btn btn-sm" onclick="fetchMeta()" id="fetch-btn" style="flex-shrink:0;height:37px;">Getir</button>
-        </div>
-        <div class="preview-card" id="preview-card">
-          <img class="preview-thumb" id="pi-img" src="" alt="">
-          <div class="preview-info"><strong id="pi-title"></strong><span id="pi-domain"></span></div>
-        </div>
-      </div>
-      <div class="or-line">veya manuel doldur</div>
-      <div class="fg"><label>Başlık *</label><input type="text" id="mi-title" placeholder="İçeriğin başlığı"></div>
-      <div class="fg"><label>Link *</label><input type="url" id="mi-url" placeholder="https://..."></div>
-      <div class="fg"><label>Kapak Görseli URL <span style="color:var(--text3);font-weight:400;text-transform:none;font-size:11px;">(otomatik gelir)</span></label><input type="url" id="mi-img" placeholder="https://..."></div>
-    </div>
-    <div class="modal-foot">
-      <button class="btn btn-ghost" onclick="closeItemModal()">İptal</button>
-      <button class="btn btn-accent" onclick="saveItem()">Kaydet</button>
-    </div>
-  </div>
-</div>
-
-<!-- MODAL: CATEGORY -->
-<div class="modal-overlay" id="cat-modal" style="display:none" onclick="if(event.target===this)closeCatModal()">
-  <div class="modal">
-    <div class="modal-head"><h2>Kategori Ekle</h2><button class="btn btn-icon" onclick="closeCatModal()"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button></div>
-    <div class="modal-body">
-      <div style="display:flex;gap:12px;align-items:flex-end;">
-        <div class="fg" style="width:72px;flex-shrink:0;margin-bottom:0;"><label>İkon</label><input type="text" id="ci-emoji" placeholder="📌" maxlength="4" style="text-align:center;font-size:18px;"></div>
-        <div class="fg" style="flex:1;margin-bottom:0;"><label>Kategori Adı *</label><input type="text" id="ci-name" placeholder="örn. Geliştirici Araçları" onkeydown="if(event.key==='Enter')saveCat()"></div>
-      </div>
-    </div>
-    <div class="modal-foot">
-      <button class="btn btn-ghost" onclick="closeCatModal()">İptal</button>
-      <button class="btn btn-accent" onclick="saveCat()">Oluştur</button>
-    </div>
-  </div>
-</div>
-
-<!-- MODAL: RSS FEED -->
-<div class="modal-overlay" id="feed-modal" style="display:none" onclick="if(event.target===this)closeFeedModal()">
-  <div class="modal">
-    <div class="modal-head"><h2>Feed Ekle</h2><button class="btn btn-icon" onclick="closeFeedModal()"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button></div>
-    <div class="modal-body">
-      <div class="fg"><label>Feed Adı</label><input type="text" id="fi-name" placeholder="örn. CSS Tricks"></div>
-      <div class="fg"><label>RSS / Atom URL *</label><input type="url" id="fi-url" placeholder="https://example.com/feed.xml" onkeydown="if(event.key==='Enter')saveFeed()"></div>
-      <p style="font-size:12px;color:var(--text3);line-height:1.6;">YouTube kanalları için: <code style="font-family:'DM Mono',monospace;background:var(--bg3);padding:2px 5px;border-radius:4px;">https://www.youtube.com/feeds/videos.xml?channel_id=CHANNEL_ID</code></p>
-    </div>
-    <div class="modal-foot">
-      <button class="btn btn-ghost" onclick="closeFeedModal()">İptal</button>
-      <button class="btn btn-accent" onclick="saveFeed()">Ekle</button>
-    </div>
-  </div>
-</div>
-
-<!-- MODAL: RSS ITEM ACCEPT -->
-<div class="modal-overlay" id="accept-modal" style="display:none" onclick="if(event.target===this)closeAcceptModal()">
-  <div class="modal">
-    <div class="modal-head"><h2>Listeye Ekle</h2><button class="btn btn-icon" onclick="closeAcceptModal()"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button></div>
-    <div class="modal-body">
-      <div class="fg"><label>Başlık</label><input type="text" id="ai-title" placeholder="Başlık"></div>
-      <div class="fg"><label>Link</label><input type="url" id="ai-url" placeholder="https://..."></div>
-      <div class="fg"><label>Tür</label>
-        <div class="type-grid" style="margin-bottom:0;">
-          <div class="type-opt selected" id="ai-topt-youtube" onclick="selAcceptType('youtube')">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M22.54 6.42a2.78 2.78 0 0 0-1.95-1.96C18.88 4 12 4 12 4s-6.88 0-8.59.46a2.78 2.78 0 0 0-1.95 1.96A29 29 0 0 0 1 12a29 29 0 0 0 .46 5.58A2.78 2.78 0 0 0 3.41 19.6C5.12 20 12 20 12 20s6.88 0 8.59-.46a2.78 2.78 0 0 0 1.95-1.95A29 29 0 0 0 23 12a29 29 0 0 0-.46-5.58z"/><polygon points="9.75 15.02 15.5 12 9.75 8.98 9.75 15.02"/></svg>YouTube
+      <!-- RSS PAGE -->
+      <div id="page-rss" style="display:none">
+        <div class="page-head">
+          <div class="page-head-left">
+            <h1>RSS Takip</h1>
+            <p>Feed'leri manuel kontrol et, beğendiklerini listeye ekle.</p>
           </div>
-          <div class="type-opt" id="ai-topt-blog" onclick="selAcceptType('blog')">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>Blog
+          <div style="display:flex;gap:8px;align-items:center;">
+            <div class="checking-indicator" id="checking-indicator">
+              <span class="spin"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                  stroke-width="2" stroke-linecap="round">
+                  <path d="M21 12a9 9 0 1 1-6.219-8.56" />
+                </svg></span>
+              Kontrol ediliyor…
+            </div>
+            <button class="btn btn-sm" onclick="checkAllFeeds()" id="check-btn">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="23 4 23 10 17 10" />
+                <path d="M20.49 15a9 9 0 1 1-.08-4" />
+              </svg>
+              Yenilikleri Kontrol Et
+            </button>
+            <button class="btn btn-sm" onclick="openFeedModal()">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+                stroke-linecap="round">
+                <line x1="12" y1="5" x2="12" y2="19" />
+                <line x1="5" y1="12" x2="19" y2="12" />
+              </svg>
+              Feed Ekle
+            </button>
           </div>
         </div>
+
+        <!-- FEEDS LIST -->
+        <div style="margin-bottom:1.5rem;">
+          <div class="rss-section-label">Takip Edilen Feedler</div>
+          <div class="rss-feeds-list" id="rss-feeds-list"></div>
+          <div class="empty" id="empty-feeds" style="display:none;padding:2rem;">
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"
+              stroke-linecap="round" style="opacity:.3">
+              <path d="M4 11a9 9 0 0 1 9 9" />
+              <path d="M4 4a16 16 0 0 1 16 16" />
+              <circle cx="5" cy="19" r="1" />
+            </svg>
+            <p>Henüz feed eklenmedi.</p>
+          </div>
+        </div>
+
+        <!-- INBOX -->
+        <div id="rss-inbox-section" style="display:none">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.75rem;">
+            <div class="rss-section-label" style="margin:0;">Gelen Kutusu <span id="inbox-count-label"
+                style="font-weight:400;color:var(--text3);"></span></div>
+            <button class="btn btn-xs btn-ghost" onclick="dismissAllInbox()">Tümünü reddet</button>
+          </div>
+          <div class="rss-items-list" id="rss-inbox-list"></div>
+        </div>
+      </div>
+
+      <!-- LEARNING PATHS -->
+      <div id="page-learning" style="display:none">
+        <div class="page-head">
+          <div class="page-head-left">
+            <h1>Öğrenme Yolları</h1>
+            <p>Sıralı, referanslı öğrenme rotaları. Türkçe kaynaklar önceliklidir, İngilizceler "sonra izle".</p>
+          </div>
+          <button class="btn btn-accent btn-sm" onclick="lpAddPath()">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+              stroke-linecap="round">
+              <line x1="12" y1="5" x2="12" y2="19" />
+              <line x1="5" y1="12" x2="19" y2="12" />
+            </svg>Yeni Yol
+          </button>
+        </div>
+        <div class="lp-setup" id="lp-setup-note" style="display:none">
+          <details>
+            <summary>Şu an yalnızca bu cihazda saklanıyor — cihazlar arası senkron için kurulum (SQL)</summary>
+            <p style="margin-top:8px;">Supabase projende <strong>SQL Editor</strong>'da aşağıdakini bir kez çalıştır;
+              sayfayı yenileyince otomatik senkronlanır.</p>
+            <pre>create table if not exists learning_state (
+  user_id uuid primary key references auth.users(id) on delete cascade,
+  data jsonb not null default '{}'::jsonb,
+  updated_at timestamptz default now()
+);
+alter table learning_state enable row level security;
+create policy "own learning_state" on learning_state
+  for all using (auth.uid() = user_id)
+  with check (auth.uid() = user_id);</pre>
+          </details>
+        </div>
+        <div id="lp-container"></div>
+      </div>
+    </main>
+  </div>
+
+  <!-- MODAL: ITEM -->
+  <div class="modal-overlay" id="item-modal" style="display:none" onclick="if(event.target===this)closeItemModal()">
+    <div class="modal">
+      <div class="modal-head">
+        <h2>Yeni İçerik Ekle</h2><button class="btn btn-icon" onclick="closeItemModal()"><svg width="16" height="16"
+            viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+            <line x1="18" y1="6" x2="6" y2="18" />
+            <line x1="6" y1="6" x2="18" y2="18" />
+          </svg></button>
+      </div>
+      <div class="modal-body">
+        <div class="type-grid">
+          <div class="type-opt selected" id="topt-youtube" onclick="selType('youtube')">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+              stroke-linecap="round" stroke-linejoin="round">
+              <path
+                d="M22.54 6.42a2.78 2.78 0 0 0-1.95-1.96C18.88 4 12 4 12 4s-6.88 0-8.59.46a2.78 2.78 0 0 0-1.95 1.96A29 29 0 0 0 1 12a29 29 0 0 0 .46 5.58A2.78 2.78 0 0 0 3.41 19.6C5.12 20 12 20 12 20s6.88 0 8.59-.46a2.78 2.78 0 0 0 1.95-1.95A29 29 0 0 0 23 12a29 29 0 0 0-.46-5.58z" />
+              <polygon points="9.75 15.02 15.5 12 9.75 8.98 9.75 15.02" />
+            </svg>YouTube
+          </div>
+          <div class="type-opt" id="topt-blog" onclick="selType('blog')">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+              stroke-linecap="round" stroke-linejoin="round">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+              <polyline points="14 2 14 8 20 8" />
+              <line x1="16" y1="13" x2="8" y2="13" />
+              <line x1="16" y1="17" x2="8" y2="17" />
+            </svg>Blog / Makale
+          </div>
+        </div>
+        <div class="fg">
+          <label>Hızlı Ekle — Linki Yapıştır</label>
+          <div class="quick-row">
+            <div class="fg"><input type="url" id="qi-url" placeholder="https://..."
+                onkeydown="if(event.key==='Enter')fetchMeta()"></div>
+            <button class="btn btn-sm" onclick="fetchMeta()" id="fetch-btn"
+              style="flex-shrink:0;height:37px;">Getir</button>
+          </div>
+          <div class="preview-card" id="preview-card">
+            <img class="preview-thumb" id="pi-img" src="" alt="">
+            <div class="preview-info"><strong id="pi-title"></strong><span id="pi-domain"></span></div>
+          </div>
+        </div>
+        <div class="or-line">veya manuel doldur</div>
+        <div class="fg"><label>Başlık *</label><input type="text" id="mi-title" placeholder="İçeriğin başlığı"></div>
+        <div class="fg"><label>Link *</label><input type="url" id="mi-url" placeholder="https://..."></div>
+        <div class="fg"><label>Kapak Görseli URL <span
+              style="color:var(--text3);font-weight:400;text-transform:none;font-size:11px;">(otomatik
+              gelir)</span></label><input type="url" id="mi-img" placeholder="https://..."></div>
+      </div>
+      <div class="modal-foot">
+        <button class="btn btn-ghost" onclick="closeItemModal()">İptal</button>
+        <button class="btn btn-accent" onclick="saveItem()">Kaydet</button>
       </div>
     </div>
-    <div class="modal-foot">
-      <button class="btn btn-ghost" onclick="closeAcceptModal()">İptal</button>
-      <button class="btn btn-accent" onclick="confirmAccept()">Listeye Ekle</button>
+  </div>
+
+  <!-- MODAL: CATEGORY -->
+  <div class="modal-overlay" id="cat-modal" style="display:none" onclick="if(event.target===this)closeCatModal()">
+    <div class="modal">
+      <div class="modal-head">
+        <h2>Kategori Ekle</h2><button class="btn btn-icon" onclick="closeCatModal()"><svg width="16" height="16"
+            viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+            <line x1="18" y1="6" x2="6" y2="18" />
+            <line x1="6" y1="6" x2="18" y2="18" />
+          </svg></button>
+      </div>
+      <div class="modal-body">
+        <div style="display:flex;gap:12px;align-items:flex-end;">
+          <div class="fg" style="width:72px;flex-shrink:0;margin-bottom:0;"><label>İkon</label><input type="text"
+              id="ci-emoji" placeholder="📌" maxlength="4" style="text-align:center;font-size:18px;"></div>
+          <div class="fg" style="flex:1;margin-bottom:0;"><label>Kategori Adı *</label><input type="text" id="ci-name"
+              placeholder="örn. Geliştirici Araçları" onkeydown="if(event.key==='Enter')saveCat()"></div>
+        </div>
+      </div>
+      <div class="modal-foot">
+        <button class="btn btn-ghost" onclick="closeCatModal()">İptal</button>
+        <button class="btn btn-accent" onclick="saveCat()">Oluştur</button>
+      </div>
     </div>
   </div>
-</div>
 
-<div class="toast" id="toast"></div>
+  <!-- MODAL: RSS FEED -->
+  <div class="modal-overlay" id="feed-modal" style="display:none" onclick="if(event.target===this)closeFeedModal()">
+    <div class="modal">
+      <div class="modal-head">
+        <h2>Feed Ekle</h2><button class="btn btn-icon" onclick="closeFeedModal()"><svg width="16" height="16"
+            viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+            <line x1="18" y1="6" x2="6" y2="18" />
+            <line x1="6" y1="6" x2="18" y2="18" />
+          </svg></button>
+      </div>
+      <div class="modal-body">
+        <div class="fg"><label>Feed Adı</label><input type="text" id="fi-name" placeholder="örn. CSS Tricks"></div>
+        <div class="fg"><label>RSS / Atom URL *</label><input type="url" id="fi-url"
+            placeholder="https://example.com/feed.xml" onkeydown="if(event.key==='Enter')saveFeed()"></div>
+        <p style="font-size:12px;color:var(--text3);line-height:1.6;">YouTube kanalları için: <code
+            style="font-family:'DM Mono',monospace;background:var(--bg3);padding:2px 5px;border-radius:4px;">https://www.youtube.com/feeds/videos.xml?channel_id=CHANNEL_ID</code>
+        </p>
+      </div>
+      <div class="modal-foot">
+        <button class="btn btn-ghost" onclick="closeFeedModal()">İptal</button>
+        <button class="btn btn-accent" onclick="saveFeed()">Ekle</button>
+      </div>
+    </div>
+  </div>
 
-<script>
-'use strict';
-const SUPABASE_URL = '%%SUPABASE_URL%%';
-const SUPABASE_KEY = '%%SUPABASE_KEY%%';
-const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY, {
-  auth:{ persistSession:true, storageKey:'listelerim-auth' }
-});
+  <!-- MODAL: RSS ITEM ACCEPT -->
+  <div class="modal-overlay" id="accept-modal" style="display:none" onclick="if(event.target===this)closeAcceptModal()">
+    <div class="modal">
+      <div class="modal-head">
+        <h2>Listeye Ekle</h2><button class="btn btn-icon" onclick="closeAcceptModal()"><svg width="16" height="16"
+            viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+            <line x1="18" y1="6" x2="6" y2="18" />
+            <line x1="6" y1="6" x2="18" y2="18" />
+          </svg></button>
+      </div>
+      <div class="modal-body">
+        <div class="fg"><label>Başlık</label><input type="text" id="ai-title" placeholder="Başlık"></div>
+        <div class="fg"><label>Link</label><input type="url" id="ai-url" placeholder="https://..."></div>
+        <div class="fg"><label>Tür</label>
+          <div class="type-grid" style="margin-bottom:0;">
+            <div class="type-opt selected" id="ai-topt-youtube" onclick="selAcceptType('youtube')">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+                stroke-linecap="round" stroke-linejoin="round">
+                <path
+                  d="M22.54 6.42a2.78 2.78 0 0 0-1.95-1.96C18.88 4 12 4 12 4s-6.88 0-8.59.46a2.78 2.78 0 0 0-1.95 1.96A29 29 0 0 0 1 12a29 29 0 0 0 .46 5.58A2.78 2.78 0 0 0 3.41 19.6C5.12 20 12 20 12 20s6.88 0 8.59-.46a2.78 2.78 0 0 0 1.95-1.95A29 29 0 0 0 23 12a29 29 0 0 0-.46-5.58z" />
+                <polygon points="9.75 15.02 15.5 12 9.75 8.98 9.75 15.02" />
+              </svg>YouTube
+            </div>
+            <div class="type-opt" id="ai-topt-blog" onclick="selAcceptType('blog')">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+                stroke-linecap="round" stroke-linejoin="round">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                <polyline points="14 2 14 8 20 8" />
+                <line x1="16" y1="13" x2="8" y2="13" />
+                <line x1="16" y1="17" x2="8" y2="17" />
+              </svg>Blog
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="modal-foot">
+        <button class="btn btn-ghost" onclick="closeAcceptModal()">İptal</button>
+        <button class="btn btn-accent" onclick="confirmAccept()">Listeye Ekle</button>
+      </div>
+    </div>
+  </div>
 
-// ── STATE ────────────────────────────────────────────────────────────
-let S = mkState();
-function mkState(){return{items:[],cats:[],feeds:[],inbox:[],filter:'all',type:'youtube',acceptType:'youtube',page:'watchlist',uid:null};}
-let pendingAcceptId = null;
+  <!-- MODAL: LEARNING EDITOR -->
+  <div class="modal-overlay" id="lp-modal" style="display:none" onclick="if(event.target===this)closeEditor()">
+    <div class="modal">
+      <div class="modal-head">
+        <h2 id="lp-modal-title">Düzenle</h2><button class="btn btn-icon" onclick="closeEditor()"><svg width="16"
+            height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+            <line x1="18" y1="6" x2="6" y2="18" />
+            <line x1="6" y1="6" x2="18" y2="18" />
+          </svg></button>
+      </div>
+      <div class="modal-body" id="lp-modal-body"></div>
+      <div class="modal-foot">
+        <button class="btn btn-ghost" onclick="closeEditor()">İptal</button>
+        <button class="btn btn-accent" onclick="saveEditor()">Kaydet</button>
+      </div>
+    </div>
+  </div>
 
-// ── THEME ────────────────────────────────────────────────────────────
-const TK='listelerim-theme';
-function initTheme(){const s=localStorage.getItem(TK);applyTheme(s||(window.matchMedia('(prefers-color-scheme:light)').matches?'light':'dark'),false);}
-function applyTheme(t,save=true){
-  document.documentElement.setAttribute('data-theme',t);
-  if(save)localStorage.setItem(TK,t);
-  const btn=document.getElementById('theme-btn');if(!btn)return;
-  btn.innerHTML=t==='dark'
-    ?`<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>`
-    :`<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>`;
-}
-function toggleTheme(){applyTheme(document.documentElement.getAttribute('data-theme')==='dark'?'light':'dark');}
+  <div class="toast" id="toast"></div>
 
-// ── INIT ─────────────────────────────────────────────────────────────
-async function init(){
-  initTheme();
-  try{const{data:{session}}=await sb.auth.getSession();
-    if(session?.user){S.uid=session.user.id;await bootApp(session.user);}else showLogin();
-  }catch(e){showLogin();}
-  fadeLoader();
-}
-function fadeLoader(){const l=document.getElementById('loader');l.classList.add('out');setTimeout(()=>l.style.display='none',320);}
-function showLogin(){document.getElementById('login-screen').style.display='flex';document.getElementById('app-screen').style.display='none';}
-function showApp(){document.getElementById('login-screen').style.display='none';document.getElementById('app-screen').style.display='block';}
+  <script>
+    'use strict';
+    const SUPABASE_URL = '%%SUPABASE_URL%%';
+    const SUPABASE_KEY = '%%SUPABASE_KEY%%';
+    const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY, {
+      auth: { persistSession: true, storageKey: 'listelerim-auth' }
+    });
 
-async function bootApp(user){
-  S=mkState();S.uid=user.id;
-  Object.keys(localStorage).filter(k=>k!==TK&&!k.startsWith('listelerim-auth')).forEach(k=>localStorage.removeItem(k));
-  const em=String(user.email||'');
-  document.getElementById('user-em').textContent=em;
-  document.getElementById('user-av').textContent=em[0]?.toUpperCase()||'?';
-  showApp();
-  await loadAll();
-  renderAll();
-}
+    // ── STATE ────────────────────────────────────────────────────────────
+    let S = mkState();
+    function mkState() { return { items: [], cats: [], feeds: [], inbox: [], filter: 'all', type: 'youtube', acceptType: 'youtube', page: 'watchlist', uid: null }; }
+    let pendingAcceptId = null;
 
-async function doLogin(){
-  const email=document.getElementById('l-email').value.trim(),pass=document.getElementById('l-pass').value;
-  const btn=document.getElementById('login-btn'),err=document.getElementById('login-error');
-  err.style.display='none';
-  if(!email||!pass){err.textContent='E-posta ve şifre zorunlu.';err.style.display='block';return;}
-  btn.textContent='Giriş yapılıyor…';btn.disabled=true;
-  const{data,error}=await sb.auth.signInWithPassword({email,password:pass});
-  btn.innerHTML='Giriş Yap <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>';
-  btn.disabled=false;
-  if(error){err.textContent='E-posta veya şifre hatalı.';err.style.display='block';return;}
-  S=mkState();await bootApp(data.user);
-}
+    // ── THEME ────────────────────────────────────────────────────────────
+    const TK = 'listelerim-theme';
+    function initTheme() { const s = localStorage.getItem(TK); applyTheme(s || (window.matchMedia('(prefers-color-scheme:light)').matches ? 'light' : 'dark'), false); }
+    function applyTheme(t, save = true) {
+      document.documentElement.setAttribute('data-theme', t);
+      if (save) localStorage.setItem(TK, t);
+      const btn = document.getElementById('theme-btn'); if (!btn) return;
+      btn.innerHTML = t === 'dark'
+        ? `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>`
+        : `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>`;
+    }
+    function toggleTheme() { applyTheme(document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark'); }
 
-async function doLogout(){
-  S=mkState();
-  ['cards-grid','cats-container','stats-row','rss-feeds-list','rss-inbox-list'].forEach(id=>{const el=document.getElementById(id);if(el)el.innerHTML='';});
-  showLogin();
-  await sb.auth.signOut();
-  document.getElementById('l-email').value='';document.getElementById('l-pass').value='';
-  document.getElementById('login-error').style.display='none';
-}
+    // ── INIT ─────────────────────────────────────────────────────────────
+    async function init() {
+      initTheme();
+      try {
+        const { data: { session } } = await sb.auth.getSession();
+        if (session?.user) { S.uid = session.user.id; await bootApp(session.user); } else showLogin();
+      } catch (e) { showLogin(); }
+      fadeLoader();
+    }
+    function fadeLoader() { const l = document.getElementById('loader'); l.classList.add('out'); setTimeout(() => l.style.display = 'none', 320); }
+    function showLogin() { document.getElementById('login-screen').style.display = 'flex'; document.getElementById('app-screen').style.display = 'none'; }
+    function showApp() { document.getElementById('login-screen').style.display = 'none'; document.getElementById('app-screen').style.display = 'block'; }
 
-// ── DATA ─────────────────────────────────────────────────────────────
-async function loadAll(){
-  if(!S.uid)return;
-  const[ir,cr,fr,inr]=await Promise.all([
-    sb.from('items').select('*').eq('user_id',S.uid).order('created_at',{ascending:false}),
-    sb.from('categories').select('*, links(*)').eq('user_id',S.uid).order('created_at',{ascending:true}),
-    sb.from('rss_feeds').select('*').eq('user_id',S.uid).order('created_at',{ascending:true}),
-    sb.from('rss_inbox').select('*').eq('user_id',S.uid).eq('status','pending').order('pub_date',{ascending:false}),
-  ]);
-  S.items=ir.data||[];
-  S.cats=(cr.data||[]).map(c=>({...c,links:c.links||[]}));
-  S.feeds=fr.data||[];
-  S.inbox=inr.data||[];
-}
+    async function bootApp(user) {
+      S = mkState(); S.uid = user.id;
+      Object.keys(localStorage).filter(k => k !== TK && !k.startsWith('listelerim-auth') && !k.startsWith('listelerim-learning')).forEach(k => localStorage.removeItem(k));
+      const em = String(user.email || '');
+      document.getElementById('user-em').textContent = em;
+      document.getElementById('user-av').textContent = em[0]?.toUpperCase() || '?';
+      showApp();
+      await loadAll();
+      await loadLearning();
+      renderAll();
+    }
 
-// ── DB ───────────────────────────────────────────────────────────────
-async function dbAdd(table,obj){const{data,error}=await sb.from(table).insert({...obj,user_id:S.uid}).select().single();if(error)throw error;return data;}
-async function dbUpdate(table,id,obj){const{error}=await sb.from(table).update(obj).eq('id',id).eq('user_id',S.uid);if(error)throw error;}
-async function dbDelete(table,id){const{error}=await sb.from(table).delete().eq('id',id).eq('user_id',S.uid);if(error)throw error;}
-async function dbAddLink(obj){const{data,error}=await sb.from('links').insert(obj).select().single();if(error)throw error;return data;}
-async function dbDeleteLink(id){const{error}=await sb.from('links').delete().eq('id',id);if(error)throw error;}
-async function dbDeleteCatFull(catId){await sb.from('links').delete().eq('category_id',catId);await sb.from('categories').delete().eq('id',catId).eq('user_id',S.uid);}
-async function dbUpdateInbox(id,status){const{error}=await sb.from('rss_inbox').update({status}).eq('id',id).eq('user_id',S.uid);if(error)throw error;}
+    async function doLogin() {
+      const email = document.getElementById('l-email').value.trim(), pass = document.getElementById('l-pass').value;
+      const btn = document.getElementById('login-btn'), err = document.getElementById('login-error');
+      err.style.display = 'none';
+      if (!email || !pass) { err.textContent = 'E-posta ve şifre zorunlu.'; err.style.display = 'block'; return; }
+      btn.textContent = 'Giriş yapılıyor…'; btn.disabled = true;
+      const { data, error } = await sb.auth.signInWithPassword({ email, password: pass });
+      btn.innerHTML = 'Giriş Yap <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>';
+      btn.disabled = false;
+      if (error) { err.textContent = 'E-posta veya şifre hatalı.'; err.style.display = 'block'; return; }
+      S = mkState(); await bootApp(data.user);
+    }
 
-// ── NAV ──────────────────────────────────────────────────────────────
-function showPage(page){
-  S.page=page;
-  ['watchlist','links','rss'].forEach(p=>{document.getElementById('page-'+p).style.display=p===page?'block':'none';});
-  document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
-  document.getElementById('nav-'+page)?.classList.add('active');
-}
-function setFilter(f){
-  S.filter=f;
-  document.querySelectorAll('.pill').forEach(p=>p.classList.toggle('active',p.dataset.f===f));
-  renderItems();
-}
+    async function doLogout() {
+      S = mkState(); learnState = null;
+      ['cards-grid', 'cats-container', 'stats-row', 'rss-feeds-list', 'rss-inbox-list', 'lp-container'].forEach(id => { const el = document.getElementById(id); if (el) el.innerHTML = ''; });
+      showLogin();
+      await sb.auth.signOut();
+      document.getElementById('l-email').value = ''; document.getElementById('l-pass').value = '';
+      document.getElementById('login-error').style.display = 'none';
+    }
 
-// ── RENDER ALL ────────────────────────────────────────────────────────
-function renderAll(){renderStats();renderItems();renderLinks();renderRss();}
+    // ── DATA ─────────────────────────────────────────────────────────────
+    async function loadAll() {
+      if (!S.uid) return;
+      const [ir, cr, fr, inr] = await Promise.all([
+        sb.from('items').select('*').eq('user_id', S.uid).order('created_at', { ascending: false }),
+        sb.from('categories').select('*, links(*)').eq('user_id', S.uid).order('created_at', { ascending: true }),
+        sb.from('rss_feeds').select('*').eq('user_id', S.uid).order('created_at', { ascending: true }),
+        sb.from('rss_inbox').select('*').eq('user_id', S.uid).eq('status', 'pending').order('pub_date', { ascending: false }),
+      ]);
+      S.items = ir.data || [];
+      S.cats = (cr.data || []).map(c => ({ ...c, links: c.links || [] }));
+      S.feeds = fr.data || [];
+      S.inbox = inr.data || [];
+    }
 
-function renderStats(){
-  const total=S.items.length,done=S.items.filter(i=>i.done).length,pct=total?Math.round(done/total*100):0;
-  document.getElementById('nc-all').textContent=total;
-  document.getElementById('nc-pending').textContent=total-done;
-  document.getElementById('nc-done').textContent=done;
-  document.getElementById('nc-links').textContent=S.cats.length;
-  const badge=document.getElementById('rss-badge');
-  badge.textContent=S.inbox.length;
-  badge.classList.toggle('show',S.inbox.length>0);
-  document.getElementById('stats-row').innerHTML=
-    `<div class="stat-card"><div class="stat-val">${total}</div><div class="stat-key">Toplam</div></div>
-     <div class="stat-card"><div class="stat-val">${total-done}</div><div class="stat-key">Bekliyor</div></div>
+    // ── DB ───────────────────────────────────────────────────────────────
+    async function dbAdd(table, obj) { const { data, error } = await sb.from(table).insert({ ...obj, user_id: S.uid }).select().single(); if (error) throw error; return data; }
+    async function dbUpdate(table, id, obj) { const { error } = await sb.from(table).update(obj).eq('id', id).eq('user_id', S.uid); if (error) throw error; }
+    async function dbDelete(table, id) { const { error } = await sb.from(table).delete().eq('id', id).eq('user_id', S.uid); if (error) throw error; }
+    async function dbAddLink(obj) { const { data, error } = await sb.from('links').insert(obj).select().single(); if (error) throw error; return data; }
+    async function dbDeleteLink(id) { const { error } = await sb.from('links').delete().eq('id', id); if (error) throw error; }
+    async function dbDeleteCatFull(catId) { await sb.from('links').delete().eq('category_id', catId); await sb.from('categories').delete().eq('id', catId).eq('user_id', S.uid); }
+    async function dbUpdateInbox(id, status) { const { error } = await sb.from('rss_inbox').update({ status }).eq('id', id).eq('user_id', S.uid); if (error) throw error; }
+
+    // ── NAV ──────────────────────────────────────────────────────────────
+    function showPage(page) {
+      S.page = page;
+      ['watchlist', 'links', 'rss', 'learning'].forEach(p => { document.getElementById('page-' + p).style.display = p === page ? 'block' : 'none'; });
+      document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+      document.getElementById('nav-' + page)?.classList.add('active');
+    }
+    function setFilter(f) {
+      S.filter = f;
+      document.querySelectorAll('.pill').forEach(p => p.classList.toggle('active', p.dataset.f === f));
+      renderItems();
+    }
+
+    // ── RENDER ALL ────────────────────────────────────────────────────────
+    function renderAll() { renderStats(); renderItems(); renderLinks(); renderRss(); renderLearning(); }
+
+    function renderStats() {
+      const total = S.items.length, done = S.items.filter(i => i.done).length, pct = total ? Math.round(done / total * 100) : 0;
+      document.getElementById('nc-all').textContent = total;
+      document.getElementById('nc-pending').textContent = total - done;
+      document.getElementById('nc-done').textContent = done;
+      document.getElementById('nc-links').textContent = S.cats.length;
+      const lc = document.getElementById('nc-learning'); if (lc) lc.textContent = (learnState && learnState.paths) ? learnState.paths.length : 0;
+      const badge = document.getElementById('rss-badge');
+      badge.textContent = S.inbox.length;
+      badge.classList.toggle('show', S.inbox.length > 0);
+      document.getElementById('stats-row').innerHTML =
+        `<div class="stat-card"><div class="stat-val">${total}</div><div class="stat-key">Toplam</div></div>
+     <div class="stat-card"><div class="stat-val">${total - done}</div><div class="stat-key">Bekliyor</div></div>
      <div class="stat-card hi"><div class="stat-val">${done}</div><div class="stat-key">Tamamlandı</div></div>
      <div class="stat-card"><div class="stat-val">${pct}%</div><div class="stat-key">İlerleme</div></div>`;
-  const pw=document.getElementById('prog-wrap');pw.style.display=total?'block':'none';
-  document.getElementById('prog-fill').style.width=pct+'%';
-  document.getElementById('prog-pct').textContent=pct+'%';
-}
+      const pw = document.getElementById('prog-wrap'); pw.style.display = total ? 'block' : 'none';
+      document.getElementById('prog-fill').style.width = pct + '%';
+      document.getElementById('prog-pct').textContent = pct + '%';
+    }
 
-function renderItems(){
-  const grid=document.getElementById('cards-grid');
-  const list=S.items.filter(it=>{
-    if(S.filter==='pending')return !it.done;
-    if(S.filter==='done')return it.done;
-    if(S.filter==='youtube')return it.type==='youtube';
-    if(S.filter==='blog')return it.type==='blog';
-    return true;
-  });
-  if(!list.length){
-    grid.innerHTML=`<div class="empty"><svg width="38" height="38" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="opacity:.3"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg><p>Gösterilecek içerik yok.</p></div>`;
-    return;
-  }
-  grid.innerHTML=list.map(it=>cardHTML(it)).join('');
-}
+    function renderItems() {
+      const grid = document.getElementById('cards-grid');
+      const list = S.items.filter(it => {
+        if (S.filter === 'pending') return !it.done;
+        if (S.filter === 'done') return it.done;
+        if (S.filter === 'youtube') return it.type === 'youtube';
+        if (S.filter === 'blog') return it.type === 'blog';
+        return true;
+      });
+      if (!list.length) {
+        grid.innerHTML = `<div class="empty"><svg width="38" height="38" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="opacity:.3"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg><p>Gösterilecek içerik yok.</p></div>`;
+        return;
+      }
+      grid.innerHTML = list.map(it => cardHTML(it)).join('');
+    }
 
-const ICON_CHECK=`<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>`;
-const ICON_CLOCK=`<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>`;
-function ytSVG(s){return`<svg width="${s}" height="${s}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M22.54 6.42a2.78 2.78 0 0 0-1.95-1.96C18.88 4 12 4 12 4s-6.88 0-8.59.46a2.78 2.78 0 0 0-1.95 1.96A29 29 0 0 0 1 12a29 29 0 0 0 .46 5.58A2.78 2.78 0 0 0 3.41 19.6C5.12 20 12 20 12 20s6.88 0 8.59-.46a2.78 2.78 0 0 0 1.95-1.95A29 29 0 0 0 23 12a29 29 0 0 0-.46-5.58z"/><polygon points="9.75 15.02 15.5 12 9.75 8.98 9.75 15.02"/></svg>`;}
-function blogSVG(s){return`<svg width="${s}" height="${s}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>`;}
+    const ICON_CHECK = `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>`;
+    const ICON_CLOCK = `<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>`;
+    function ytSVG(s) { return `<svg width="${s}" height="${s}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M22.54 6.42a2.78 2.78 0 0 0-1.95-1.96C18.88 4 12 4 12 4s-6.88 0-8.59.46a2.78 2.78 0 0 0-1.95 1.96A29 29 0 0 0 1 12a29 29 0 0 0 .46 5.58A2.78 2.78 0 0 0 3.41 19.6C5.12 20 12 20 12 20s6.88 0 8.59-.46a2.78 2.78 0 0 0 1.95-1.95A29 29 0 0 0 23 12a29 29 0 0 0-.46-5.58z"/><polygon points="9.75 15.02 15.5 12 9.75 8.98 9.75 15.02"/></svg>`; }
+    function blogSVG(s) { return `<svg width="${s}" height="${s}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>`; }
 
-function cardHTML(it){
-  const isYT=it.type==='youtube';
-  const ytId=isYT?getYouTubeID(it.url):null;
-  let thumbEl;
-  if(it.image_url){
-    const fb=ytId?`https://img.youtube.com/vi/${ytId}/hqdefault.jpg`:'';
-    const onerr=fb?`onerror="if(this.dataset.tried){this.style.display='none';this.nextElementSibling.style.display='flex';}else{this.dataset.tried=1;this.src='${fb}'}"`:
-      `onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"`;
-    thumbEl=`<img class="card-thumb" src="${esc(it.image_url)}" alt="" ${onerr} loading="lazy"><div class="card-thumb-ph" style="display:none">${isYT?ytSVG(28):blogSVG(28)}</div>`;
-  }else{thumbEl=`<div class="card-thumb-ph">${isYT?ytSVG(28):blogSVG(28)}</div>`;}
-  return`<div class="card ${it.done?'done':''}" id="c-${it.id}">
+    function cardHTML(it) {
+      const isYT = it.type === 'youtube';
+      const ytId = isYT ? getYouTubeID(it.url) : null;
+      let thumbEl;
+      if (it.image_url) {
+        const fb = ytId ? `https://img.youtube.com/vi/${ytId}/hqdefault.jpg` : '';
+        const onerr = fb ? `onerror="if(this.dataset.tried){this.style.display='none';this.nextElementSibling.style.display='flex';}else{this.dataset.tried=1;this.src='${fb}'}"` :
+          `onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"`;
+        thumbEl = `<img class="card-thumb" src="${esc(it.image_url)}" alt="" ${onerr} loading="lazy"><div class="card-thumb-ph" style="display:none">${isYT ? ytSVG(28) : blogSVG(28)}</div>`;
+      } else { thumbEl = `<div class="card-thumb-ph">${isYT ? ytSVG(28) : blogSVG(28)}</div>`; }
+      return `<div class="card ${it.done ? 'done' : ''}" id="c-${it.id}">
     <div class="card-media">
       <a href="${esc(it.url)}" target="_blank" rel="noopener noreferrer">${thumbEl}</a>
-      <div class="card-tag ${isYT?'yt':''}">${isYT?ytSVG(11):blogSVG(11)}${isYT?'YouTube':'Blog'}</div>
+      <div class="card-tag ${isYT ? 'yt' : ''}">${isYT ? ytSVG(11) : blogSVG(11)}${isYT ? 'YouTube' : 'Blog'}</div>
       <button class="card-del" onclick="deleteItem('${it.id}')" title="Sil"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
     </div>
     <div class="card-body">
       <div class="card-title">${esc(it.title)}</div>
       <div class="card-footer">
-        <span class="status-badge ${it.done?'done':'pending'}">${it.done?ICON_CHECK+' Tamamlandı':ICON_CLOCK+' Bekliyor'}</span>
-        <button class="check-btn ${it.done?'done':''}" onclick="toggleDone('${it.id}',${!it.done})">
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="${it.done?'#0e0e0c':'var(--text3)'}" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+        <span class="status-badge ${it.done ? 'done' : 'pending'}">${it.done ? ICON_CHECK + ' Tamamlandı' : ICON_CLOCK + ' Bekliyor'}</span>
+        <button class="check-btn ${it.done ? 'done' : ''}" onclick="toggleDone('${it.id}',${!it.done})">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="${it.done ? '#0e0e0c' : 'var(--text3)'}" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
         </button>
       </div>
     </div>
   </div>`;
-}
+    }
 
-function renderLinks(){
-  const cont=document.getElementById('cats-container'),empty=document.getElementById('empty-links');
-  if(!S.cats.length){cont.innerHTML='';empty.style.display='block';return;}
-  empty.style.display='none';
-  cont.innerHTML=S.cats.map(cat=>`
+    function renderLinks() {
+      const cont = document.getElementById('cats-container'), empty = document.getElementById('empty-links');
+      if (!S.cats.length) { cont.innerHTML = ''; empty.style.display = 'block'; return; }
+      empty.style.display = 'none';
+      cont.innerHTML = S.cats.map(cat => `
     <div class="cat-block" id="cat-${cat.id}">
       <div class="cat-head">
-        <div class="cat-name"><span>${cat.emoji||'📌'}</span>${esc(cat.name)}</div>
+        <div class="cat-name"><span>${cat.emoji || '📌'}</span>${esc(cat.name)}</div>
         <button class="btn btn-danger btn-xs" onclick="deleteCat('${cat.id}')"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>Sil</button>
       </div>
-      <div class="link-list">${(cat.links||[]).map(lk=>`
+      <div class="link-list">${(cat.links || []).map(lk => `
         <div class="link-row"><div class="link-dot"></div>
-          <a href="${esc(lk.url)}" target="_blank" rel="noopener noreferrer">${esc(lk.title||getDomain(lk.url))}</a>
+          <a href="${esc(lk.url)}" target="_blank" rel="noopener noreferrer">${esc(lk.title || getDomain(lk.url))}</a>
           <span class="link-domain">${getDomain(lk.url)}</span>
           <button class="link-del" onclick="deleteLink('${cat.id}','${lk.id}')">×</button>
         </div>`).join('')}</div>
@@ -682,42 +2429,42 @@ function renderLinks(){
         <button class="btn btn-sm" onclick="addLink('${cat.id}')">Ekle</button>
       </div>
     </div>`).join('');
-}
+    }
 
-// ── RSS RENDER ────────────────────────────────────────────────────────
-function renderRss(){
-  const feedList=document.getElementById('rss-feeds-list'),emptyFeeds=document.getElementById('empty-feeds');
-  if(!S.feeds.length){feedList.innerHTML='';emptyFeeds.style.display='flex';}
-  else{
-    emptyFeeds.style.display='none';
-    feedList.innerHTML=S.feeds.map(f=>`
+    // ── RSS RENDER ────────────────────────────────────────────────────────
+    function renderRss() {
+      const feedList = document.getElementById('rss-feeds-list'), emptyFeeds = document.getElementById('empty-feeds');
+      if (!S.feeds.length) { feedList.innerHTML = ''; emptyFeeds.style.display = 'flex'; }
+      else {
+        emptyFeeds.style.display = 'none';
+        feedList.innerHTML = S.feeds.map(f => `
       <div class="rss-feed-row">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--accent-dim)" stroke-width="2" stroke-linecap="round" style="flex-shrink:0"><path d="M4 11a9 9 0 0 1 9 9"/><path d="M4 4a16 16 0 0 1 16 16"/><circle cx="5" cy="19" r="1"/></svg>
         <div class="rss-feed-info">
-          <div class="rss-feed-title">${esc(f.name||getDomain(f.url))}</div>
+          <div class="rss-feed-title">${esc(f.name || getDomain(f.url))}</div>
           <div class="rss-feed-url">${esc(f.url)}</div>
         </div>
-        <div class="rss-feed-meta">${f.last_checked?'Son: '+fmtDate(f.last_checked):''}</div>
+        <div class="rss-feed-meta">${f.last_checked ? 'Son: ' + fmtDate(f.last_checked) : ''}</div>
         <button class="btn btn-danger btn-xs" onclick="deleteFeed('${f.id}')"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>Kaldır</button>
       </div>`).join('');
-  }
-  renderInbox();
-}
+      }
+      renderInbox();
+    }
 
-function renderInbox(){
-  const sec=document.getElementById('rss-inbox-section'),list=document.getElementById('rss-inbox-list');
-  const lbl=document.getElementById('inbox-count-label');
-  if(!S.inbox.length){sec.style.display='none';return;}
-  sec.style.display='block';
-  lbl.textContent=`(${S.inbox.length} öğe)`;
-  list.innerHTML=S.inbox.map(item=>`
+    function renderInbox() {
+      const sec = document.getElementById('rss-inbox-section'), list = document.getElementById('rss-inbox-list');
+      const lbl = document.getElementById('inbox-count-label');
+      if (!S.inbox.length) { sec.style.display = 'none'; return; }
+      sec.style.display = 'block';
+      lbl.textContent = `(${S.inbox.length} öğe)`;
+      list.innerHTML = S.inbox.map(item => `
     <div class="rss-item" id="ri-${item.id}">
       <div class="rss-item-head">
-        <div class="rss-item-source">${esc(item.feed_name||'Feed')}</div>
+        <div class="rss-item-source">${esc(item.feed_name || 'Feed')}</div>
         <div class="rss-item-title"><a href="${esc(item.url)}" target="_blank" rel="noopener noreferrer">${esc(item.title)}</a></div>
       </div>
       <div class="rss-item-footer">
-        <div class="rss-item-date">${item.pub_date?fmtDate(item.pub_date):''}</div>
+        <div class="rss-item-date">${item.pub_date ? fmtDate(item.pub_date) : ''}</div>
         <div class="rss-item-actions">
           <button class="btn btn-danger btn-xs" onclick="rejectInboxItem('${item.id}')">
             <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>Reddet
@@ -728,254 +2475,679 @@ function renderInbox(){
         </div>
       </div>
     </div>`).join('');
-}
+    }
 
-// ── RSS FEED CHECK ────────────────────────────────────────────────────
-async function checkAllFeeds(){
-  if(!S.feeds.length){toast('Önce feed ekle.','err');return;}
-  const btn=document.getElementById('check-btn'),ind=document.getElementById('checking-indicator');
-  btn.disabled=true;ind.classList.add('show');
-  let newCount=0;
-  for(const feed of S.feeds){
-    try{
-      // Use allorigins proxy to bypass CORS
-      const proxyUrl=`https://api.allorigins.win/get?url=${encodeURIComponent(feed.url)}`;
-      const res=await fetch(proxyUrl);
-      const data=await res.json();
-      const parser=new DOMParser();
-      const xml=parser.parseFromString(data.contents,'text/xml');
-      const items=[...xml.querySelectorAll('item, entry')];
-      // Get existing URLs for this feed to avoid duplicates
-      const{data:existing}=await sb.from('rss_inbox').select('url').eq('feed_id',feed.id).eq('user_id',S.uid);
-      const existingUrls=new Set((existing||[]).map(e=>e.url));
-      const newItems=[];
-      for(const item of items.slice(0,20)){
-        const title=(item.querySelector('title')?.textContent||'').trim();
-        const link=item.querySelector('link')?.textContent?.trim()||item.querySelector('link')?.getAttribute('href')||'';
-        const pubDate=item.querySelector('pubDate,published,updated')?.textContent||'';
-        if(!title||!link||existingUrls.has(link))continue;
-        newItems.push({
-          user_id:S.uid,feed_id:feed.id,feed_name:feed.name||getDomain(feed.url),
-          title,url:link,pub_date:pubDate?new Date(pubDate).toISOString():null,status:'pending'
-        });
+    // ── RSS FEED CHECK ────────────────────────────────────────────────────
+    async function checkAllFeeds() {
+      if (!S.feeds.length) { toast('Önce feed ekle.', 'err'); return; }
+      const btn = document.getElementById('check-btn'), ind = document.getElementById('checking-indicator');
+      btn.disabled = true; ind.classList.add('show');
+      let newCount = 0;
+      for (const feed of S.feeds) {
+        try {
+          // Use allorigins proxy to bypass CORS
+          const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(feed.url)}`;
+          const res = await fetch(proxyUrl);
+          const data = await res.json();
+          const parser = new DOMParser();
+          const xml = parser.parseFromString(data.contents, 'text/xml');
+          const items = [...xml.querySelectorAll('item, entry')];
+          // Get existing URLs for this feed to avoid duplicates
+          const { data: existing } = await sb.from('rss_inbox').select('url').eq('feed_id', feed.id).eq('user_id', S.uid);
+          const existingUrls = new Set((existing || []).map(e => e.url));
+          const newItems = [];
+          for (const item of items.slice(0, 20)) {
+            const title = (item.querySelector('title')?.textContent || '').trim();
+            const link = item.querySelector('link')?.textContent?.trim() || item.querySelector('link')?.getAttribute('href') || '';
+            const pubDate = item.querySelector('pubDate,published,updated')?.textContent || '';
+            if (!title || !link || existingUrls.has(link)) continue;
+            newItems.push({
+              user_id: S.uid, feed_id: feed.id, feed_name: feed.name || getDomain(feed.url),
+              title, url: link, pub_date: pubDate ? new Date(pubDate).toISOString() : null, status: 'pending'
+            });
+          }
+          if (newItems.length) {
+            const { data: inserted } = await sb.from('rss_inbox').insert(newItems).select();
+            if (inserted) S.inbox.unshift(...inserted);
+            newCount += newItems.length;
+          }
+          // Update last_checked
+          await sb.from('rss_feeds').update({ last_checked: new Date().toISOString() }).eq('id', feed.id);
+          const f = S.feeds.find(f => f.id === feed.id); if (f) f.last_checked = new Date().toISOString();
+        } catch (e) { console.warn('Feed error:', feed.url, e); }
       }
-      if(newItems.length){
-        const{data:inserted}=await sb.from('rss_inbox').insert(newItems).select();
-        if(inserted)S.inbox.unshift(...inserted);
-        newCount+=newItems.length;
+      btn.disabled = false; ind.classList.remove('show');
+      renderRss(); renderStats();
+      toast(newCount > 0 ? `${newCount} yeni öğe bulundu.` : 'Yeni içerik yok.', newCount > 0 ? 'ok' : '');
+    }
+
+    async function rejectInboxItem(id) {
+      S.inbox = S.inbox.filter(i => i.id !== id); renderInbox(); renderStats();
+      try { await dbUpdateInbox(id, 'rejected'); } catch (e) { }
+    }
+
+    async function dismissAllInbox() {
+      if (!confirm(`${S.inbox.length} öğeyi reddetmek istediğine emin misin?`)) return;
+      const ids = S.inbox.map(i => i.id);
+      S.inbox = []; renderInbox(); renderStats();
+      try { await sb.from('rss_inbox').update({ status: 'rejected' }).in('id', ids); } catch (e) { }
+      toast('Tümü reddedildi.', 'ok');
+    }
+
+    // ── ACCEPT MODAL ─────────────────────────────────────────────────────
+    function openAcceptModal(id) {
+      const item = S.inbox.find(i => i.id === id); if (!item) return;
+      pendingAcceptId = id;
+      document.getElementById('ai-title').value = item.title;
+      document.getElementById('ai-url').value = item.url;
+      const isYT = item.url.includes('youtube.com') || item.url.includes('youtu.be');
+      selAcceptType(isYT ? 'youtube' : 'blog');
+      document.getElementById('accept-modal').style.display = 'flex';
+    }
+    function closeAcceptModal() { document.getElementById('accept-modal').style.display = 'none'; pendingAcceptId = null; }
+    function selAcceptType(t) {
+      S.acceptType = t;
+      document.getElementById('ai-topt-youtube').classList.toggle('selected', t === 'youtube');
+      document.getElementById('ai-topt-blog').classList.toggle('selected', t === 'blog');
+    }
+    async function confirmAccept() {
+      if (!pendingAcceptId) return;
+      const title = document.getElementById('ai-title').value.trim(), url = document.getElementById('ai-url').value.trim();
+      if (!title || !url) { toast('Başlık ve link zorunlu!', 'err'); return; }
+      const ytId = getYouTubeID(url);
+      const imgUrl = ytId ? `https://img.youtube.com/vi/${ytId}/hqdefault.jpg` : null;
+      try {
+        const saved = await dbAdd('items', { title, url: ensureHttp(url), image_url: imgUrl, type: S.acceptType, done: false });
+        S.items.unshift(saved);
+        await dbUpdateInbox(pendingAcceptId, 'accepted');
+        S.inbox = S.inbox.filter(i => i.id !== pendingAcceptId);
+        renderAll(); closeAcceptModal(); toast('Listeye eklendi.', 'ok');
+      } catch (e) { toast('Hata: ' + e.message, 'err'); }
+    }
+
+    // ── FEED CRUD ─────────────────────────────────────────────────────────
+    function openFeedModal() { document.getElementById('feed-modal').style.display = 'flex'; setTimeout(() => document.getElementById('fi-url').focus(), 50); }
+    function closeFeedModal() { document.getElementById('feed-modal').style.display = 'none'; document.getElementById('fi-name').value = ''; document.getElementById('fi-url').value = ''; }
+    async function saveFeed() {
+      const url = document.getElementById('fi-url').value.trim(), name = document.getElementById('fi-name').value.trim();
+      if (!url) { toast('Feed URL zorunlu!', 'err'); return; }
+      try {
+        const saved = await dbAdd('rss_feeds', { url: ensureHttp(url), name: name || getDomain(url) });
+        S.feeds.push(saved); renderRss(); closeFeedModal(); toast('Feed eklendi.', 'ok');
+      } catch (e) { toast('Hata: ' + e.message, 'err'); }
+    }
+    async function deleteFeed(id) {
+      if (!confirm('Bu feed\'i kaldırmak istediğine emin misin?')) return;
+      S.feeds = S.feeds.filter(f => f.id !== id); renderRss();
+      try { await sb.from('rss_feeds').delete().eq('id', id).eq('user_id', S.uid); } catch (e) { }
+      toast('Feed kaldırıldı.', 'ok');
+    }
+
+    // ── ITEM ACTIONS ──────────────────────────────────────────────────────
+    async function toggleDone(id, done) {
+      const it = S.items.find(i => i.id === id); if (!it) return;
+      it.done = done; renderStats(); renderItems();
+      try { await dbUpdate('items', id, { done }); } catch (e) { it.done = !done; renderStats(); renderItems(); toast('Güncelleme başarısız.', 'err'); }
+    }
+    async function deleteItem(id) {
+      if (!confirm('Bu içeriği silmek istediğine emin misin?')) return;
+      S.items = S.items.filter(i => i.id !== id); renderStats(); renderItems();
+      try { await dbDelete('items', id); toast('İçerik silindi.', 'ok'); } catch (e) { await loadAll(); renderAll(); toast('Silinemedi.', 'err'); }
+    }
+
+    // ── CAT / LINK ACTIONS ────────────────────────────────────────────────
+    async function deleteCat(id) {
+      if (!confirm('Bu kategoriyi ve tüm linklerini silmek istediğine emin misin?')) return;
+      S.cats = S.cats.filter(c => c.id !== id); renderLinks(); renderStats();
+      try { await dbDeleteCatFull(id); toast('Kategori silindi.', 'ok'); } catch (e) { await loadAll(); renderAll(); }
+    }
+    async function addLink(catId) {
+      const input = document.getElementById('li-' + catId); const url = (input?.value || '').trim(); if (!url) return;
+      const cat = S.cats.find(c => c.id === catId); if (!cat) return;
+      const obj = { url: ensureHttp(url), title: getDomain(url), category_id: catId };
+      input.value = '';
+      try { const saved = await dbAddLink(obj); cat.links.push(saved); renderLinks(); toast('Link eklendi.', 'ok'); }
+      catch (e) { toast('Eklenemedi: ' + e.message, 'err'); }
+    }
+    async function deleteLink(catId, linkId) {
+      const cat = S.cats.find(c => c.id === catId); if (!cat) return;
+      cat.links = cat.links.filter(l => l.id !== linkId); renderLinks();
+      try { await dbDeleteLink(linkId); } catch (e) { await loadAll(); renderLinks(); }
+    }
+
+    // ── MODAL: ITEM ───────────────────────────────────────────────────────
+    function openItemModal() { document.getElementById('item-modal').style.display = 'flex'; document.getElementById('qi-url').focus(); }
+    function closeItemModal() {
+      document.getElementById('item-modal').style.display = 'none';
+      ['qi-url', 'mi-title', 'mi-url', 'mi-img'].forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
+      document.getElementById('preview-card').classList.remove('show');
+    }
+    function selType(t) {
+      S.type = t;
+      document.getElementById('topt-youtube').classList.toggle('selected', t === 'youtube');
+      document.getElementById('topt-blog').classList.toggle('selected', t === 'blog');
+    }
+
+    // ── YOUTUBE TITLE FIX: youtube.com/oembed (most reliable) ────────────
+    function getYouTubeID(url) {
+      const re = /(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|shorts\/|u\/\w\/|watch\?v=|watch\?.+&v=))([^#&?]{11})/;
+      const m = (url || '').match(re); return m && m[1].length === 11 ? m[1] : null;
+    }
+
+    async function fetchYouTubeTitle(url) {
+      // Primary: youtube oembed (gives clean title, no API key needed)
+      try {
+        const res = await fetch(`https://www.youtube.com/oembed?url=${encodeURIComponent(url)}&format=json`);
+        if (res.ok) { const d = await res.json(); if (d.title) return d.title; }
+      } catch (e) { }
+      // Fallback: noembed
+      try {
+        const res = await fetch(`https://noembed.com/embed?url=${encodeURIComponent(url)}`);
+        if (res.ok) { const d = await res.json(); if (d.title && !d.error) return d.title; }
+      } catch (e) { }
+      return null;
+    }
+
+    async function fetchMeta() {
+      const raw = document.getElementById('qi-url').value.trim(); if (!raw) return;
+      const url = ensureHttp(raw);
+      const btn = document.getElementById('fetch-btn'); btn.textContent = '…'; btn.disabled = true;
+      const ytId = getYouTubeID(url);
+      if (ytId) {
+        selType('youtube');
+        const maxRes = `https://img.youtube.com/vi/${ytId}/maxresdefault.jpg`;
+        const hqRes = `https://img.youtube.com/vi/${ytId}/hqdefault.jpg`;
+        const title = await fetchYouTubeTitle(url) || `YouTube Video`;
+        document.getElementById('mi-title').value = title;
+        document.getElementById('mi-url').value = url;
+        document.getElementById('mi-img').value = maxRes;
+        const pimg = document.getElementById('pi-img');
+        pimg.onerror = () => { pimg.src = hqRes; pimg.onerror = null; };
+        pimg.src = maxRes;
+        document.getElementById('pi-title').textContent = title;
+        document.getElementById('pi-domain').textContent = 'youtube.com';
+        document.getElementById('preview-card').classList.add('show');
+      } else {
+        selType('blog');
+        try {
+          const res = await fetch(`https://api.microlink.io?url=${encodeURIComponent(url)}`);
+          const data = await res.json();
+          const title = data.data?.title || getDomain(url), imgUrl = data.data?.image?.url || data.data?.screenshot?.url || '';
+          document.getElementById('mi-title').value = title;
+          document.getElementById('mi-url').value = url;
+          document.getElementById('mi-img').value = imgUrl;
+          if (imgUrl) document.getElementById('pi-img').src = imgUrl;
+          document.getElementById('pi-title').textContent = title;
+          document.getElementById('pi-domain').textContent = getDomain(url);
+          document.getElementById('preview-card').classList.add('show');
+        } catch (e) { document.getElementById('mi-url').value = url; }
       }
-      // Update last_checked
-      await sb.from('rss_feeds').update({last_checked:new Date().toISOString()}).eq('id',feed.id);
-      const f=S.feeds.find(f=>f.id===feed.id);if(f)f.last_checked=new Date().toISOString();
-    }catch(e){console.warn('Feed error:',feed.url,e);}
-  }
-  btn.disabled=false;ind.classList.remove('show');
-  renderRss();renderStats();
-  toast(newCount>0?`${newCount} yeni öğe bulundu.`:'Yeni içerik yok.', newCount>0?'ok':'');
-}
+      btn.textContent = 'Getir'; btn.disabled = false;
+    }
 
-async function rejectInboxItem(id){
-  S.inbox=S.inbox.filter(i=>i.id!==id);renderInbox();renderStats();
-  try{await dbUpdateInbox(id,'rejected');}catch(e){}
-}
+    async function saveItem() {
+      const title = document.getElementById('mi-title').value.trim(), url = document.getElementById('mi-url').value.trim();
+      if (!title || !url) { toast('Başlık ve link zorunlu!', 'err'); return; }
+      const ytId = getYouTubeID(url);
+      let imgUrl = document.getElementById('mi-img').value.trim() || null;
+      if (ytId && !imgUrl) imgUrl = `https://img.youtube.com/vi/${ytId}/hqdefault.jpg`;
+      const obj = { title, url: ensureHttp(url), image_url: imgUrl, type: S.type, done: false };
+      try { const saved = await dbAdd('items', obj); S.items.unshift(saved); renderAll(); closeItemModal(); toast('İçerik eklendi.', 'ok'); }
+      catch (e) { toast('Hata: ' + e.message, 'err'); }
+    }
 
-async function dismissAllInbox(){
-  if(!confirm(`${S.inbox.length} öğeyi reddetmek istediğine emin misin?`))return;
-  const ids=S.inbox.map(i=>i.id);
-  S.inbox=[];renderInbox();renderStats();
-  try{await sb.from('rss_inbox').update({status:'rejected'}).in('id',ids);}catch(e){}
-  toast('Tümü reddedildi.','ok');
-}
+    // ── MODAL: CAT ────────────────────────────────────────────────────────
+    function openCatModal() { document.getElementById('cat-modal').style.display = 'flex'; setTimeout(() => document.getElementById('ci-name').focus(), 50); }
+    function closeCatModal() { document.getElementById('cat-modal').style.display = 'none'; document.getElementById('ci-name').value = ''; document.getElementById('ci-emoji').value = ''; }
+    async function saveCat() {
+      const name = document.getElementById('ci-name').value.trim(), emoji = document.getElementById('ci-emoji').value.trim() || '📌';
+      if (!name) { toast('Kategori adı zorunlu!', 'err'); return; }
+      try { const saved = await dbAdd('categories', { name, emoji }); S.cats.push({ ...saved, links: [] }); renderLinks(); renderStats(); closeCatModal(); showPage('links'); toast('Kategori oluşturuldu.', 'ok'); }
+      catch (e) { toast('Hata: ' + e.message, 'err'); }
+    }
 
-// ── ACCEPT MODAL ─────────────────────────────────────────────────────
-function openAcceptModal(id){
-  const item=S.inbox.find(i=>i.id===id);if(!item)return;
-  pendingAcceptId=id;
-  document.getElementById('ai-title').value=item.title;
-  document.getElementById('ai-url').value=item.url;
-  const isYT=item.url.includes('youtube.com')||item.url.includes('youtu.be');
-  selAcceptType(isYT?'youtube':'blog');
-  document.getElementById('accept-modal').style.display='flex';
-}
-function closeAcceptModal(){document.getElementById('accept-modal').style.display='none';pendingAcceptId=null;}
-function selAcceptType(t){
-  S.acceptType=t;
-  document.getElementById('ai-topt-youtube').classList.toggle('selected',t==='youtube');
-  document.getElementById('ai-topt-blog').classList.toggle('selected',t==='blog');
-}
-async function confirmAccept(){
-  if(!pendingAcceptId)return;
-  const title=document.getElementById('ai-title').value.trim(),url=document.getElementById('ai-url').value.trim();
-  if(!title||!url){toast('Başlık ve link zorunlu!','err');return;}
-  const ytId=getYouTubeID(url);
-  const imgUrl=ytId?`https://img.youtube.com/vi/${ytId}/hqdefault.jpg`:null;
-  try{
-    const saved=await dbAdd('items',{title,url:ensureHttp(url),image_url:imgUrl,type:S.acceptType,done:false});
-    S.items.unshift(saved);
-    await dbUpdateInbox(pendingAcceptId,'accepted');
-    S.inbox=S.inbox.filter(i=>i.id!==pendingAcceptId);
-    renderAll();closeAcceptModal();toast('Listeye eklendi.','ok');
-  }catch(e){toast('Hata: '+e.message,'err');}
-}
+    // ── TOAST ─────────────────────────────────────────────────────────────
+    let toastT;
+    function toast(msg, type = '') {
+      const el = document.getElementById('toast');
+      const icon = type === 'ok' ? `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>` :
+        type === 'err' ? `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--red)" stroke-width="2.5" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>` : '';
+      el.innerHTML = icon + esc(msg); el.className = 'toast show' + (type ? ' ' + type : '');
+      clearTimeout(toastT); toastT = setTimeout(() => el.classList.remove('show'), 2800);
+    }
 
-// ── FEED CRUD ─────────────────────────────────────────────────────────
-function openFeedModal(){document.getElementById('feed-modal').style.display='flex';setTimeout(()=>document.getElementById('fi-url').focus(),50);}
-function closeFeedModal(){document.getElementById('feed-modal').style.display='none';document.getElementById('fi-name').value='';document.getElementById('fi-url').value='';}
-async function saveFeed(){
-  const url=document.getElementById('fi-url').value.trim(),name=document.getElementById('fi-name').value.trim();
-  if(!url){toast('Feed URL zorunlu!','err');return;}
-  try{
-    const saved=await dbAdd('rss_feeds',{url:ensureHttp(url),name:name||getDomain(url)});
-    S.feeds.push(saved);renderRss();closeFeedModal();toast('Feed eklendi.','ok');
-  }catch(e){toast('Hata: '+e.message,'err');}
-}
-async function deleteFeed(id){
-  if(!confirm('Bu feed\'i kaldırmak istediğine emin misin?'))return;
-  S.feeds=S.feeds.filter(f=>f.id!==id);renderRss();
-  try{await sb.from('rss_feeds').delete().eq('id',id).eq('user_id',S.uid);}catch(e){}
-  toast('Feed kaldırıldı.','ok');
-}
+    // ── UTILS ─────────────────────────────────────────────────────────────
+    function esc(s) { return String(s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;'); }
+    function ensureHttp(u) { return /^https?:\/\//i.test(u) ? u : 'https://' + u; }
+    function getDomain(u) { try { return new URL(ensureHttp(u)).hostname.replace(/^www\./, ''); } catch { return u; } }
+    function fmtDate(d) { try { return new Date(d).toLocaleDateString('tr-TR', { day: 'numeric', month: 'short', year: 'numeric' }); } catch { return ''; } }
 
-// ── ITEM ACTIONS ──────────────────────────────────────────────────────
-async function toggleDone(id,done){
-  const it=S.items.find(i=>i.id===id);if(!it)return;
-  it.done=done;renderStats();renderItems();
-  try{await dbUpdate('items',id,{done});}catch(e){it.done=!done;renderStats();renderItems();toast('Güncelleme başarısız.','err');}
-}
-async function deleteItem(id){
-  if(!confirm('Bu içeriği silmek istediğine emin misin?'))return;
-  S.items=S.items.filter(i=>i.id!==id);renderStats();renderItems();
-  try{await dbDelete('items',id);toast('İçerik silindi.','ok');}catch(e){await loadAll();renderAll();toast('Silinemedi.','err');}
-}
+    // ── LEARNING PATHS ────────────────────────────────────────────────────
+    let learnState = null;       // { paths: [...] }
+    let learnBackend = 'db';     // 'db' | 'local'
+    let lpEdit = null;           // active editor context
+    let lpInited = false;        // first-step auto-open done
+    const lpOpen = new Set();    // open step ids
+    let _lpc = 0;
+    function lpId() { _lpc++; return 'lp' + Date.now().toString(36) + _lpc.toString(36); }
+    function lpLSKey() { return 'listelerim-learning-' + (S.uid || 'anon'); }
 
-// ── CAT / LINK ACTIONS ────────────────────────────────────────────────
-async function deleteCat(id){
-  if(!confirm('Bu kategoriyi ve tüm linklerini silmek istediğine emin misin?'))return;
-  S.cats=S.cats.filter(c=>c.id!==id);renderLinks();renderStats();
-  try{await dbDeleteCatFull(id);toast('Kategori silindi.','ok');}catch(e){await loadAll();renderAll();}
-}
-async function addLink(catId){
-  const input=document.getElementById('li-'+catId);const url=(input?.value||'').trim();if(!url)return;
-  const cat=S.cats.find(c=>c.id===catId);if(!cat)return;
-  const obj={url:ensureHttp(url),title:getDomain(url),category_id:catId};
-  input.value='';
-  try{const saved=await dbAddLink(obj);cat.links.push(saved);renderLinks();toast('Link eklendi.','ok');}
-  catch(e){toast('Eklenemedi: '+e.message,'err');}
-}
-async function deleteLink(catId,linkId){
-  const cat=S.cats.find(c=>c.id===catId);if(!cat)return;
-  cat.links=cat.links.filter(l=>l.id!==linkId);renderLinks();
-  try{await dbDeleteLink(linkId);}catch(e){await loadAll();renderLinks();}
-}
+    const LP_KIND_LIST = ['video', 'playlist', 'course', 'doc', 'tool', 'book', 'practice', 'site'];
+    function lpKindLabel(k) { return ({ video: 'Video', playlist: 'Liste', course: 'Kurs', doc: 'Doküman', tool: 'Araç', book: 'Kitap', practice: 'Pratik', site: 'Site' })[k] || 'Bağlantı'; }
+    function lpKindSVG(k, s) {
+      s = s || 13;
+      const A = `width="${s}" height="${s}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"`;
+      switch (k) {
+        case 'video': return ytSVG(s);
+        case 'playlist': return `<svg ${A}><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>`;
+        case 'course': return `<svg ${A}><path d="M22 10 12 5 2 10l10 5 10-5z"/><path d="M6 12v5c0 1 2.5 3 6 3s6-2 6-3v-5"/></svg>`;
+        case 'doc': return blogSVG(s);
+        case 'tool': return `<svg ${A}><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>`;
+        case 'book': return `<svg ${A}><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>`;
+        case 'practice': return `<svg ${A}><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>`;
+        default: return `<svg ${A}><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>`;
+      }
+    }
+    function checkSVG(done) { return `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="${done ? '#0e0e0c' : 'var(--text3)'}" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>`; }
+    const LP_CHK = `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#0e0e0c" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>`;
+    const LP_IC = {
+      edit: `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>`,
+      del: `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>`,
+      trash: `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>`,
+      chev: `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>`,
+      up: `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="18 15 12 9 6 15"/></svg>`,
+      down: `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>`,
+      watch: `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>`,
+      add: `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>`,
+      path: `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="6" cy="19" r="3"/><path d="M9 19h8.5a3.5 3.5 0 0 0 0-7h-11a3.5 3.5 0 0 1 0-7H15"/><circle cx="18" cy="5" r="3"/></svg>`
+    };
 
-// ── MODAL: ITEM ───────────────────────────────────────────────────────
-function openItemModal(){document.getElementById('item-modal').style.display='flex';document.getElementById('qi-url').focus();}
-function closeItemModal(){
-  document.getElementById('item-modal').style.display='none';
-  ['qi-url','mi-title','mi-url','mi-img'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
-  document.getElementById('preview-card').classList.remove('show');
-}
-function selType(t){
-  S.type=t;
-  document.getElementById('topt-youtube').classList.toggle('selected',t==='youtube');
-  document.getElementById('topt-blog').classList.toggle('selected',t==='blog');
-}
+    // ── LEARNING: PERSISTENCE ─────────────────────────────────────────────
+    async function loadLearning() {
+      learnState = null; learnBackend = 'db';
+      if (!S.uid) { learnState = defaultLearnState(); return; }
+      try {
+        const { data, error } = await sb.from('learning_state').select('data').eq('user_id', S.uid).maybeSingle();
+        if (error) throw error;
+        if (data && data.data && data.data.paths) { learnState = data.data; learnBackend = 'db'; return; }
+        // No row yet: migrate any local-only edits to the DB, otherwise seed the default.
+        let seed = defaultLearnState();
+        try { const raw = localStorage.getItem(lpLSKey()); const loc = raw ? JSON.parse(raw) : null; if (loc && loc.paths) seed = loc; } catch (_) { }
+        learnState = seed; learnBackend = 'db'; await saveLearning(); return;
+      } catch (e) {
+        learnBackend = 'local';
+        try { const raw = localStorage.getItem(lpLSKey()); learnState = raw ? JSON.parse(raw) : defaultLearnState(); }
+        catch (_) { learnState = defaultLearnState(); }
+        try { localStorage.setItem(lpLSKey(), JSON.stringify(learnState)); } catch (_) { }
+      }
+    }
+    async function saveLearning() {
+      if (!learnState) return;
+      if (learnBackend === 'db' && S.uid) {
+        try { const { error } = await sb.from('learning_state').upsert({ user_id: S.uid, data: learnState, updated_at: new Date().toISOString() }, { onConflict: 'user_id' }); if (error) throw error; return; }
+        catch (e) { learnBackend = 'local'; const n = document.getElementById('lp-setup-note'); if (n) n.style.display = 'block'; }
+      }
+      try { localStorage.setItem(lpLSKey(), JSON.stringify(learnState)); } catch (_) { }
+    }
 
-// ── YOUTUBE TITLE FIX: youtube.com/oembed (most reliable) ────────────
-function getYouTubeID(url){
-  const re=/(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|shorts\/|u\/\w\/|watch\?v=|watch\?.+&v=))([^#&?]{11})/;
-  const m=(url||'').match(re);return m&&m[1].length===11?m[1]:null;
-}
+    // ── LEARNING: LOOKUPS & STATS ─────────────────────────────────────────
+    function lpFindPath(pid) { return (learnState && learnState.paths || []).find(p => p.id === pid); }
+    function lpFindStep(pid, sid) { const p = lpFindPath(pid); return p && (p.steps || []).find(s => s.id === sid); }
+    function lpFindRes(pid, sid, rid) { const s = lpFindStep(pid, sid); return s && (s.resources || []).find(r => r.id === rid); }
+    function getPlaylistID(url) { const m = (url || '').match(/[?&]list=([^&#]+)/); return m ? m[1] : null; }
+    function lpResUnits(r) { if (r.kind === 'playlist' && r.videos && r.videos.length) return { t: r.videos.length, d: r.videos.filter(v => v.done).length }; return { t: 1, d: r.done ? 1 : 0 }; }
+    function lpResIsDone(r) { const u = lpResUnits(r); return u.t > 0 && u.d === u.t; }
+    function lpStepUnits(s) { let t = 0, d = 0; (s.resources || []).forEach(r => { const u = lpResUnits(r); t += u.t; d += u.d; }); return { t, d }; }
+    function lpStats(p) { let t = 0, d = 0; (p.steps || []).forEach(s => { const u = lpStepUnits(s); t += u.t; d += u.d; }); return { t, d, pct: t ? Math.round(d / t * 100) : 0 }; }
 
-async function fetchYouTubeTitle(url){
-  // Primary: youtube oembed (gives clean title, no API key needed)
-  try{
-    const res=await fetch(`https://www.youtube.com/oembed?url=${encodeURIComponent(url)}&format=json`);
-    if(res.ok){const d=await res.json();if(d.title)return d.title;}
-  }catch(e){}
-  // Fallback: noembed
-  try{
-    const res=await fetch(`https://noembed.com/embed?url=${encodeURIComponent(url)}`);
-    if(res.ok){const d=await res.json();if(d.title&&!d.error)return d.title;}
-  }catch(e){}
-  return null;
-}
+    // ── LEARNING: RENDER ──────────────────────────────────────────────────
+    function renderLearning() {
+      const cont = document.getElementById('lp-container'); if (!cont) return;
+      const note = document.getElementById('lp-setup-note'); if (note) note.style.display = (learnBackend === 'local') ? 'block' : 'none';
+      if (!learnState || !learnState.paths || !learnState.paths.length) {
+        cont.innerHTML = `<div class="lp-empty"><p style="margin-bottom:14px;">Henüz bir öğrenme yolu yok.</p>
+        <div style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap;">
+          <button class="btn btn-accent btn-sm" onclick="lpLoadTemplate()">Malware Analizi şablonunu yükle</button>
+          <button class="btn btn-sm" onclick="lpAddPath()">+ Boş Yol</button>
+        </div></div>`;
+        return;
+      }
+      if (!lpInited) { const p0 = learnState.paths[0]; if (p0 && p0.steps && p0.steps[0]) lpOpen.add(p0.steps[0].id); lpInited = true; }
+      cont.innerHTML = learnState.paths.map(p => lpPathHTML(p)).join('');
+    }
 
-async function fetchMeta(){
-  const raw=document.getElementById('qi-url').value.trim();if(!raw)return;
-  const url=ensureHttp(raw);
-  const btn=document.getElementById('fetch-btn');btn.textContent='…';btn.disabled=true;
-  const ytId=getYouTubeID(url);
-  if(ytId){
-    selType('youtube');
-    const maxRes=`https://img.youtube.com/vi/${ytId}/maxresdefault.jpg`;
-    const hqRes=`https://img.youtube.com/vi/${ytId}/hqdefault.jpg`;
-    const title=await fetchYouTubeTitle(url)||`YouTube Video`;
-    document.getElementById('mi-title').value=title;
-    document.getElementById('mi-url').value=url;
-    document.getElementById('mi-img').value=maxRes;
-    const pimg=document.getElementById('pi-img');
-    pimg.onerror=()=>{pimg.src=hqRes;pimg.onerror=null;};
-    pimg.src=maxRes;
-    document.getElementById('pi-title').textContent=title;
-    document.getElementById('pi-domain').textContent='youtube.com';
-    document.getElementById('preview-card').classList.add('show');
-  }else{
-    selType('blog');
-    try{
-      const res=await fetch(`https://api.microlink.io?url=${encodeURIComponent(url)}`);
-      const data=await res.json();
-      const title=data.data?.title||getDomain(url),imgUrl=data.data?.image?.url||data.data?.screenshot?.url||'';
-      document.getElementById('mi-title').value=title;
-      document.getElementById('mi-url').value=url;
-      document.getElementById('mi-img').value=imgUrl;
-      if(imgUrl)document.getElementById('pi-img').src=imgUrl;
-      document.getElementById('pi-title').textContent=title;
-      document.getElementById('pi-domain').textContent=getDomain(url);
-      document.getElementById('preview-card').classList.add('show');
-    }catch(e){document.getElementById('mi-url').value=url;}
-  }
-  btn.textContent='Getir';btn.disabled=false;
-}
+    function lpPathHTML(p) {
+      const st = lpStats(p);
+      const steps = (p.steps || []).map((s, i) => lpStepHTML(p, s, i)).join('') ||
+        `<div class="lp-empty" style="padding:1.75rem;">Henüz adım yok. <button class="btn btn-xs" onclick="lpAddStep('${p.id}')">+ Adım ekle</button></div>`;
+      return `<div class="lp-path">
+      <div class="lp-path-head">
+        <div class="lp-path-top">
+          <div class="lp-path-icon">${LP_IC.path}</div>
+          <div class="lp-path-meta">
+            <div class="lp-path-title">${esc(p.title)}</div>
+            ${p.desc ? `<div class="lp-path-desc">${esc(p.desc)}</div>` : ''}
+          </div>
+          <div class="lp-path-actions">
+            <button class="btn btn-xs" onclick="lpAddStep('${p.id}')">+ Adım</button>
+            <button class="lp-res-btn" onclick="lpEditPath('${p.id}')" title="Yolu düzenle">${LP_IC.edit}</button>
+            <button class="lp-res-btn del" onclick="lpDeletePath('${p.id}')" title="Yolu sil">${LP_IC.trash}</button>
+          </div>
+        </div>
+        <div class="lp-prog">
+          <div class="lp-prog-bar"><div class="lp-prog-fill" style="width:${st.pct}%"></div></div>
+          <div class="lp-prog-pct">${st.d}/${st.t} · ${st.pct}%</div>
+        </div>
+      </div>
+      <div class="lp-steps">${steps}</div>
+    </div>`;
+    }
 
-async function saveItem(){
-  const title=document.getElementById('mi-title').value.trim(),url=document.getElementById('mi-url').value.trim();
-  if(!title||!url){toast('Başlık ve link zorunlu!','err');return;}
-  const ytId=getYouTubeID(url);
-  let imgUrl=document.getElementById('mi-img').value.trim()||null;
-  if(ytId&&!imgUrl)imgUrl=`https://img.youtube.com/vi/${ytId}/hqdefault.jpg`;
-  const obj={title,url:ensureHttp(url),image_url:imgUrl,type:S.type,done:false};
-  try{const saved=await dbAdd('items',obj);S.items.unshift(saved);renderAll();closeItemModal();toast('İçerik eklendi.','ok');}
-  catch(e){toast('Hata: '+e.message,'err');}
-}
+    function lpStepHTML(p, s, idx) {
+      const rs = s.resources || [];
+      const u = lpStepUnits(s);
+      const complete = u.t > 0 && u.d === u.t;
+      const open = lpOpen.has(s.id);
+      const primary = rs.filter(r => !r.later), later = rs.filter(r => r.later);
+      const grid = arr => `<div class="cards-grid lp-cards">${arr.map(r => lpResBlock(p, s, r)).join('')}</div>`;
+      return `<div class="lp-step ${complete ? 'complete' : ''} ${open ? 'open' : ''}" id="lp-step-${s.id}">
+      <div class="lp-step-head" onclick="lpToggleStep('${s.id}')">
+        <div class="lp-step-num">${complete ? LP_CHK : (idx + 1)}</div>
+        <div class="lp-step-info">
+          <div class="lp-step-title">${esc(s.title)}</div>
+          <div class="lp-step-sub">${u.t ? u.d + '/' + u.t + ' tamamlandı' : 'kaynak yok'}</div>
+        </div>
+        <div class="lp-step-ctrls">
+          <button class="lp-res-btn" onclick="event.stopPropagation();lpMoveStep('${p.id}','${s.id}',-1)" title="Yukarı">${LP_IC.up}</button>
+          <button class="lp-res-btn" onclick="event.stopPropagation();lpMoveStep('${p.id}','${s.id}',1)" title="Aşağı">${LP_IC.down}</button>
+          <button class="lp-res-btn" onclick="event.stopPropagation();lpEditStep('${p.id}','${s.id}')" title="Düzenle">${LP_IC.edit}</button>
+          <button class="lp-res-btn del" onclick="event.stopPropagation();lpDeleteStep('${p.id}','${s.id}')" title="Sil">${LP_IC.del}</button>
+        </div>
+        <span class="lp-step-chev">${LP_IC.chev}</span>
+      </div>
+      <div class="lp-step-body">
+        ${s.desc ? `<div class="lp-step-desc">${esc(s.desc)}</div>` : ''}
+        ${primary.length ? grid(primary) : ''}
+        ${later.length ? `<div class="lp-divider">Sonra izle · opsiyonel</div>${grid(later)}` : ''}
+        <div class="lp-add-res"><button class="btn btn-xs btn-ghost" onclick="lpAddRes('${p.id}','${s.id}')">${LP_IC.add} Kaynak ekle</button></div>
+      </div>
+    </div>`;
+    }
 
-// ── MODAL: CAT ────────────────────────────────────────────────────────
-function openCatModal(){document.getElementById('cat-modal').style.display='flex';setTimeout(()=>document.getElementById('ci-name').focus(),50);}
-function closeCatModal(){document.getElementById('cat-modal').style.display='none';document.getElementById('ci-name').value='';document.getElementById('ci-emoji').value='';}
-async function saveCat(){
-  const name=document.getElementById('ci-name').value.trim(),emoji=document.getElementById('ci-emoji').value.trim()||'📌';
-  if(!name){toast('Kategori adı zorunlu!','err');return;}
-  try{const saved=await dbAdd('categories',{name,emoji});S.cats.push({...saved,links:[]});renderLinks();renderStats();closeCatModal();showPage('links');toast('Kategori oluşturuldu.','ok');}
-  catch(e){toast('Hata: '+e.message,'err');}
-}
+    // A resource card + (for an expanded loaded playlist) its child video cards, flowing in the same grid.
+    function lpResBlock(p, s, r) {
+      let html = lpResHTML(p, s, r);
+      if (r.kind === 'playlist' && r._expanded && r.videos && r.videos.length) {
+        html += r.videos.map(v => lpVideoCardHTML(p, s, r, v)).join('');
+      }
+      return html;
+    }
 
-// ── TOAST ─────────────────────────────────────────────────────────────
-let toastT;
-function toast(msg,type=''){
-  const el=document.getElementById('toast');
-  const icon=type==='ok'?`<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>`:
-    type==='err'?`<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--red)" stroke-width="2.5" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>`:'';
-  el.innerHTML=icon+esc(msg);el.className='toast show'+(type?' '+type:'');
-  clearTimeout(toastT);toastT=setTimeout(()=>el.classList.remove('show'),2800);
-}
+    function lpThumbHTML(cover, kind) {
+      if (cover) return `<img class="card-thumb" src="${esc(cover)}" alt="" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'" loading="lazy"><div class="card-thumb-ph" style="display:none">${lpKindSVG(kind, 28)}</div>`;
+      return `<div class="card-thumb-ph">${lpKindSVG(kind, 28)}</div>`;
+    }
 
-// ── UTILS ─────────────────────────────────────────────────────────────
-function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');}
-function ensureHttp(u){return/^https?:\/\//i.test(u)?u:'https://'+u;}
-function getDomain(u){try{return new URL(ensureHttp(u)).hostname.replace(/^www\./,'');}catch{return u;}}
-function fmtDate(d){try{return new Date(d).toLocaleDateString('tr-TR',{day:'numeric',month:'short',year:'numeric'});}catch{return '';}}
+    function lpResHTML(p, s, r) {
+      const isPlaylist = r.kind === 'playlist', isVideo = r.kind === 'video';
+      const ytId = isVideo ? getYouTubeID(r.url) : null;
+      let cover = r.thumb || (ytId ? `https://img.youtube.com/vi/${ytId}/hqdefault.jpg` : '');
+      if (!cover && isPlaylist && r.videos && r.videos[0] && r.videos[0].vid) cover = `https://img.youtube.com/vi/${r.videos[0].vid}/hqdefault.jpg`;
+      const tagCls = (isVideo || isPlaylist) ? 'card-tag yt' : 'card-tag';
+      const done = lpResIsDone(r);
+      const langBadge = `<span class="lp-badge ${r.lang === 'tr' ? 'tr' : 'en'}">${r.lang === 'tr' ? 'TR' : 'EN'}</span>`;
+      let footLeft = langBadge, footRight = '';
+      if (isPlaylist && r.videos && r.videos.length) {
+        const u = lpResUnits(r);
+        footLeft += `<button class="btn btn-xs btn-ghost lp-pl-toggle" onclick="lpTogglePlaylist('${p.id}','${s.id}','${r.id}')">${r._expanded ? LP_IC.up : LP_IC.down} ${u.d}/${u.t} video</button>`;
+      } else if (isPlaylist) {
+        footLeft += `<button class="btn btn-xs lp-pl-load" onclick="lpLoadPlaylist('${p.id}','${s.id}','${r.id}')" ${r._loading ? 'disabled' : ''}>${r._loading ? 'Yükleniyor…' : 'Videoları yükle'}</button>`;
+        footRight = `<button class="check-btn ${done ? 'done' : ''}" onclick="lpToggleRes('${p.id}','${s.id}','${r.id}')" title="Tamamlandı">${checkSVG(done)}</button>`;
+      } else {
+        footRight = `<button class="check-btn ${done ? 'done' : ''}" onclick="lpToggleRes('${p.id}','${s.id}','${r.id}')" title="Tamamlandı">${checkSVG(done)}</button>`;
+      }
+      return `<div class="card lp-card ${done ? 'done' : ''}">
+      <div class="card-media">
+        <a href="${esc(r.url)}" target="_blank" rel="noopener noreferrer">${lpThumbHTML(cover, r.kind)}</a>
+        <div class="${tagCls}">${lpKindSVG(r.kind, 11)}${lpKindLabel(r.kind)}</div>
+        <div class="lp-card-tools">
+          <button class="lp-tool" onclick="lpAddToWatch('${p.id}','${s.id}','${r.id}')" title="İzleme listesine ekle">${LP_IC.watch}</button>
+          <button class="lp-tool" onclick="lpEditRes('${p.id}','${s.id}','${r.id}')" title="Düzenle">${LP_IC.edit}</button>
+          <button class="lp-tool del" onclick="lpDeleteRes('${p.id}','${s.id}','${r.id}')" title="Sil">${LP_IC.del}</button>
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="card-title"><a class="lp-title-link" href="${esc(r.url)}" target="_blank" rel="noopener noreferrer">${esc(r.title)}</a></div>
+        ${r.note ? `<div class="lp-res-note">${esc(r.note)}</div>` : ''}
+        <div class="card-footer">
+          <div class="lp-foot-left">${footLeft}</div>
+          ${footRight}
+        </div>
+      </div>
+    </div>`;
+    }
 
-init();
-</script>
+    function lpVideoCardHTML(p, s, r, v) {
+      const ytId = v.vid || getYouTubeID(v.url);
+      const cover = ytId ? `https://img.youtube.com/vi/${ytId}/hqdefault.jpg` : '';
+      const isTr = r.lang === 'tr';
+      return `<div class="card lp-card lp-child ${v.done ? 'done' : ''}">
+      <div class="card-media">
+        <a href="${esc(v.url)}" target="_blank" rel="noopener noreferrer">${lpThumbHTML(cover, 'video')}</a>
+        <div class="card-tag yt">${ytSVG(11)}Video</div>
+        <div class="lp-card-tools">
+          <button class="lp-tool" onclick="lpAddVideoToWatch('${p.id}','${s.id}','${r.id}','${v.id}')" title="İzleme listesine ekle">${LP_IC.watch}</button>
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="card-title"><a class="lp-title-link" href="${esc(v.url)}" target="_blank" rel="noopener noreferrer">${esc(v.title)}</a></div>
+        <div class="card-footer">
+          <div class="lp-foot-left"><span class="lp-badge ${isTr ? 'tr' : 'en'}">${isTr ? 'TR' : 'EN'}</span></div>
+          <button class="check-btn ${v.done ? 'done' : ''}" onclick="lpToggleVideo('${p.id}','${s.id}','${r.id}','${v.id}')" title="İzlendi">${checkSVG(v.done)}</button>
+        </div>
+      </div>
+    </div>`;
+    }
+
+    // ── LEARNING: ACTIONS ─────────────────────────────────────────────────
+    function lpToggleStep(sid) { if (lpOpen.has(sid)) lpOpen.delete(sid); else lpOpen.add(sid); const el = document.getElementById('lp-step-' + sid); if (el) el.classList.toggle('open'); }
+    function lpAddPath() { openEditor('path', {}); }
+    function lpEditPath(pid) { openEditor('path', { pid }); }
+    async function lpDeletePath(pid) { if (!confirm('Bu öğrenme yolunu ve tüm adımlarını silmek istediğine emin misin?')) return; learnState.paths = learnState.paths.filter(p => p.id !== pid); renderLearning(); renderStats(); await saveLearning(); toast('Yol silindi.', 'ok'); }
+    function lpAddStep(pid) { openEditor('step', { pid }); }
+    function lpEditStep(pid, sid) { openEditor('step', { pid, sid }); }
+    async function lpDeleteStep(pid, sid) { if (!confirm('Bu adımı silmek istediğine emin misin?')) return; const p = lpFindPath(pid); if (p) p.steps = p.steps.filter(s => s.id !== sid); renderLearning(); renderStats(); await saveLearning(); toast('Adım silindi.', 'ok'); }
+    async function lpMoveStep(pid, sid, dir) { const p = lpFindPath(pid); if (!p) return; const i = p.steps.findIndex(s => s.id === sid); const j = i + dir; if (j < 0 || j >= p.steps.length) return;[p.steps[i], p.steps[j]] = [p.steps[j], p.steps[i]]; renderLearning(); await saveLearning(); }
+    function lpAddRes(pid, sid) { openEditor('resource', { pid, sid }); }
+    function lpEditRes(pid, sid, rid) { openEditor('resource', { pid, sid, rid }); }
+    async function lpDeleteRes(pid, sid, rid) { if (!confirm('Bu kaynağı silmek istediğine emin misin?')) return; const s = lpFindStep(pid, sid); if (s) s.resources = s.resources.filter(r => r.id !== rid); renderLearning(); renderStats(); await saveLearning(); toast('Kaynak silindi.', 'ok'); }
+    async function lpToggleRes(pid, sid, rid) { const r = lpFindRes(pid, sid, rid); if (!r) return; r.done = !r.done; renderLearning(); renderStats(); await saveLearning(); }
+    async function lpLoadTemplate() { if (!learnState) learnState = { paths: [] }; learnState.paths.push(defaultMalwarePath()); lpInited = false; renderLearning(); renderStats(); await saveLearning(); toast('Malware Analizi şablonu yüklendi.', 'ok'); }
+    async function lpPushWatch(title, url) {
+      const ytId = getYouTubeID(url);
+      const type = ytId ? 'youtube' : 'blog';
+      const image_url = ytId ? `https://img.youtube.com/vi/${ytId}/hqdefault.jpg` : null;
+      try { const saved = await dbAdd('items', { title, url: ensureHttp(url), image_url, type, done: false }); S.items.unshift(saved); renderStats(); renderItems(); toast('İzleme listesine eklendi.', 'ok'); }
+      catch (e) { toast('Eklenemedi: ' + e.message, 'err'); }
+    }
+    async function lpAddToWatch(pid, sid, rid) { const r = lpFindRes(pid, sid, rid); if (r) await lpPushWatch(r.title, r.url); }
+    async function lpAddVideoToWatch(pid, sid, rid, vid) { const r = lpFindRes(pid, sid, rid); if (!r || !r.videos) return; const v = r.videos.find(x => x.id === vid); if (v) await lpPushWatch(v.title, v.url); }
+
+    // ── LEARNING: PLAYLIST EXPANSION ──────────────────────────────────────
+    function lpTogglePlaylist(pid, sid, rid) { const r = lpFindRes(pid, sid, rid); if (!r) return; r._expanded = !r._expanded; renderLearning(); saveLearning(); }
+    async function lpToggleVideo(pid, sid, rid, vid) { const r = lpFindRes(pid, sid, rid); if (!r || !r.videos) return; const v = r.videos.find(x => x.id === vid); if (!v) return; v.done = !v.done; renderLearning(); renderStats(); await saveLearning(); }
+    async function lpLoadPlaylist(pid, sid, rid) {
+      const r = lpFindRes(pid, sid, rid); if (!r) return;
+      const plId = getPlaylistID(r.url);
+      if (!plId) { toast('Bu bağlantıda playlist (list=) parametresi yok.', 'err'); return; }
+      r._loading = true; renderLearning();
+      try {
+        const feed = `https://www.youtube.com/feeds/videos.xml?playlist_id=${plId}`;
+        const res = await fetch(`https://api.allorigins.win/get?url=${encodeURIComponent(feed)}`);
+        const data = await res.json();
+        const xml = new DOMParser().parseFromString(data.contents, 'text/xml');
+        const entries = [...xml.querySelectorAll('entry')];
+        const vids = entries.map((en, i) => {
+          const title = (en.querySelector('title') ? en.querySelector('title').textContent : '').trim();
+          const lk = en.querySelector('link');
+          const link = (lk ? lk.getAttribute('href') : '') || '';
+          const vEl = en.getElementsByTagName('yt:videoId')[0];
+          const vid = (vEl ? vEl.textContent : '') || getYouTubeID(link) || '';
+          return { id: 'v' + (vid || (i + '-' + lpId())), vid, title, url: link, done: false };
+        }).filter(v => v.title && v.url);
+        if (!vids.length) { r._loading = false; renderLearning(); toast('Video bulunamadı (playlist gizli olabilir).', 'err'); return; }
+        if (r.videos && r.videos.length) { const prev = {}; r.videos.forEach(v => { if (v.vid) prev[v.vid] = v.done; }); vids.forEach(v => { if (prev[v.vid]) v.done = true; }); }
+        r.videos = vids; r._expanded = true; r._loading = false;
+        renderLearning(); renderStats(); await saveLearning();
+        toast(vids.length >= 15 ? 'İlk 15 video yüklendi (YouTube feed limiti).' : vids.length + ' video yüklendi.', 'ok');
+      } catch (e) { r._loading = false; renderLearning(); toast('Yüklenemedi: ' + e.message, 'err'); }
+    }
+
+    // ── LEARNING: EDITOR MODAL ────────────────────────────────────────────
+    function openEditor(mode, ctx) {
+      lpEdit = Object.assign({ mode }, ctx);
+      const titleEl = document.getElementById('lp-modal-title');
+      const body = document.getElementById('lp-modal-body');
+      let html = '';
+      if (mode === 'path') {
+        const p = ctx.pid ? lpFindPath(ctx.pid) : null;
+        titleEl.textContent = p ? 'Yolu Düzenle' : 'Yeni Yol';
+        html = `<div class="fg"><label>Yol Adı *</label><input type="text" id="lp-f-title" value="${p ? esc(p.title) : ''}" placeholder="örn. Malware Analizi"></div>
+        <div class="fg" style="margin-bottom:0;"><label>Açıklama</label><textarea id="lp-f-desc" placeholder="Bu yolun amacı...">${p ? esc(p.desc || '') : ''}</textarea></div>`;
+      } else if (mode === 'step') {
+        const s = ctx.sid ? lpFindStep(ctx.pid, ctx.sid) : null;
+        titleEl.textContent = s ? 'Adımı Düzenle' : 'Yeni Adım';
+        html = `<div class="fg"><label>Adım Başlığı *</label><input type="text" id="lp-f-title" value="${s ? esc(s.title) : ''}" placeholder="örn. İşletim Sistemi Temelleri"></div>
+        <div class="fg" style="margin-bottom:0;"><label>Açıklama / Ne çalışılacak</label><textarea id="lp-f-desc" placeholder="Bu adımda şunları öğren...">${s ? esc(s.desc || '') : ''}</textarea></div>`;
+      } else {
+        const r = ctx.rid ? lpFindRes(ctx.pid, ctx.sid, ctx.rid) : null;
+        titleEl.textContent = r ? 'Kaynağı Düzenle' : 'Yeni Kaynak';
+        const kinds = LP_KIND_LIST.map(k => `<option value="${k}" ${r && r.kind === k ? 'selected' : ''}>${lpKindLabel(k)}</option>`).join('');
+        html = `<div class="fg"><label>Başlık *</label><input type="text" id="lp-f-title" value="${r ? esc(r.title) : ''}" placeholder="Kaynağın adı"></div>
+        <div class="fg"><label>Link *</label><input type="url" id="lp-f-url" value="${r ? esc(r.url) : ''}" placeholder="https://..."></div>
+        <div style="display:flex;gap:10px;">
+          <div class="fg" style="flex:1;"><label>Tür</label><select id="lp-f-kind">${kinds}</select></div>
+          <div class="fg" style="flex:1;"><label>Dil</label><select id="lp-f-lang"><option value="tr" ${!r || r.lang === 'tr' ? 'selected' : ''}>TR (öncelikli)</option><option value="en" ${r && r.lang === 'en' ? 'selected' : ''}>EN</option></select></div>
+        </div>
+        <div class="fg"><label>Not (opsiyonel)</label><input type="text" id="lp-f-note" value="${r ? esc(r.note || '') : ''}" placeholder="Kısa not"></div>
+        <label style="display:flex;align-items:center;gap:8px;font-size:13px;color:var(--text2);cursor:pointer;"><input type="checkbox" id="lp-f-later" ${r && r.later ? 'checked' : ''} style="width:auto;"> "Sonra izle" olarak işaretle (ikincil / opsiyonel)</label>`;
+      }
+      body.innerHTML = html;
+      document.getElementById('lp-modal').style.display = 'flex';
+      setTimeout(() => { const t = document.getElementById('lp-f-title'); if (t) t.focus(); }, 50);
+    }
+    function closeEditor() { const m = document.getElementById('lp-modal'); if (m) m.style.display = 'none'; lpEdit = null; }
+    async function saveEditor() {
+      if (!lpEdit) return;
+      const val = id => { const e = document.getElementById(id); return e ? e.value.trim() : ''; };
+      const m = lpEdit.mode;
+      if (m === 'path') {
+        const title = val('lp-f-title'); if (!title) { toast('Yol adı zorunlu!', 'err'); return; }
+        const desc = val('lp-f-desc');
+        if (lpEdit.pid) { const p = lpFindPath(lpEdit.pid); if (p) { p.title = title; p.desc = desc; } }
+        else { learnState.paths.push({ id: lpId(), title, desc, steps: [] }); }
+      } else if (m === 'step') {
+        const title = val('lp-f-title'); if (!title) { toast('Başlık zorunlu!', 'err'); return; }
+        const desc = val('lp-f-desc'); const p = lpFindPath(lpEdit.pid); if (!p) return;
+        if (lpEdit.sid) { const s = lpFindStep(lpEdit.pid, lpEdit.sid); if (s) { s.title = title; s.desc = desc; } }
+        else { const s = { id: lpId(), title, desc, resources: [] }; p.steps = p.steps || []; p.steps.push(s); lpOpen.add(s.id); }
+      } else {
+        const title = val('lp-f-title'), url = val('lp-f-url'); if (!title || !url) { toast('Başlık ve link zorunlu!', 'err'); return; }
+        const kind = val('lp-f-kind') || 'site', lang = val('lp-f-lang') || 'tr', note = val('lp-f-note');
+        const later = !!(document.getElementById('lp-f-later') && document.getElementById('lp-f-later').checked);
+        const s = lpFindStep(lpEdit.pid, lpEdit.sid); if (!s) return; s.resources = s.resources || [];
+        if (lpEdit.rid) { const r = lpFindRes(lpEdit.pid, lpEdit.sid, lpEdit.rid); if (r) { r.title = title; r.url = ensureHttp(url); r.kind = kind; r.lang = lang; r.note = note; r.later = later; } }
+        else { s.resources.push({ id: lpId(), title, url: ensureHttp(url), kind, lang, note, later, done: false }); }
+      }
+      closeEditor(); renderLearning(); renderStats(); await saveLearning(); toast('Kaydedildi.', 'ok');
+    }
+
+    // ── LEARNING: DEFAULT CONTENT (Malware Analizi) ───────────────────────
+    function defaultLearnState() { return { paths: [defaultMalwarePath()] }; }
+    function defaultMalwarePath() {
+      const R = (title, url, kind, lang, later, note, thumb) => ({ id: lpId(), title, url, kind, lang: lang || 'tr', later: !!later, note: note || '', thumb: thumb || '', done: false });
+      const ST = (title, desc, resources) => ({ id: lpId(), title, desc, resources });
+      const YT = id => `https://img.youtube.com/vi/${id}/hqdefault.jpg`;
+      return {
+        id: lpId(), title: 'Malware Analizi',
+        desc: 'Sıfırdan temel malware analisti seviyesine giden sıralı yol. Türkçe kaynaklar önceliklidir; İngilizce içerikler "Sonra izle" olarak işaretlidir. Önerilen sıra: Assembly → Ghidra/x64dbg → Malware Unicorn → OALabs → Practical Malware Analysis → gerçek örnek analizi (~3-6 ay). Oynatma listelerinde "Videoları yükle" ile her videoyu tek tek görüp işaretleyebilirsin.',
+        steps: [
+          ST('Genel Kurslar & Oynatma Listeleri', 'Yola başlamadan baştan sona takip edeceğin bir kurs seç. Türkçe olanlarla başla; İngilizce oynatma listelerini referans / "sonra izle" olarak kullan. Playlist kartındaki "Videoları yükle" ile içindeki videolar tek tek listelenir.', [
+            R('Siber Güvenlik Akademisi — Malware Analysis (Analiz) Eğitimleri', 'https://www.youtube.com/playlist?list=PLRzqj5IrfWN4M4e1XEbKc1E9lF1aInt3y', 'playlist', 'tr', false, 'Türkçe, baştan sona izlenecek ana seri', YT('xGEV7NKqZ9k')),
+            R('Udemy — Zararlı Yazılım Analizi (Malware Analysis)', 'https://www.udemy.com/course/zararl-yazalm-analizi-malware-analysis/', 'course', 'tr', false, 'Türkçe kapsamlı kurs'),
+            R('Siber Yıldız — Malware Analizi Videoları', 'https://www.youtube.com/results?search_query=siber+y%C4%B1ld%C4%B1z+malware+analizi', 'video', 'tr', false, 'Türkçe; kanaldan ilgili videolar'),
+            R('Guided Hacking — Practical Malware Analysis Tutorials', 'https://www.youtube.com/playlist?list=PLt9cUwGw6CYEpBwasTz7WWgphfRWof0_O', 'playlist', 'en', true, 'PMA kitabını takip eden seri', YT('lwUve1VdFYs')),
+            R('John Hammond — Malware', 'https://www.youtube.com/playlist?list=PL1H1sBF1VAKWMn_3QPddayIypbbITTGZv', 'playlist', 'en', true, '', YT('fV-pTu5T59M')),
+            R('CryptoW@re — Analysing Real Malware Samples', 'https://www.youtube.com/playlist?list=PLR_k_vG4Lz0FaCRrbWf5pWlS6Q9Hnw9On', 'playlist', 'en', true, '', YT('1_oSqb-z3Kk')),
+            R('MyDFIR — Cybersecurity SOC Analyst Hands-On Labs', 'https://www.youtube.com/playlist?list=PLG6KGSNK4PuDdqYkOuIlAoNmwtLg5wyYJ', 'playlist', 'en', true, 'SOC / DFIR pratiği', YT('0DuJnPxKfBg')),
+          ]),
+          ST('Temel Bilgisayar & İşletim Sistemi Bilgisi', 'Windows nasıl çalışır öğren: Process, Thread, DLL, Registry, Windows servisleri ve PE (Portable Executable) dosya formatı. "Bir program çalışınca ne oluyor?" sorusuna net cevap verebilmelisin.', [
+            R('Microsoft Learn — Win32 / Windows API', 'https://learn.microsoft.com/en-us/windows/win32/', 'doc', 'en', false, 'Resmî referans'),
+            R('Microsoft — Processes and Threads', 'https://learn.microsoft.com/en-us/windows/win32/procthread/processes-and-threads', 'doc', 'en', false, ''),
+            R('Microsoft — Dynamic-Link Libraries (DLL)', 'https://learn.microsoft.com/en-us/windows/win32/dlls/dynamic-link-libraries', 'doc', 'en', false, ''),
+            R('Corkami — PE101 (PE formatı görsel rehber)', 'https://github.com/corkami/pics/blob/master/binary/pe101/README.md', 'doc', 'en', false, 'PE header için git-bak referansı'),
+            R('Practical Malware Analysis (ilk bölümler)', 'https://nostarch.com/malware', 'book', 'en', false, ''),
+          ]),
+          ST('C ve Assembly Temelleri', 'C: pointer, struct, memory allocation, stack/heap, fonksiyon çağrısı. x86/x64 Assembly: register’lar, stack, calling convention, JMP/CALL/RET. Disassembly’de gördüğünü okuyabilmen için şart.', [
+            R('OpenSecurityTraining2 — Intro to x86', 'https://opensecuritytraining.info/IntroX86.html', 'course', 'en', false, 'Güncel platform: ost2.fyi'),
+            R('OpenSecurityTraining2 — Welcome / RE for Windows', 'https://opensecuritytraining.info/Welcome.html', 'course', 'en', false, ''),
+            R('Felix Cloutier — x86/x64 Instruction Reference', 'https://www.felixcloutier.com/x86/', 'doc', 'en', false, 'Komut arama referansı'),
+            R('OST2 (güncel kurs platformu)', 'https://ost2.fyi/', 'site', 'en', true, ''),
+          ]),
+          ST('Reverse Engineering Temelleri', 'Disassembly, debugging, breakpoint, call stack, import table, string analizi. Araçları kur ve üzerlerinde gez: Ghidra (statik), x64dbg (dinamik).', [
+            R('Ghidra (NSA, ücretsiz disassembler/decompiler)', 'https://ghidra-sre.org', 'tool', 'en', false, ''),
+            R('x64dbg (Windows debugger)', 'https://x64dbg.com', 'tool', 'en', false, ''),
+            R('Low Level — Every Level of Reverse Engineering Explained', 'https://youtu.be/8vk5z9VAaBQ', 'video', 'en', true, 'Genel bakış'),
+            R('OALabs — YouTube', 'https://www.youtube.com/@OALABS', 'video', 'en', true, 'Gerçek malware üzerinden RE'),
+            R('OALabs — Research Blog & Notes', 'https://research.openanalysis.net/', 'site', 'en', true, ''),
+            R('crackmes.one (RE pratiği)', 'https://crackmes.one', 'practice', 'en', false, ''),
+          ]),
+          ST('Malware Analizi Temelleri (Statik & Dinamik)', 'Statik analiz: strings, PE header, imports, resources (PEStudio, DIE, Ghidra). Dinamik analiz: Process Monitor, Process Explorer, TCPView, Wireshark ile davranış izleme.', [
+            R('Malware Unicorn — RE101', 'https://malwareunicorn.org/workshops/re101.html', 'course', 'en', false, 'Başlangıç için mükemmel, ücretsiz'),
+            R('Malware Unicorn — RE102', 'https://malwareunicorn.org/workshops/re102.html', 'course', 'en', false, ''),
+            R('PEStudio (statik PE inceleme)', 'https://www.winitor.com', 'tool', 'en', false, ''),
+            R('Detect It Easy / DIE (packer & derleyici tespiti)', 'https://github.com/horsicq/Detect-It-Easy', 'tool', 'en', false, ''),
+            R('Sysinternals (Procmon, Process Explorer, TCPView)', 'https://learn.microsoft.com/en-us/sysinternals/', 'tool', 'en', false, ''),
+            R('Wireshark (ağ trafiği analizi)', 'https://www.wireshark.org', 'tool', 'en', false, ''),
+          ]),
+          ST('Malware Türleri', 'Her birinin davranışını öğren ve örnekle eşleştir: RAT, Stealer, Downloader, Dropper, Loader, Rootkit, Ransomware, Banker Trojan.', [
+            R('MITRE ATT&CK (teknik & taktik matrisi)', 'https://attack.mitre.org', 'site', 'en', false, ''),
+            R('Malpedia (malware ailesi ansiklopedisi)', 'https://malpedia.caad.fkie.fraunhofer.de', 'site', 'en', false, ''),
+            R('MalwareBazaar — etikete göre örnekler', 'https://bazaar.abuse.ch', 'site', 'en', true, 'Tür/aileye göre gerçek örnekler'),
+          ]),
+          ST('Güvenli Analiz Ortamı (Lab) Kur', 'ASLA ana makinende çalıştırma. Sanallaştırma kullan. Önerilen: Windows 10 VM + snapshot + host-only network + internet KAPALI. Hazır dağıtımlar: FLARE-VM, REMnux. Gerçek zararlıyı sadece izole lab’da çalıştır.', [
+            R('LetsDefend — Building a Malware Analysis Lab', 'https://www.youtube.com/playlist?list=PLgLVwK69OPbxA37i0Hn1S_Tj-eWNj2JYu', 'playlist', 'en', false, 'Adım adım lab kurulumu', YT('_ZRRipGJMbI')),
+            R('VirtualBox', 'https://www.virtualbox.org', 'tool', 'en', false, ''),
+            R('VMware Workstation', 'https://www.vmware.com/products/workstation-pro.html', 'tool', 'en', false, ''),
+            R('FLARE-VM (Windows analiz araç seti)', 'https://github.com/mandiant/flare-vm', 'tool', 'en', false, ''),
+            R('REMnux (Linux analiz dağıtımı)', 'https://remnux.org', 'tool', 'en', false, ''),
+          ]),
+          ST('Pratik Platformlar', 'Öğrendiğini gerçek örnek / trafik üzerinde uygula; zorluğu başlangıç → orta → ileri sırayla artır.', [
+            R('Malware-Traffic-Analysis.net (başlangıç, ağ)', 'https://www.malware-traffic-analysis.net', 'practice', 'en', false, ''),
+            R('ANY.RUN (etkileşimli sandbox)', 'https://any.run', 'practice', 'en', false, ''),
+            R('HackTheBox Academy — Intro to Malware Analysis', 'https://academy.hackthebox.com', 'practice', 'en', false, ''),
+            R('TryHackMe — Malware Analysis', 'https://tryhackme.com', 'practice', 'en', false, ''),
+            R('MalwareBazaar (ileri, gerçek örnek)', 'https://bazaar.abuse.ch', 'practice', 'en', false, ''),
+            R('VirusTotal', 'https://www.virustotal.com', 'site', 'en', false, ''),
+            R('Hybrid Analysis', 'https://www.hybrid-analysis.com', 'site', 'en', false, ''),
+            R('Triage (tria.ge sandbox)', 'https://tria.ge', 'site', 'en', false, ''),
+          ]),
+          ST('İleri: PE Injection & Anti-Analysis', 'Process / PE injection, packing/unpacking, anti-analiz (evasion) teknikleri. Malware’in kendini gizleme yöntemlerini öğren.', [
+            R('Malware Unicorn — PE Injection Workshop', 'https://malwareunicorn.org/workshops/peinjection.html', 'course', 'en', false, ''),
+            R('Unprotect Project (evasion teknikleri ansiklopedisi)', 'https://unprotect.it', 'site', 'en', false, ''),
+          ]),
+          ST('Kitaplar', 'Referans kitaplar. Başlangıç: Practical Malware Analysis, Practical Reverse Engineering. İleri: Windows Internals, Malware Analyst’s Cookbook.', [
+            R('Practical Malware Analysis', 'https://nostarch.com/malware', 'book', 'en', false, 'Alanın temel kitabı'),
+            R('Practical Reverse Engineering', 'https://www.goodreads.com/book/show/18933769-practical-reverse-engineering', 'book', 'en', false, ''),
+            R('Windows Internals', 'https://learn.microsoft.com/en-us/sysinternals/resources/windows-internals', 'book', 'en', true, ''),
+            R('Malware Analyst’s Cookbook', 'https://www.goodreads.com/book/show/9418194-malware-analyst-s-cookbook-and-dvd', 'book', 'en', true, ''),
+          ]),
+        ]
+      };
+    }
+
+    init();
+  </script>
 </body>
+
 </html>
