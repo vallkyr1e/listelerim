@@ -1702,6 +1702,116 @@
       white-space: nowrap;
     }
 
+    /* expanded playlist = full-width grouped section */
+    .lp-pl-section {
+      grid-column: 1 / -1;
+      background: var(--bg);
+      border: 1px solid var(--border2);
+      border-radius: 12px;
+      overflow: hidden;
+      margin: 2px 0;
+    }
+
+    .lp-pl-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 11px 13px;
+      background: var(--bg2);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .lp-pl-coverlink {
+      flex-shrink: 0;
+      display: block;
+      line-height: 0;
+    }
+
+    .lp-pl-cover,
+    .lp-pl-cover-ph {
+      width: 60px;
+      height: 38px;
+      border-radius: 6px;
+      object-fit: cover;
+      background: var(--bg4);
+      display: block;
+    }
+
+    .lp-pl-cover-ph {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--text3);
+    }
+
+    .lp-pl-hmeta {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .lp-pl-htitle {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text);
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      min-width: 0;
+    }
+
+    .lp-pl-htitle .lp-title-link {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .lp-pl-hsub {
+      font-size: 11px;
+      color: var(--text3);
+      font-family: 'DM Mono', monospace;
+      margin-top: 3px;
+    }
+
+    .lp-pl-bar {
+      height: 4px;
+      background: var(--bg3);
+      border-radius: 3px;
+      overflow: hidden;
+      margin-top: 7px;
+      max-width: 300px;
+    }
+
+    .lp-pl-bar-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--accent-dim), var(--accent));
+      border-radius: 3px;
+      transition: width .4s ease;
+    }
+
+    .lp-pl-hactions {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      flex-shrink: 0;
+    }
+
+    .lp-pl-videos {
+      grid-template-columns: repeat(auto-fill, minmax(166px, 1fr));
+      padding: 12px 13px;
+      gap: 12px;
+    }
+
+    @media(max-width:560px) {
+      .lp-pl-header {
+        flex-wrap: wrap;
+      }
+
+      .lp-pl-hactions {
+        width: 100%;
+        justify-content: flex-end;
+      }
+    }
+
     .lp-badge {
       font-size: 9px;
       font-weight: 700;
@@ -2876,11 +2986,34 @@ create policy "own learning_state" on learning_state
 
     // A resource card + (for an expanded loaded playlist) its child video cards, flowing in the same grid.
     function lpResBlock(p, s, r) {
-      let html = lpResHTML(p, s, r);
-      if (r.kind === 'playlist' && r._expanded && r.videos && r.videos.length) {
-        html += r.videos.map(v => lpVideoCardHTML(p, s, r, v)).join('');
-      }
-      return html;
+      // An expanded, loaded playlist becomes a full-width grouped section; everything else is a card.
+      if (r.kind === 'playlist' && r._expanded && r.videos && r.videos.length) return lpPlSectionHTML(p, s, r);
+      return lpResHTML(p, s, r);
+    }
+
+    function lpPlSectionHTML(p, s, r) {
+      const u = lpResUnits(r), pct = u.t ? Math.round(u.d / u.t * 100) : 0, allDone = u.t > 0 && u.d === u.t;
+      let cover = r.thumb || (r.videos[0] && r.videos[0].vid ? `https://img.youtube.com/vi/${r.videos[0].vid}/hqdefault.jpg` : '');
+      const coverEl = cover
+        ? `<img class="lp-pl-cover" src="${esc(cover)}" alt="" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"><div class="lp-pl-cover-ph" style="display:none">${lpKindSVG('playlist', 16)}</div>`
+        : `<div class="lp-pl-cover-ph">${lpKindSVG('playlist', 16)}</div>`;
+      return `<div class="lp-pl-section">
+      <div class="lp-pl-header">
+        <a class="lp-pl-coverlink" href="${esc(r.url)}" target="_blank" rel="noopener noreferrer">${coverEl}</a>
+        <div class="lp-pl-hmeta">
+          <div class="lp-pl-htitle"><a class="lp-title-link" href="${esc(r.url)}" target="_blank" rel="noopener noreferrer">${esc(r.title)}</a><span class="lp-badge ${r.lang === 'tr' ? 'tr' : 'en'}">${r.lang === 'tr' ? 'TR' : 'EN'}</span></div>
+          <div class="lp-pl-hsub">Oynatma listesi · ${u.d}/${u.t} izlendi · %${pct}</div>
+          <div class="lp-pl-bar"><div class="lp-pl-bar-fill" style="width:${pct}%"></div></div>
+        </div>
+        <div class="lp-pl-hactions">
+          <button class="btn btn-xs btn-ghost" onclick="lpMarkAllVideos('${p.id}','${s.id}','${r.id}',${allDone ? 'false' : 'true'})">${allDone ? 'Temizle' : 'Tümünü izlendi'}</button>
+          <button class="lp-res-btn" onclick="lpEditRes('${p.id}','${s.id}','${r.id}')" title="Düzenle">${LP_IC.edit}</button>
+          <button class="lp-res-btn del" onclick="lpDeleteRes('${p.id}','${s.id}','${r.id}')" title="Sil">${LP_IC.del}</button>
+          <button class="btn btn-xs lp-pl-toggle" onclick="lpTogglePlaylist('${p.id}','${s.id}','${r.id}')">${LP_IC.up} Gizle</button>
+        </div>
+      </div>
+      <div class="cards-grid lp-pl-videos">${r.videos.map(v => lpVideoCardHTML(p, s, r, v)).join('')}</div>
+    </div>`;
     }
 
     function lpThumbHTML(cover, kind) {
@@ -2899,7 +3032,7 @@ create policy "own learning_state" on learning_state
       let footLeft = langBadge, footRight = '';
       if (isPlaylist && r.videos && r.videos.length) {
         const u = lpResUnits(r);
-        footLeft += `<button class="btn btn-xs btn-ghost lp-pl-toggle" onclick="lpTogglePlaylist('${p.id}','${s.id}','${r.id}')">${r._expanded ? LP_IC.up : LP_IC.down} ${u.d}/${u.t} video</button>`;
+        footLeft += `<button class="btn btn-xs btn-ghost lp-pl-toggle" onclick="lpTogglePlaylist('${p.id}','${s.id}','${r.id}')">${LP_IC.down} ${u.d}/${u.t} video göster</button>`;
       } else if (isPlaylist) {
         footLeft += `<button class="btn btn-xs lp-pl-load" onclick="lpLoadPlaylist('${p.id}','${s.id}','${r.id}')" ${r._loading ? 'disabled' : ''}>${r._loading ? 'Yükleniyor…' : 'Videoları yükle'}</button>`;
         footRight = `<button class="check-btn ${done ? 'done' : ''}" onclick="lpToggleRes('${p.id}','${s.id}','${r.id}')" title="Tamamlandı">${checkSVG(done)}</button>`;
@@ -2931,7 +3064,7 @@ create policy "own learning_state" on learning_state
       const ytId = v.vid || getYouTubeID(v.url);
       const cover = ytId ? `https://img.youtube.com/vi/${ytId}/hqdefault.jpg` : '';
       const isTr = r.lang === 'tr';
-      return `<div class="card lp-card lp-child ${v.done ? 'done' : ''}">
+      return `<div class="card lp-card ${v.done ? 'done' : ''}">
       <div class="card-media">
         <a href="${esc(v.url)}" target="_blank" rel="noopener noreferrer">${lpThumbHTML(cover, 'video')}</a>
         <div class="card-tag yt">${ytSVG(11)}Video</div>
@@ -2976,6 +3109,28 @@ create policy "own learning_state" on learning_state
     // ── LEARNING: PLAYLIST EXPANSION ──────────────────────────────────────
     function lpTogglePlaylist(pid, sid, rid) { const r = lpFindRes(pid, sid, rid); if (!r) return; r._expanded = !r._expanded; renderLearning(); saveLearning(); }
     async function lpToggleVideo(pid, sid, rid, vid) { const r = lpFindRes(pid, sid, rid); if (!r || !r.videos) return; const v = r.videos.find(x => x.id === vid); if (!v) return; v.done = !v.done; renderLearning(); renderStats(); await saveLearning(); }
+    async function lpMarkAllVideos(pid, sid, rid, val) { const r = lpFindRes(pid, sid, rid); if (!r || !r.videos) return; r.videos.forEach(v => v.done = !!val); renderLearning(); renderStats(); await saveLearning(); }
+    // Try several public CORS proxies in order; return the fetched body text. Resilient to any one being down (e.g. allorigins 522).
+    async function lpFetchText(targetUrl) {
+      const enc = encodeURIComponent(targetUrl);
+      const attempts = [
+        { url: `https://corsproxy.io/?url=${enc}`, raw: true },
+        { url: `https://api.codetabs.com/v1/proxy/?quest=${enc}`, raw: true },
+        { url: `https://api.allorigins.win/raw?url=${enc}`, raw: true },
+        { url: `https://thingproxy.freeboard.io/fetch/${targetUrl}`, raw: true },
+        { url: `https://api.allorigins.win/get?url=${enc}`, raw: false },
+      ];
+      let lastErr;
+      for (const a of attempts) {
+        try {
+          const res = await fetch(a.url);
+          if (!res.ok) throw new Error('HTTP ' + res.status);
+          if (a.raw) { const t = await res.text(); if (t && t.length > 50) return t; throw new Error('boş yanıt'); }
+          const j = await res.json(); if (j && j.contents) return j.contents; throw new Error('içerik yok');
+        } catch (e) { lastErr = e; }
+      }
+      throw new Error('hiçbir proxy yanıt vermedi (' + (lastErr ? lastErr.message : '?') + ')');
+    }
     async function lpLoadPlaylist(pid, sid, rid) {
       const r = lpFindRes(pid, sid, rid); if (!r) return;
       const plId = getPlaylistID(r.url);
@@ -2983,9 +3138,8 @@ create policy "own learning_state" on learning_state
       r._loading = true; renderLearning();
       try {
         const feed = `https://www.youtube.com/feeds/videos.xml?playlist_id=${plId}`;
-        const res = await fetch(`https://api.allorigins.win/get?url=${encodeURIComponent(feed)}`);
-        const data = await res.json();
-        const xml = new DOMParser().parseFromString(data.contents, 'text/xml');
+        const contents = await lpFetchText(feed);
+        const xml = new DOMParser().parseFromString(contents, 'text/xml');
         const entries = [...xml.querySelectorAll('entry')];
         const vids = entries.map((en, i) => {
           const title = (en.querySelector('title') ? en.querySelector('title').textContent : '').trim();
@@ -3029,6 +3183,7 @@ create policy "own learning_state" on learning_state
           <div class="fg" style="flex:1;"><label>Tür</label><select id="lp-f-kind">${kinds}</select></div>
           <div class="fg" style="flex:1;"><label>Dil</label><select id="lp-f-lang"><option value="tr" ${!r || r.lang === 'tr' ? 'selected' : ''}>TR (öncelikli)</option><option value="en" ${r && r.lang === 'en' ? 'selected' : ''}>EN</option></select></div>
         </div>
+        <div class="fg"><label>Kapak Görseli URL <span style="color:var(--text3);font-weight:400;text-transform:none;font-size:11px;">(YouTube için otomatik)</span></label><input type="url" id="lp-f-thumb" value="${r ? esc(r.thumb || '') : ''}" placeholder="https://...jpg"></div>
         <div class="fg"><label>Not (opsiyonel)</label><input type="text" id="lp-f-note" value="${r ? esc(r.note || '') : ''}" placeholder="Kısa not"></div>
         <label style="display:flex;align-items:center;gap:8px;font-size:13px;color:var(--text2);cursor:pointer;"><input type="checkbox" id="lp-f-later" ${r && r.later ? 'checked' : ''} style="width:auto;"> "Sonra izle" olarak işaretle (ikincil / opsiyonel)</label>`;
       }
@@ -3054,10 +3209,11 @@ create policy "own learning_state" on learning_state
       } else {
         const title = val('lp-f-title'), url = val('lp-f-url'); if (!title || !url) { toast('Başlık ve link zorunlu!', 'err'); return; }
         const kind = val('lp-f-kind') || 'site', lang = val('lp-f-lang') || 'tr', note = val('lp-f-note');
+        const thumb = val('lp-f-thumb');
         const later = !!(document.getElementById('lp-f-later') && document.getElementById('lp-f-later').checked);
         const s = lpFindStep(lpEdit.pid, lpEdit.sid); if (!s) return; s.resources = s.resources || [];
-        if (lpEdit.rid) { const r = lpFindRes(lpEdit.pid, lpEdit.sid, lpEdit.rid); if (r) { r.title = title; r.url = ensureHttp(url); r.kind = kind; r.lang = lang; r.note = note; r.later = later; } }
-        else { s.resources.push({ id: lpId(), title, url: ensureHttp(url), kind, lang, note, later, done: false }); }
+        if (lpEdit.rid) { const r = lpFindRes(lpEdit.pid, lpEdit.sid, lpEdit.rid); if (r) { r.title = title; r.url = ensureHttp(url); r.kind = kind; r.lang = lang; r.note = note; r.thumb = thumb; r.later = later; } }
+        else { s.resources.push({ id: lpId(), title, url: ensureHttp(url), kind, lang, note, thumb, later, done: false }); }
       }
       closeEditor(); renderLearning(); renderStats(); await saveLearning(); toast('Kaydedildi.', 'ok');
     }
