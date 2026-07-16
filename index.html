@@ -1901,6 +1901,30 @@
         font-size: 22px;
       }
     }
+
+    /* ── ADDED: kategori/etiket, arama, toplu ekleme, link kontrolleri ── */
+    .area-chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
+    .chip { font: 500 12px 'DM Sans', sans-serif; padding: 4px 11px; border-radius: 20px; background: var(--bg3); color: var(--text2); border: 1px solid var(--border); cursor: pointer; transition: .15s; }
+    .chip:hover { color: var(--text); border-color: var(--border2); }
+    .chip.active { background: var(--accent-bg); color: var(--accent); border-color: var(--accent-dim); }
+    .card-cat { display: inline-flex; align-items: center; gap: 4px; font: 500 10.5px 'DM Sans', sans-serif; color: var(--text2); background: var(--bg3); border: 1px solid var(--border); padding: 2px 7px; border-radius: 20px; margin-right: auto; }
+    .cat-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--accent-dim); flex-shrink: 0; }
+    .rss-group-label { font: 600 11px 'DM Sans', sans-serif; letter-spacing: .06em; text-transform: uppercase; color: var(--text3); margin: 16px 0 8px; }
+    .rss-group-label:first-child { margin-top: 0; }
+    .link-row.read a { color: var(--text3); text-decoration: line-through; }
+    .link-ctrl { background: none; border: none; color: var(--text3); cursor: pointer; padding: 2px; display: inline-flex; align-items: center; border-radius: 4px; flex-shrink: 0; }
+    .link-ctrl:hover { color: var(--text); background: var(--bg3); }
+    .link-ctrl.on { color: var(--accent); }
+    .link-ctrl[disabled] { opacity: .25; cursor: default; pointer-events: none; }
+    .sidebar-search { padding: 0 14px 12px; }
+    .sidebar-search input { width: 100%; background: var(--bg3); border: 1px solid var(--border); border-radius: 8px; padding: 7px 10px; color: var(--text); font: 400 13px 'DM Sans', sans-serif; outline: none; }
+    .sidebar-search input:focus { border-color: var(--border2); }
+    .search-sec-label { font: 600 11px 'DM Sans', sans-serif; letter-spacing: .06em; text-transform: uppercase; color: var(--text3); margin: 20px 0 10px; }
+    .search-sec-label:first-child { margin-top: 0; }
+    .bulk-ta { width: 100%; min-height: 150px; background: var(--bg3); border: 1px solid var(--border); border-radius: 8px; padding: 10px; color: var(--text); font: 400 13px 'DM Mono', monospace; outline: none; resize: vertical; }
+    .bulk-ta:focus { border-color: var(--border2); }
+    .foot-tools { display: flex; gap: 6px; margin-bottom: 8px; }
+    .foot-tools .btn { flex: 1; justify-content: center; }
   </style>
 </head>
 
@@ -1938,6 +1962,9 @@
       <div class="sidebar-top">
         <div class="sidebar-wordmark">Listelerim<span class="dot">.</span></div>
         <button class="theme-btn" onclick="toggleTheme()" id="theme-btn" title="Tema değiştir"></button>
+      </div>
+      <div class="sidebar-search">
+        <input type="search" id="global-search" placeholder="Ara… (içerik, link, feed)" oninput="doSearch(this.value)" autocomplete="off">
       </div>
       <div class="sidebar-nav">
         <div class="nav-lbl">İçerikler</div>
@@ -1998,6 +2025,10 @@
           <div class="user-av" id="user-av">?</div>
           <span class="user-em" id="user-em">–</span>
         </div>
+        <div class="foot-tools">
+          <button class="btn btn-sm" onclick="exportJSON()" title="Tüm veriyi JSON olarak indir">Yedek Al</button>
+          <button class="btn btn-sm" onclick="document.getElementById('import-file').click()" title="JSON yedeği yükle">Yükle</button>
+        </div>
         <button class="btn-logout" onclick="doLogout()">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
             stroke-linecap="round" stroke-linejoin="round">
@@ -2042,6 +2073,7 @@
             <button class="pill" data-f="blog" onclick="setFilter('blog')">Blog</button>
           </div>
         </div>
+        <div class="area-chips" id="wl-area-chips"></div>
         <div class="cards-grid" id="cards-grid"></div>
       </div>
 
@@ -2127,6 +2159,7 @@
                 style="font-weight:400;color:var(--text3);"></span></div>
             <button class="btn btn-xs btn-ghost" onclick="dismissAllInbox()">Tümünü reddet</button>
           </div>
+          <div class="area-chips" id="inbox-area-chips" style="margin:0 0 .75rem;"></div>
           <div class="rss-items-list" id="rss-inbox-list"></div>
         </div>
       </div>
@@ -2163,6 +2196,17 @@ create policy "own learning_state" on learning_state
           </details>
         </div>
         <div id="lp-container"></div>
+      </div>
+
+      <!-- SEARCH RESULTS -->
+      <div id="page-search" style="display:none">
+        <div class="page-head">
+          <div class="page-head-left">
+            <h1>Arama Sonuçları</h1>
+            <p id="search-sub">—</p>
+          </div>
+        </div>
+        <div id="search-results"></div>
       </div>
     </main>
   </div>
@@ -2213,6 +2257,8 @@ create policy "own learning_state" on learning_state
         <div class="or-line">veya manuel doldur</div>
         <div class="fg"><label>Başlık *</label><input type="text" id="mi-title" placeholder="İçeriğin başlığı"></div>
         <div class="fg"><label>Link *</label><input type="url" id="mi-url" placeholder="https://..."></div>
+        <div class="fg"><label>Alan / Kategori</label><input type="text" id="mi-cat" list="cat-datalist" placeholder="örn. Red Team" autocomplete="off"></div>
+        <datalist id="cat-datalist"></datalist>
         <div class="fg"><label>Kapak Görseli URL <span
               style="color:var(--text3);font-weight:400;text-transform:none;font-size:11px;">(otomatik
               gelir)</span></label><input type="url" id="mi-img" placeholder="https://..."></div>
@@ -2235,12 +2281,8 @@ create policy "own learning_state" on learning_state
           </svg></button>
       </div>
       <div class="modal-body">
-        <div style="display:flex;gap:12px;align-items:flex-end;">
-          <div class="fg" style="width:72px;flex-shrink:0;margin-bottom:0;"><label>İkon</label><input type="text"
-              id="ci-emoji" placeholder="📌" maxlength="4" style="text-align:center;font-size:18px;"></div>
-          <div class="fg" style="flex:1;margin-bottom:0;"><label>Kategori Adı *</label><input type="text" id="ci-name"
-              placeholder="örn. Geliştirici Araçları" onkeydown="if(event.key==='Enter')saveCat()"></div>
-        </div>
+        <div class="fg" style="margin-bottom:0;"><label>Kategori Adı *</label><input type="text" id="ci-name"
+            placeholder="örn. Red Team" onkeydown="if(event.key==='Enter')saveCat()"></div>
       </div>
       <div class="modal-foot">
         <button class="btn btn-ghost" onclick="closeCatModal()">İptal</button>
@@ -2263,6 +2305,7 @@ create policy "own learning_state" on learning_state
         <div class="fg"><label>Feed Adı</label><input type="text" id="fi-name" placeholder="örn. CSS Tricks"></div>
         <div class="fg"><label>RSS / Atom URL *</label><input type="url" id="fi-url"
             placeholder="https://example.com/feed.xml" onkeydown="if(event.key==='Enter')saveFeed()"></div>
+        <div class="fg"><label>Alan / Kategori</label><input type="text" id="fi-cat" list="cat-datalist" placeholder="örn. CTI" autocomplete="off"></div>
         <p style="font-size:12px;color:var(--text3);line-height:1.6;">YouTube kanalları için: <code
             style="font-family:'DM Mono',monospace;background:var(--bg3);padding:2px 5px;border-radius:4px;">https://www.youtube.com/feeds/videos.xml?channel_id=CHANNEL_ID</code>
         </p>
@@ -2287,6 +2330,7 @@ create policy "own learning_state" on learning_state
       <div class="modal-body">
         <div class="fg"><label>Başlık</label><input type="text" id="ai-title" placeholder="Başlık"></div>
         <div class="fg"><label>Link</label><input type="url" id="ai-url" placeholder="https://..."></div>
+        <div class="fg"><label>Alan / Kategori</label><input type="text" id="ai-cat" list="cat-datalist" placeholder="Alan" autocomplete="off"></div>
         <div class="fg"><label>Tür</label>
           <div class="type-grid" style="margin-bottom:0;">
             <div class="type-opt selected" id="ai-topt-youtube" onclick="selAcceptType('youtube')">
@@ -2334,6 +2378,32 @@ create policy "own learning_state" on learning_state
     </div>
   </div>
 
+  <!-- MODAL: BULK LINK -->
+  <div class="modal-overlay" id="bulk-modal" style="display:none" onclick="if(event.target===this)closeBulkModal()">
+    <div class="modal">
+      <div class="modal-head">
+        <h2>Toplu Link Ekle</h2><button class="btn btn-icon" onclick="closeBulkModal()"><svg width="16" height="16"
+            viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+            <line x1="18" y1="6" x2="6" y2="18" />
+            <line x1="6" y1="6" x2="18" y2="18" />
+          </svg></button>
+      </div>
+      <div class="modal-body">
+        <div class="fg" style="margin-bottom:8px;"><label id="bulk-cat-label">Kategori</label></div>
+        <p style="font-size:12px;color:var(--text3);line-height:1.6;margin-bottom:8px;">Her satıra bir URL. İstersen
+          <code style="font-family:'DM Mono',monospace;background:var(--bg3);padding:2px 5px;border-radius:4px;">Başlık | https://...</code>
+          biçiminde başlık da verebilirsin.</p>
+        <textarea class="bulk-ta" id="bulk-ta" placeholder="https://0xdf.gitlab.io&#10;ired.team | https://www.ired.team&#10;https://specterops.io"></textarea>
+      </div>
+      <div class="modal-foot">
+        <button class="btn btn-ghost" onclick="closeBulkModal()">İptal</button>
+        <button class="btn btn-accent" onclick="saveBulk()">Ekle</button>
+      </div>
+    </div>
+  </div>
+
+  <input type="file" id="import-file" accept="application/json,.json" style="display:none" onchange="importJSON(this.files[0])">
+
   <div class="toast" id="toast"></div>
 
   <script>
@@ -2346,8 +2416,9 @@ create policy "own learning_state" on learning_state
 
     // ── STATE ────────────────────────────────────────────────────────────
     let S = mkState();
-    function mkState() { return { items: [], cats: [], feeds: [], inbox: [], filter: 'all', type: 'youtube', acceptType: 'youtube', page: 'watchlist', uid: null }; }
+    function mkState() { return { items: [], cats: [], feeds: [], inbox: [], filter: 'all', area: 'all', inboxArea: 'all', q: '', type: 'youtube', acceptType: 'youtube', page: 'watchlist', uid: null }; }
     let pendingAcceptId = null;
+    let bulkCatId = null;
 
     // ── THEME ────────────────────────────────────────────────────────────
     const TK = 'listelerim-theme';
@@ -2429,6 +2500,7 @@ create policy "own learning_state" on learning_state
     async function dbUpdate(table, id, obj) { const { error } = await sb.from(table).update(obj).eq('id', id).eq('user_id', S.uid); if (error) throw error; }
     async function dbDelete(table, id) { const { error } = await sb.from(table).delete().eq('id', id).eq('user_id', S.uid); if (error) throw error; }
     async function dbAddLink(obj) { const { data, error } = await sb.from('links').insert(obj).select().single(); if (error) throw error; return data; }
+    async function dbUpdateLink(id, obj) { const { error } = await sb.from('links').update(obj).eq('id', id); if (error) throw error; }
     async function dbDeleteLink(id) { const { error } = await sb.from('links').delete().eq('id', id); if (error) throw error; }
     async function dbDeleteCatFull(catId) { await sb.from('links').delete().eq('category_id', catId); await sb.from('categories').delete().eq('id', catId).eq('user_id', S.uid); }
     async function dbUpdateInbox(id, status) { const { error } = await sb.from('rss_inbox').update({ status }).eq('id', id).eq('user_id', S.uid); if (error) throw error; }
@@ -2436,9 +2508,31 @@ create policy "own learning_state" on learning_state
     // ── NAV ──────────────────────────────────────────────────────────────
     function showPage(page) {
       S.page = page;
+      const gs = document.getElementById('global-search'); if (gs && gs.value) { gs.value = ''; S.q = ''; }
+      document.getElementById('page-search').style.display = 'none';
       ['watchlist', 'links', 'rss', 'learning'].forEach(p => { document.getElementById('page-' + p).style.display = p === page ? 'block' : 'none'; });
       document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
       document.getElementById('nav-' + page)?.classList.add('active');
+    }
+
+    // ── CATEGORY / AREA HELPERS ───────────────────────────────────────────
+    function allAreaNames() {
+      const set = new Set();
+      S.cats.forEach(c => { if (c.name) set.add(c.name); });
+      S.items.forEach(i => { if (i.category) set.add(i.category); });
+      S.feeds.forEach(f => { if (f.category) set.add(f.category); });
+      return [...set].sort((a, b) => a.localeCompare(b, 'tr'));
+    }
+    function fillCatDatalist() {
+      const dl = document.getElementById('cat-datalist'); if (!dl) return;
+      dl.innerHTML = allAreaNames().map(n => `<option value="${esc(n)}">`).join('');
+    }
+    function areaChipsHTML(current, values, handler) {
+      const chip = (val, label) => {
+        const enc = encodeURIComponent(val).replace(/'/g, '%27');
+        return `<button class="chip ${current === val ? 'active' : ''}" onclick="${handler}(decodeURIComponent('${enc}'))">${esc(label)}</button>`;
+      };
+      return chip('all', 'Tüm alanlar') + values.map(v => chip(v, v)).join('');
     }
     function setFilter(f) {
       S.filter = f;
@@ -2471,11 +2565,13 @@ create policy "own learning_state" on learning_state
 
     function renderItems() {
       const grid = document.getElementById('cards-grid');
+      renderAreaChips();
       const list = S.items.filter(it => {
-        if (S.filter === 'pending') return !it.done;
-        if (S.filter === 'done') return it.done;
-        if (S.filter === 'youtube') return it.type === 'youtube';
-        if (S.filter === 'blog') return it.type === 'blog';
+        if (S.filter === 'pending' && it.done) return false;
+        if (S.filter === 'done' && !it.done) return false;
+        if (S.filter === 'youtube' && it.type !== 'youtube') return false;
+        if (S.filter === 'blog' && it.type !== 'blog') return false;
+        if (S.area !== 'all' && (it.category || '') !== S.area) return false;
         return true;
       });
       if (!list.length) {
@@ -2484,6 +2580,12 @@ create policy "own learning_state" on learning_state
       }
       grid.innerHTML = list.map(it => cardHTML(it)).join('');
     }
+    function renderAreaChips() {
+      const box = document.getElementById('wl-area-chips'); if (!box) return;
+      const areas = [...new Set(S.items.map(i => i.category).filter(Boolean))].sort((a, b) => a.localeCompare(b, 'tr'));
+      box.innerHTML = areas.length ? areaChipsHTML(S.area, areas, 'setAreaFilter') : '';
+    }
+    function setAreaFilter(a) { S.area = a; renderItems(); }
 
     const ICON_CHECK = `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>`;
     const ICON_CLOCK = `<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>`;
@@ -2508,6 +2610,7 @@ create policy "own learning_state" on learning_state
     </div>
     <div class="card-body">
       <div class="card-title">${esc(it.title)}</div>
+      ${it.category ? `<div style="margin-bottom:8px;"><span class="card-cat"><span class="cat-dot"></span>${esc(it.category)}</span></div>` : ''}
       <div class="card-footer">
         <span class="status-badge ${it.done ? 'done' : 'pending'}">${it.done ? ICON_CHECK + ' Tamamlandı' : ICON_CLOCK + ' Bekliyor'}</span>
         <button class="check-btn ${it.done ? 'done' : ''}" onclick="toggleDone('${it.id}',${!it.done})">
@@ -2518,36 +2621,49 @@ create policy "own learning_state" on learning_state
   </div>`;
     }
 
+    function sortedLinks(cat) {
+      return (cat.links || []).slice().sort((a, b) => {
+        const pa = (a.position == null ? 1e9 : a.position), pb = (b.position == null ? 1e9 : b.position);
+        if (pa !== pb) return pa - pb;
+        return new Date(a.created_at || 0) - new Date(b.created_at || 0);
+      });
+    }
     function renderLinks() {
       const cont = document.getElementById('cats-container'), empty = document.getElementById('empty-links');
       if (!S.cats.length) { cont.innerHTML = ''; empty.style.display = 'block'; return; }
       empty.style.display = 'none';
-      cont.innerHTML = S.cats.map(cat => `
-    <div class="cat-block" id="cat-${cat.id}">
-      <div class="cat-head">
-        <div class="cat-name"><span>${cat.emoji || '📌'}</span>${esc(cat.name)}</div>
-        <button class="btn btn-danger btn-xs" onclick="deleteCat('${cat.id}')"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>Sil</button>
-      </div>
-      <div class="link-list">${(cat.links || []).map(lk => `
-        <div class="link-row"><div class="link-dot"></div>
+      cont.innerHTML = S.cats.map(cat => {
+        const links = sortedLinks(cat);
+        const rows = links.map((lk, i) => `
+        <div class="link-row ${lk.is_read ? 'read' : ''}"><div class="link-dot"></div>
           <a href="${esc(lk.url)}" target="_blank" rel="noopener noreferrer">${esc(lk.title || getDomain(lk.url))}</a>
           <span class="link-domain">${getDomain(lk.url)}</span>
+          <button class="link-ctrl ${lk.is_read ? 'on' : ''}" title="Okundu" onclick="toggleLinkRead('${cat.id}','${lk.id}')"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></button>
+          <button class="link-ctrl" title="Yukarı" onclick="moveLink('${cat.id}','${lk.id}',-1)" ${i === 0 ? 'disabled' : ''}><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="18 15 12 9 6 15"/></svg></button>
+          <button class="link-ctrl" title="Aşağı" onclick="moveLink('${cat.id}','${lk.id}',1)" ${i === links.length - 1 ? 'disabled' : ''}><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></button>
           <button class="link-del" onclick="deleteLink('${cat.id}','${lk.id}')">×</button>
-        </div>`).join('')}</div>
+        </div>`).join('');
+        return `
+    <div class="cat-block" id="cat-${cat.id}">
+      <div class="cat-head">
+        <div class="cat-name"><span class="cat-dot"></span>${esc(cat.name)} <span style="color:var(--text3);font-weight:400;font-size:12px;">${links.length}</span></div>
+        <div class="icon-btns">
+          <button class="btn btn-xs" onclick="openBulkModal('${cat.id}')">Toplu ekle</button>
+          <button class="btn btn-danger btn-xs" onclick="deleteCat('${cat.id}')"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>Sil</button>
+        </div>
+      </div>
+      <div class="link-list">${rows}</div>
       <div class="add-link-row">
         <input class="add-link-input" type="url" placeholder="Link ekle ve Enter'a bas…" id="li-${cat.id}" onkeydown="if(event.key==='Enter')addLink('${cat.id}')">
         <button class="btn btn-sm" onclick="addLink('${cat.id}')">Ekle</button>
       </div>
-    </div>`).join('');
+    </div>`;
+      }).join('');
     }
 
     // ── RSS RENDER ────────────────────────────────────────────────────────
-    function renderRss() {
-      const feedList = document.getElementById('rss-feeds-list'), emptyFeeds = document.getElementById('empty-feeds');
-      if (!S.feeds.length) { feedList.innerHTML = ''; emptyFeeds.style.display = 'flex'; }
-      else {
-        emptyFeeds.style.display = 'none';
-        feedList.innerHTML = S.feeds.map(f => `
+    function feedRowHTML(f) {
+      return `
       <div class="rss-feed-row">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--accent-dim)" stroke-width="2" stroke-linecap="round" style="flex-shrink:0"><path d="M4 11a9 9 0 0 1 9 9"/><path d="M4 4a16 16 0 0 1 16 16"/><circle cx="5" cy="19" r="1"/></svg>
         <div class="rss-feed-info">
@@ -2556,21 +2672,41 @@ create policy "own learning_state" on learning_state
         </div>
         <div class="rss-feed-meta">${f.last_checked ? 'Son: ' + fmtDate(f.last_checked) : ''}</div>
         <button class="btn btn-danger btn-xs" onclick="deleteFeed('${f.id}')"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>Kaldır</button>
-      </div>`).join('');
+      </div>`;
+    }
+    function renderRss() {
+      const feedList = document.getElementById('rss-feeds-list'), emptyFeeds = document.getElementById('empty-feeds');
+      if (!S.feeds.length) { feedList.innerHTML = ''; emptyFeeds.style.display = 'flex'; }
+      else {
+        emptyFeeds.style.display = 'none';
+        const groups = {};
+        S.feeds.forEach(f => { const k = (f.category || 'Diğer'); (groups[k] = groups[k] || []).push(f); });
+        const keys = Object.keys(groups).sort((a, b) => a === 'Diğer' ? 1 : b === 'Diğer' ? -1 : a.localeCompare(b, 'tr'));
+        const showLabels = keys.some(k => k !== 'Diğer');
+        feedList.innerHTML = keys.map(k =>
+          (showLabels ? `<div class="rss-group-label">${esc(k)}</div>` : '') + groups[k].map(feedRowHTML).join('')
+        ).join('');
       }
       renderInbox();
     }
 
+    function inboxArea(item) { return item.category || (S.feeds.find(f => f.id === item.feed_id) || {}).category || ''; }
+    function setInboxArea(a) { S.inboxArea = a; renderInbox(); }
     function renderInbox() {
       const sec = document.getElementById('rss-inbox-section'), list = document.getElementById('rss-inbox-list');
-      const lbl = document.getElementById('inbox-count-label');
+      const lbl = document.getElementById('inbox-count-label'), chips = document.getElementById('inbox-area-chips');
       if (!S.inbox.length) { sec.style.display = 'none'; return; }
       sec.style.display = 'block';
-      lbl.textContent = `(${S.inbox.length} öğe)`;
-      list.innerHTML = S.inbox.map(item => `
+      const areas = [...new Set(S.inbox.map(inboxArea).filter(Boolean))].sort((a, b) => a.localeCompare(b, 'tr'));
+      chips.innerHTML = areas.length ? areaChipsHTML(S.inboxArea, areas, 'setInboxArea') : '';
+      const shown = S.inbox.filter(it => S.inboxArea === 'all' || inboxArea(it) === S.inboxArea);
+      lbl.textContent = `(${shown.length} öğe)`;
+      list.innerHTML = shown.map(item => {
+        const area = inboxArea(item);
+        return `
     <div class="rss-item" id="ri-${item.id}">
       <div class="rss-item-head">
-        <div class="rss-item-source">${esc(item.feed_name || 'Feed')}</div>
+        <div class="rss-item-source">${esc(item.feed_name || 'Feed')}${area ? ` · <span style="color:var(--accent-dim)">${esc(area)}</span>` : ''}</div>
         <div class="rss-item-title"><a href="${esc(item.url)}" target="_blank" rel="noopener noreferrer">${esc(item.title)}</a></div>
       </div>
       <div class="rss-item-footer">
@@ -2584,7 +2720,8 @@ create policy "own learning_state" on learning_state
           </button>
         </div>
       </div>
-    </div>`).join('');
+    </div>`;
+      }).join('');
     }
 
     // ── RSS FEED CHECK ────────────────────────────────────────────────────
@@ -2613,7 +2750,8 @@ create policy "own learning_state" on learning_state
             if (!title || !link || existingUrls.has(link)) continue;
             newItems.push({
               user_id: S.uid, feed_id: feed.id, feed_name: feed.name || getDomain(feed.url),
-              title, url: link, pub_date: pubDate ? new Date(pubDate).toISOString() : null, status: 'pending'
+              title, url: link, pub_date: pubDate ? new Date(pubDate).toISOString() : null, status: 'pending',
+              category: feed.category || null
             });
           }
           if (newItems.length) {
@@ -2648,8 +2786,10 @@ create policy "own learning_state" on learning_state
     function openAcceptModal(id) {
       const item = S.inbox.find(i => i.id === id); if (!item) return;
       pendingAcceptId = id;
+      fillCatDatalist();
       document.getElementById('ai-title').value = item.title;
       document.getElementById('ai-url').value = item.url;
+      document.getElementById('ai-cat').value = inboxArea(item);
       const isYT = item.url.includes('youtube.com') || item.url.includes('youtu.be');
       selAcceptType(isYT ? 'youtube' : 'blog');
       document.getElementById('accept-modal').style.display = 'flex';
@@ -2664,10 +2804,11 @@ create policy "own learning_state" on learning_state
       if (!pendingAcceptId) return;
       const title = document.getElementById('ai-title').value.trim(), url = document.getElementById('ai-url').value.trim();
       if (!title || !url) { toast('Başlık ve link zorunlu!', 'err'); return; }
+      const cat = document.getElementById('ai-cat').value.trim() || null;
       const ytId = getYouTubeID(url);
       const imgUrl = ytId ? `https://img.youtube.com/vi/${ytId}/hqdefault.jpg` : null;
       try {
-        const saved = await dbAdd('items', { title, url: ensureHttp(url), image_url: imgUrl, type: S.acceptType, done: false });
+        const saved = await dbAdd('items', { title, url: ensureHttp(url), image_url: imgUrl, type: S.acceptType, done: false, category: cat });
         S.items.unshift(saved);
         await dbUpdateInbox(pendingAcceptId, 'accepted');
         S.inbox = S.inbox.filter(i => i.id !== pendingAcceptId);
@@ -2676,13 +2817,14 @@ create policy "own learning_state" on learning_state
     }
 
     // ── FEED CRUD ─────────────────────────────────────────────────────────
-    function openFeedModal() { document.getElementById('feed-modal').style.display = 'flex'; setTimeout(() => document.getElementById('fi-url').focus(), 50); }
-    function closeFeedModal() { document.getElementById('feed-modal').style.display = 'none'; document.getElementById('fi-name').value = ''; document.getElementById('fi-url').value = ''; }
+    function openFeedModal() { fillCatDatalist(); document.getElementById('feed-modal').style.display = 'flex'; setTimeout(() => document.getElementById('fi-url').focus(), 50); }
+    function closeFeedModal() { document.getElementById('feed-modal').style.display = 'none'; document.getElementById('fi-name').value = ''; document.getElementById('fi-url').value = ''; document.getElementById('fi-cat').value = ''; }
     async function saveFeed() {
       const url = document.getElementById('fi-url').value.trim(), name = document.getElementById('fi-name').value.trim();
       if (!url) { toast('Feed URL zorunlu!', 'err'); return; }
+      const cat = document.getElementById('fi-cat').value.trim() || null;
       try {
-        const saved = await dbAdd('rss_feeds', { url: ensureHttp(url), name: name || getDomain(url) });
+        const saved = await dbAdd('rss_feeds', { url: ensureHttp(url), name: name || getDomain(url), category: cat });
         S.feeds.push(saved); renderRss(); closeFeedModal(); toast('Feed eklendi.', 'ok');
       } catch (e) { toast('Hata: ' + e.message, 'err'); }
     }
@@ -2711,10 +2853,11 @@ create policy "own learning_state" on learning_state
       S.cats = S.cats.filter(c => c.id !== id); renderLinks(); renderStats();
       try { await dbDeleteCatFull(id); toast('Kategori silindi.', 'ok'); } catch (e) { await loadAll(); renderAll(); }
     }
+    function nextLinkPos(cat) { return (cat.links || []).reduce((m, l) => Math.max(m, l.position == null ? -1 : l.position), -1) + 1; }
     async function addLink(catId) {
       const input = document.getElementById('li-' + catId); const url = (input?.value || '').trim(); if (!url) return;
       const cat = S.cats.find(c => c.id === catId); if (!cat) return;
-      const obj = { url: ensureHttp(url), title: getDomain(url), category_id: catId };
+      const obj = { url: ensureHttp(url), title: getDomain(url), category_id: catId, position: nextLinkPos(cat) };
       input.value = '';
       try { const saved = await dbAddLink(obj); cat.links.push(saved); renderLinks(); toast('Link eklendi.', 'ok'); }
       catch (e) { toast('Eklenemedi: ' + e.message, 'err'); }
@@ -2724,12 +2867,60 @@ create policy "own learning_state" on learning_state
       cat.links = cat.links.filter(l => l.id !== linkId); renderLinks();
       try { await dbDeleteLink(linkId); } catch (e) { await loadAll(); renderLinks(); }
     }
+    async function toggleLinkRead(catId, linkId) {
+      const cat = S.cats.find(c => c.id === catId); if (!cat) return;
+      const lk = cat.links.find(l => l.id === linkId); if (!lk) return;
+      lk.is_read = !lk.is_read; renderLinks();
+      try { await dbUpdateLink(linkId, { is_read: lk.is_read }); }
+      catch (e) { lk.is_read = !lk.is_read; renderLinks(); toast('Güncellenemedi.', 'err'); }
+    }
+    async function moveLink(catId, linkId, dir) {
+      const cat = S.cats.find(c => c.id === catId); if (!cat) return;
+      const links = sortedLinks(cat);
+      const idx = links.findIndex(l => l.id === linkId), j = idx + dir;
+      if (idx < 0 || j < 0 || j >= links.length) return;
+      links.forEach((l, i) => { l.position = i; });
+      const tmp = links[idx].position; links[idx].position = links[j].position; links[j].position = tmp;
+      renderLinks();
+      try { await Promise.all(links.map(l => dbUpdateLink(l.id, { position: l.position }))); }
+      catch (e) { await loadAll(); renderLinks(); toast('Sıralanamadı.', 'err'); }
+    }
+    function openBulkModal(catId) {
+      bulkCatId = catId;
+      const cat = S.cats.find(c => c.id === catId);
+      document.getElementById('bulk-cat-label').textContent = 'Kategori: ' + (cat ? cat.name : '');
+      document.getElementById('bulk-ta').value = '';
+      document.getElementById('bulk-modal').style.display = 'flex';
+      setTimeout(() => document.getElementById('bulk-ta').focus(), 50);
+    }
+    function closeBulkModal() { document.getElementById('bulk-modal').style.display = 'none'; bulkCatId = null; }
+    async function saveBulk() {
+      const cat = S.cats.find(c => c.id === bulkCatId); if (!cat) { closeBulkModal(); return; }
+      const lines = document.getElementById('bulk-ta').value.split('\n').map(l => l.trim()).filter(Boolean);
+      let pos = nextLinkPos(cat);
+      const rows = [];
+      for (const line of lines) {
+        let title = '', url = '';
+        if (line.includes('|')) { const p = line.split('|'); title = p[0].trim(); url = p.slice(1).join('|').trim(); }
+        else { url = line; }
+        if (!url) continue;
+        url = ensureHttp(url);
+        rows.push({ url, title: title || getDomain(url), category_id: bulkCatId, position: pos++ });
+      }
+      if (!rows.length) { closeBulkModal(); return; }
+      try {
+        const { data, error } = await sb.from('links').insert(rows).select();
+        if (error) throw error;
+        cat.links.push(...(data || []));
+        renderLinks(); closeBulkModal(); toast(`${rows.length} link eklendi.`, 'ok');
+      } catch (e) { toast('Hata: ' + e.message, 'err'); }
+    }
 
     // ── MODAL: ITEM ───────────────────────────────────────────────────────
-    function openItemModal() { document.getElementById('item-modal').style.display = 'flex'; document.getElementById('qi-url').focus(); }
+    function openItemModal() { fillCatDatalist(); document.getElementById('item-modal').style.display = 'flex'; document.getElementById('qi-url').focus(); }
     function closeItemModal() {
       document.getElementById('item-modal').style.display = 'none';
-      ['qi-url', 'mi-title', 'mi-url', 'mi-img'].forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
+      ['qi-url', 'mi-title', 'mi-url', 'mi-img', 'mi-cat'].forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
       document.getElementById('preview-card').classList.remove('show');
     }
     function selType(t) {
@@ -2801,19 +2992,100 @@ create policy "own learning_state" on learning_state
       const ytId = getYouTubeID(url);
       let imgUrl = document.getElementById('mi-img').value.trim() || null;
       if (ytId && !imgUrl) imgUrl = `https://img.youtube.com/vi/${ytId}/hqdefault.jpg`;
-      const obj = { title, url: ensureHttp(url), image_url: imgUrl, type: S.type, done: false };
+      const cat = document.getElementById('mi-cat').value.trim() || null;
+      const obj = { title, url: ensureHttp(url), image_url: imgUrl, type: S.type, done: false, category: cat };
       try { const saved = await dbAdd('items', obj); S.items.unshift(saved); renderAll(); closeItemModal(); toast('İçerik eklendi.', 'ok'); }
       catch (e) { toast('Hata: ' + e.message, 'err'); }
     }
 
     // ── MODAL: CAT ────────────────────────────────────────────────────────
     function openCatModal() { document.getElementById('cat-modal').style.display = 'flex'; setTimeout(() => document.getElementById('ci-name').focus(), 50); }
-    function closeCatModal() { document.getElementById('cat-modal').style.display = 'none'; document.getElementById('ci-name').value = ''; document.getElementById('ci-emoji').value = ''; }
+    function closeCatModal() { document.getElementById('cat-modal').style.display = 'none'; document.getElementById('ci-name').value = ''; }
     async function saveCat() {
-      const name = document.getElementById('ci-name').value.trim(), emoji = document.getElementById('ci-emoji').value.trim() || '📌';
+      const name = document.getElementById('ci-name').value.trim();
       if (!name) { toast('Kategori adı zorunlu!', 'err'); return; }
-      try { const saved = await dbAdd('categories', { name, emoji }); S.cats.push({ ...saved, links: [] }); renderLinks(); renderStats(); closeCatModal(); showPage('links'); toast('Kategori oluşturuldu.', 'ok'); }
+      try { const saved = await dbAdd('categories', { name, emoji: '' }); S.cats.push({ ...saved, links: [] }); renderLinks(); renderStats(); closeCatModal(); showPage('links'); toast('Kategori oluşturuldu.', 'ok'); }
       catch (e) { toast('Hata: ' + e.message, 'err'); }
+    }
+
+    // ── GLOBAL SEARCH ─────────────────────────────────────────────────────
+    function doSearch(q) {
+      S.q = (q || '').trim();
+      const sp = document.getElementById('page-search');
+      if (!S.q) { sp.style.display = 'none'; showPage(S.page || 'watchlist'); return; }
+      ['watchlist', 'links', 'rss', 'learning'].forEach(p => { document.getElementById('page-' + p).style.display = 'none'; });
+      document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+      sp.style.display = 'block';
+      renderSearch();
+    }
+    function searchRow(url, title, meta) {
+      return `<div class="link-row"><div class="link-dot"></div><a href="${esc(url)}" target="_blank" rel="noopener noreferrer">${esc(title)}</a><span class="link-domain">${esc(meta)}</span></div>`;
+    }
+    function renderSearch() {
+      const q = S.q.toLocaleLowerCase('tr');
+      const hit = (s) => (s || '').toLocaleLowerCase('tr').includes(q);
+      const items = S.items.filter(i => hit(i.title) || hit(i.url) || hit(i.category));
+      const links = [];
+      S.cats.forEach(c => (c.links || []).forEach(l => { if (hit(l.title) || hit(l.url) || hit(c.name)) links.push({ ...l, catName: c.name }); }));
+      const feeds = S.feeds.filter(f => hit(f.name) || hit(f.url) || hit(f.category));
+      const total = items.length + links.length + feeds.length;
+      document.getElementById('search-sub').textContent = `"${S.q}" için ${total} sonuç`;
+      const box = document.getElementById('search-results');
+      if (!total) { box.innerHTML = `<div class="empty"><p>Sonuç bulunamadı.</p></div>`; return; }
+      let html = '';
+      if (items.length) html += `<div class="search-sec-label">İzleme Listesi (${items.length})</div><div class="link-list">` + items.map(i => searchRow(i.url, i.title, i.category || getDomain(i.url))).join('') + `</div>`;
+      if (links.length) html += `<div class="search-sec-label">Faydalı Linkler (${links.length})</div><div class="link-list">` + links.map(l => searchRow(l.url, l.title || getDomain(l.url), l.catName || '')).join('') + `</div>`;
+      if (feeds.length) html += `<div class="search-sec-label">Feed'ler (${feeds.length})</div><div class="link-list">` + feeds.map(f => searchRow(f.url, f.name || getDomain(f.url), f.category || getDomain(f.url))).join('') + `</div>`;
+      box.innerHTML = html;
+    }
+
+    // ── BACKUP / RESTORE ──────────────────────────────────────────────────
+    function exportJSON() {
+      const payload = {
+        _app: 'listelerim', _version: 1, _exported_at: new Date().toISOString(),
+        items: S.items.map(i => ({ title: i.title, url: i.url, image_url: i.image_url, type: i.type, done: i.done, category: i.category })),
+        categories: S.cats.map(c => ({ name: c.name, links: (c.links || []).map(l => ({ title: l.title, url: l.url, is_read: l.is_read, position: l.position })) })),
+        feeds: S.feeds.map(f => ({ name: f.name, url: f.url, category: f.category })),
+        learning: (learnState || null)
+      };
+      const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = 'listelerim-yedek-' + new Date().toISOString().slice(0, 10) + '.json';
+      document.body.appendChild(a); a.click(); a.remove();
+      setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+      toast('Yedek indirildi.', 'ok');
+    }
+    async function importJSON(file) {
+      const fileInput = document.getElementById('import-file');
+      if (!file) return;
+      if (!confirm('Yedekteki içerik mevcut verinin ÜZERİNE EKLENİR (silme yapılmaz). Devam edilsin mi?')) { fileInput.value = ''; return; }
+      try {
+        const data = JSON.parse(await file.text());
+        let added = 0;
+        for (const i of (data.items || [])) {
+          try { const s = await dbAdd('items', { title: i.title, url: i.url, image_url: i.image_url || null, type: i.type || 'blog', done: !!i.done, category: i.category || null }); S.items.unshift(s); added++; } catch (e) { }
+        }
+        for (const c of (data.categories || [])) {
+          if (!c.name) continue;
+          try {
+            const savedCat = await dbAdd('categories', { name: c.name, emoji: '' });
+            const cat = { ...savedCat, links: [] }; S.cats.push(cat);
+            let pos = 0;
+            for (const l of (c.links || [])) {
+              if (!l.url) continue;
+              try { const sl = await dbAddLink({ url: ensureHttp(l.url), title: l.title || getDomain(l.url), category_id: cat.id, is_read: !!l.is_read, position: (l.position == null ? pos++ : l.position) }); cat.links.push(sl); added++; } catch (e) { }
+            }
+          } catch (e) { }
+        }
+        for (const f of (data.feeds || [])) {
+          if (!f.url) continue;
+          try { const s = await dbAdd('rss_feeds', { url: ensureHttp(f.url), name: f.name || getDomain(f.url), category: f.category || null }); S.feeds.push(s); added++; } catch (e) { }
+        }
+        renderAll();
+        toast(`Yedekten ${added} kayıt eklendi.`, 'ok');
+      } catch (e) { toast('Yedek okunamadı: ' + e.message, 'err'); }
+      fileInput.value = '';
     }
 
     // ── TOAST ─────────────────────────────────────────────────────────────
