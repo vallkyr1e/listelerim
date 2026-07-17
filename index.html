@@ -3189,7 +3189,6 @@ create policy "own learning_state" on learning_state
       if (!learnState || !learnState.paths || !learnState.paths.length) {
         cont.innerHTML = `<div class="lp-empty"><p style="margin-bottom:14px;">Henüz bir öğrenme yolu yok.</p>
         <div style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap;">
-          <button class="btn btn-accent btn-sm" onclick="lpLoadTemplate()">Malware Analizi şablonunu yükle</button>
           <button class="btn btn-sm" onclick="lpAddPath()">+ Boş Yol</button>
         </div></div>`;
         return;
@@ -3367,7 +3366,6 @@ create policy "own learning_state" on learning_state
     function lpEditRes(pid, sid, rid) { openEditor('resource', { pid, sid, rid }); }
     async function lpDeleteRes(pid, sid, rid) { if (!confirm('Bu kaynağı silmek istediğine emin misin?')) return; const s = lpFindStep(pid, sid); if (s) s.resources = s.resources.filter(r => r.id !== rid); renderLearning(); renderStats(); await saveLearning(); toast('Kaynak silindi.', 'ok'); }
     async function lpToggleRes(pid, sid, rid) { const r = lpFindRes(pid, sid, rid); if (!r) return; r.done = !r.done; renderLearning(); renderStats(); await saveLearning(); }
-    async function lpLoadTemplate() { if (!learnState) learnState = { paths: [] }; learnState.paths.push(defaultMalwarePath()); lpInited = false; renderLearning(); renderStats(); await saveLearning(); toast('Malware Analizi şablonu yüklendi.', 'ok'); }
     async function lpPushWatch(title, url) {
       const ytId = getYouTubeID(url);
       const type = ytId ? 'youtube' : 'blog';
@@ -3438,7 +3436,7 @@ create policy "own learning_state" on learning_state
       if (mode === 'path') {
         const p = ctx.pid ? lpFindPath(ctx.pid) : null;
         titleEl.textContent = p ? 'Yolu Düzenle' : 'Yeni Yol';
-        html = `<div class="fg"><label>Yol Adı *</label><input type="text" id="lp-f-title" value="${p ? esc(p.title) : ''}" placeholder="örn. Malware Analizi"></div>
+        html = `<div class="fg"><label>Yol Adı *</label><input type="text" id="lp-f-title" value="${p ? esc(p.title) : ''}" placeholder="örn. CPTS Reaktivasyon"></div>
         <div class="fg" style="margin-bottom:0;"><label>Açıklama</label><textarea id="lp-f-desc" placeholder="Bu yolun amacı...">${p ? esc(p.desc || '') : ''}</textarea></div>`;
       } else if (mode === 'step') {
         const s = ctx.sid ? lpFindStep(ctx.pid, ctx.sid) : null;
@@ -3450,13 +3448,19 @@ create policy "own learning_state" on learning_state
         titleEl.textContent = r ? 'Kaynağı Düzenle' : 'Yeni Kaynak';
         const kinds = LP_KIND_LIST.map(k => `<option value="${k}" ${r && r.kind === k ? 'selected' : ''}>${lpKindLabel(k)}</option>`).join('');
         html = `<div class="fg"><label>Başlık *</label><input type="text" id="lp-f-title" value="${r ? esc(r.title) : ''}" placeholder="Kaynağın adı"></div>
-        <div class="fg"><label>Link *</label><input type="url" id="lp-f-url" value="${r ? esc(r.url) : ''}" placeholder="https://..."></div>
+        <div class="fg"><label>Link *</label>
+          <div class="quick-row">
+            <div class="fg" style="margin-bottom:0;flex:1;"><input type="url" id="lp-f-url" value="${r ? esc(r.url) : ''}" placeholder="https://..." onkeydown="if(event.key==='Enter'){event.preventDefault();lpFetchMeta();}"></div>
+            <button type="button" class="btn btn-sm" id="lp-fetch-btn" onclick="lpFetchMeta()" style="flex-shrink:0;height:37px;">Getir</button>
+          </div>
+          <div style="font-size:11px;color:var(--text3);margin-top:4px;">Başlık, kapak ve açıklamayı otomatik doldurur (yalnızca boş alanları).</div>
+        </div>
         <div style="display:flex;gap:10px;">
           <div class="fg" style="flex:1;"><label>Tür</label><select id="lp-f-kind">${kinds}</select></div>
           <div class="fg" style="flex:1;"><label>Dil</label><select id="lp-f-lang"><option value="tr" ${!r || r.lang === 'tr' ? 'selected' : ''}>TR (öncelikli)</option><option value="en" ${r && r.lang === 'en' ? 'selected' : ''}>EN</option></select></div>
         </div>
         <div class="fg"><label>Kapak Görseli URL <span style="color:var(--text3);font-weight:400;text-transform:none;font-size:11px;">(YouTube için otomatik)</span></label><input type="url" id="lp-f-thumb" value="${r ? esc(r.thumb || '') : ''}" placeholder="https://...jpg"></div>
-        <div class="fg"><label>Not (opsiyonel)</label><input type="text" id="lp-f-note" value="${r ? esc(r.note || '') : ''}" placeholder="Kısa not"></div>
+        <div class="fg"><label>Not / Açıklama (opsiyonel)</label><input type="text" id="lp-f-note" value="${r ? esc(r.note || '') : ''}" placeholder="Kısa not veya otomatik açıklama"></div>
         <label style="display:flex;align-items:center;gap:8px;font-size:13px;color:var(--text2);cursor:pointer;"><input type="checkbox" id="lp-f-later" ${r && r.later ? 'checked' : ''} style="width:auto;"> "Sonra izle" olarak işaretle (ikincil / opsiyonel)</label>`;
       }
       body.innerHTML = html;
@@ -3464,6 +3468,38 @@ create policy "own learning_state" on learning_state
       setTimeout(() => { const t = document.getElementById('lp-f-title'); if (t) t.focus(); }, 50);
     }
     function closeEditor() { const m = document.getElementById('lp-modal'); if (m) m.style.display = 'none'; lpEdit = null; }
+
+    // Kaynak editöründe "Getir": başlık/kapak/açıklamayı otomatik doldurur (boş alanlar).
+    async function lpFetchMeta() {
+      const urlEl = document.getElementById('lp-f-url'); if (!urlEl) return;
+      const raw = (urlEl.value || '').trim(); if (!raw) { toast('Önce link yapıştır.', 'err'); return; }
+      const url = ensureHttp(raw);
+      const btn = document.getElementById('lp-fetch-btn'); const old = btn ? btn.textContent : '';
+      if (btn) { btn.textContent = '…'; btn.disabled = true; }
+      const setIfEmpty = (id, v) => { const e = document.getElementById(id); if (e && v && !e.value.trim()) e.value = v; };
+      try {
+        const ytId = getYouTubeID(url), plId = getPlaylistID(url);
+        if (ytId || plId) {
+          const title = await fetchYouTubeTitle(url);
+          if (title) setIfEmpty('lp-f-title', title);
+          if (ytId) setIfEmpty('lp-f-thumb', `https://img.youtube.com/vi/${ytId}/hqdefault.jpg`);
+          const kindEl = document.getElementById('lp-f-kind');
+          if (kindEl && kindEl.value === LP_KIND_LIST[0]) kindEl.value = plId ? 'playlist' : 'video';
+        } else {
+          const res = await fetch(`https://api.microlink.io?url=${encodeURIComponent(url)}`);
+          const data = await res.json();
+          const d = (data && data.data) ? data.data : {};
+          if (d.title) setIfEmpty('lp-f-title', d.title);
+          const img = (d.image && d.image.url) || (d.logo && d.logo.url) || (d.screenshot && d.screenshot.url) || '';
+          if (img) setIfEmpty('lp-f-thumb', img);
+          if (d.description) setIfEmpty('lp-f-note', String(d.description).slice(0, 300));
+        }
+        urlEl.value = url;
+        toast('Bilgiler getirildi.', 'ok');
+      } catch (e) { toast('Getirilemedi: ' + (e.message || 'hata'), 'err'); }
+      if (btn) { btn.textContent = old || 'Getir'; btn.disabled = false; }
+    }
+
     async function saveEditor() {
       if (!lpEdit) return;
       const val = id => { const e = document.getElementById(id); return e ? e.value.trim() : ''; };
@@ -3490,89 +3526,8 @@ create policy "own learning_state" on learning_state
       closeEditor(); renderLearning(); renderStats(); await saveLearning(); toast('Kaydedildi.', 'ok');
     }
 
-    // ── LEARNING: DEFAULT CONTENT (Malware Analizi) ───────────────────────
-    function defaultLearnState() { return { paths: [defaultMalwarePath()] }; }
-    function defaultMalwarePath() {
-      const R = (title, url, kind, lang, later, note, thumb) => ({ id: lpId(), title, url, kind, lang: lang || 'tr', later: !!later, note: note || '', thumb: thumb || '', done: false });
-      const ST = (title, desc, resources) => ({ id: lpId(), title, desc, resources });
-      const YT = id => `https://img.youtube.com/vi/${id}/hqdefault.jpg`;
-      return {
-        id: lpId(), title: 'Malware Analizi',
-        desc: 'Sıfırdan temel malware analisti seviyesine giden sıralı yol. Türkçe kaynaklar önceliklidir; İngilizce içerikler "Sonra izle" olarak işaretlidir. Önerilen sıra: Assembly → Ghidra/x64dbg → Malware Unicorn → OALabs → Practical Malware Analysis → gerçek örnek analizi (~3-6 ay). Oynatma listelerinde "Videoları yükle" ile her videoyu tek tek görüp işaretleyebilirsin.',
-        steps: [
-          ST('Genel Kurslar & Oynatma Listeleri', 'Yola başlamadan baştan sona takip edeceğin bir kurs seç. Türkçe olanlarla başla; İngilizce oynatma listelerini referans / "sonra izle" olarak kullan. Playlist kartındaki "Videoları yükle" ile içindeki videolar tek tek listelenir.', [
-            R('Siber Güvenlik Akademisi — Malware Analysis (Analiz) Eğitimleri', 'https://www.youtube.com/playlist?list=PLRzqj5IrfWN4M4e1XEbKc1E9lF1aInt3y', 'playlist', 'tr', false, 'Türkçe, baştan sona izlenecek ana seri', YT('xGEV7NKqZ9k')),
-            R('Udemy — Zararlı Yazılım Analizi (Malware Analysis)', 'https://www.udemy.com/course/zararl-yazalm-analizi-malware-analysis/', 'course', 'tr', false, 'Türkçe kapsamlı kurs'),
-            R('Siber Yıldız — Malware Analizi Videoları', 'https://www.youtube.com/results?search_query=siber+y%C4%B1ld%C4%B1z+malware+analizi', 'video', 'tr', false, 'Türkçe; kanaldan ilgili videolar'),
-            R('Guided Hacking — Practical Malware Analysis Tutorials', 'https://www.youtube.com/playlist?list=PLt9cUwGw6CYEpBwasTz7WWgphfRWof0_O', 'playlist', 'en', true, 'PMA kitabını takip eden seri', YT('lwUve1VdFYs')),
-            R('John Hammond — Malware', 'https://www.youtube.com/playlist?list=PL1H1sBF1VAKWMn_3QPddayIypbbITTGZv', 'playlist', 'en', true, '', YT('fV-pTu5T59M')),
-            R('CryptoW@re — Analysing Real Malware Samples', 'https://www.youtube.com/playlist?list=PLR_k_vG4Lz0FaCRrbWf5pWlS6Q9Hnw9On', 'playlist', 'en', true, '', YT('1_oSqb-z3Kk')),
-            R('MyDFIR — Cybersecurity SOC Analyst Hands-On Labs', 'https://www.youtube.com/playlist?list=PLG6KGSNK4PuDdqYkOuIlAoNmwtLg5wyYJ', 'playlist', 'en', true, 'SOC / DFIR pratiği', YT('0DuJnPxKfBg')),
-          ]),
-          ST('Temel Bilgisayar & İşletim Sistemi Bilgisi', 'Windows nasıl çalışır öğren: Process, Thread, DLL, Registry, Windows servisleri ve PE (Portable Executable) dosya formatı. "Bir program çalışınca ne oluyor?" sorusuna net cevap verebilmelisin.', [
-            R('Microsoft Learn — Win32 / Windows API', 'https://learn.microsoft.com/en-us/windows/win32/', 'doc', 'en', false, 'Resmî referans'),
-            R('Microsoft — Processes and Threads', 'https://learn.microsoft.com/en-us/windows/win32/procthread/processes-and-threads', 'doc', 'en', false, ''),
-            R('Microsoft — Dynamic-Link Libraries (DLL)', 'https://learn.microsoft.com/en-us/windows/win32/dlls/dynamic-link-libraries', 'doc', 'en', false, ''),
-            R('Corkami — PE101 (PE formatı görsel rehber)', 'https://github.com/corkami/pics/blob/master/binary/pe101/README.md', 'doc', 'en', false, 'PE header için git-bak referansı'),
-            R('Practical Malware Analysis (ilk bölümler)', 'https://nostarch.com/malware', 'book', 'en', false, ''),
-          ]),
-          ST('C ve Assembly Temelleri', 'C: pointer, struct, memory allocation, stack/heap, fonksiyon çağrısı. x86/x64 Assembly: register’lar, stack, calling convention, JMP/CALL/RET. Disassembly’de gördüğünü okuyabilmen için şart.', [
-            R('OpenSecurityTraining2 — Intro to x86', 'https://opensecuritytraining.info/IntroX86.html', 'course', 'en', false, 'Güncel platform: ost2.fyi'),
-            R('OpenSecurityTraining2 — Welcome / RE for Windows', 'https://opensecuritytraining.info/Welcome.html', 'course', 'en', false, ''),
-            R('Felix Cloutier — x86/x64 Instruction Reference', 'https://www.felixcloutier.com/x86/', 'doc', 'en', false, 'Komut arama referansı'),
-            R('OST2 (güncel kurs platformu)', 'https://ost2.fyi/', 'site', 'en', true, ''),
-          ]),
-          ST('Reverse Engineering Temelleri', 'Disassembly, debugging, breakpoint, call stack, import table, string analizi. Araçları kur ve üzerlerinde gez: Ghidra (statik), x64dbg (dinamik).', [
-            R('Ghidra (NSA, ücretsiz disassembler/decompiler)', 'https://ghidra-sre.org', 'tool', 'en', false, ''),
-            R('x64dbg (Windows debugger)', 'https://x64dbg.com', 'tool', 'en', false, ''),
-            R('Low Level — Every Level of Reverse Engineering Explained', 'https://youtu.be/8vk5z9VAaBQ', 'video', 'en', true, 'Genel bakış'),
-            R('OALabs — YouTube', 'https://www.youtube.com/@OALABS', 'video', 'en', true, 'Gerçek malware üzerinden RE'),
-            R('OALabs — Research Blog & Notes', 'https://research.openanalysis.net/', 'site', 'en', true, ''),
-            R('crackmes.one (RE pratiği)', 'https://crackmes.one', 'practice', 'en', false, ''),
-          ]),
-          ST('Malware Analizi Temelleri (Statik & Dinamik)', 'Statik analiz: strings, PE header, imports, resources (PEStudio, DIE, Ghidra). Dinamik analiz: Process Monitor, Process Explorer, TCPView, Wireshark ile davranış izleme.', [
-            R('Malware Unicorn — RE101', 'https://malwareunicorn.org/workshops/re101.html', 'course', 'en', false, 'Başlangıç için mükemmel, ücretsiz'),
-            R('Malware Unicorn — RE102', 'https://malwareunicorn.org/workshops/re102.html', 'course', 'en', false, ''),
-            R('PEStudio (statik PE inceleme)', 'https://www.winitor.com', 'tool', 'en', false, ''),
-            R('Detect It Easy / DIE (packer & derleyici tespiti)', 'https://github.com/horsicq/Detect-It-Easy', 'tool', 'en', false, ''),
-            R('Sysinternals (Procmon, Process Explorer, TCPView)', 'https://learn.microsoft.com/en-us/sysinternals/', 'tool', 'en', false, ''),
-            R('Wireshark (ağ trafiği analizi)', 'https://www.wireshark.org', 'tool', 'en', false, ''),
-          ]),
-          ST('Malware Türleri', 'Her birinin davranışını öğren ve örnekle eşleştir: RAT, Stealer, Downloader, Dropper, Loader, Rootkit, Ransomware, Banker Trojan.', [
-            R('MITRE ATT&CK (teknik & taktik matrisi)', 'https://attack.mitre.org', 'site', 'en', false, ''),
-            R('Malpedia (malware ailesi ansiklopedisi)', 'https://malpedia.caad.fkie.fraunhofer.de', 'site', 'en', false, ''),
-            R('MalwareBazaar — etikete göre örnekler', 'https://bazaar.abuse.ch', 'site', 'en', true, 'Tür/aileye göre gerçek örnekler'),
-          ]),
-          ST('Güvenli Analiz Ortamı (Lab) Kur', 'ASLA ana makinende çalıştırma. Sanallaştırma kullan. Önerilen: Windows 10 VM + snapshot + host-only network + internet KAPALI. Hazır dağıtımlar: FLARE-VM, REMnux. Gerçek zararlıyı sadece izole lab’da çalıştır.', [
-            R('LetsDefend — Building a Malware Analysis Lab', 'https://www.youtube.com/playlist?list=PLgLVwK69OPbxA37i0Hn1S_Tj-eWNj2JYu', 'playlist', 'en', false, 'Adım adım lab kurulumu', YT('_ZRRipGJMbI')),
-            R('VirtualBox', 'https://www.virtualbox.org', 'tool', 'en', false, ''),
-            R('VMware Workstation', 'https://www.vmware.com/products/workstation-pro.html', 'tool', 'en', false, ''),
-            R('FLARE-VM (Windows analiz araç seti)', 'https://github.com/mandiant/flare-vm', 'tool', 'en', false, ''),
-            R('REMnux (Linux analiz dağıtımı)', 'https://remnux.org', 'tool', 'en', false, ''),
-          ]),
-          ST('Pratik Platformlar', 'Öğrendiğini gerçek örnek / trafik üzerinde uygula; zorluğu başlangıç → orta → ileri sırayla artır.', [
-            R('Malware-Traffic-Analysis.net (başlangıç, ağ)', 'https://www.malware-traffic-analysis.net', 'practice', 'en', false, ''),
-            R('ANY.RUN (etkileşimli sandbox)', 'https://any.run', 'practice', 'en', false, ''),
-            R('HackTheBox Academy — Intro to Malware Analysis', 'https://academy.hackthebox.com', 'practice', 'en', false, ''),
-            R('TryHackMe — Malware Analysis', 'https://tryhackme.com', 'practice', 'en', false, ''),
-            R('MalwareBazaar (ileri, gerçek örnek)', 'https://bazaar.abuse.ch', 'practice', 'en', false, ''),
-            R('VirusTotal', 'https://www.virustotal.com', 'site', 'en', false, ''),
-            R('Hybrid Analysis', 'https://www.hybrid-analysis.com', 'site', 'en', false, ''),
-            R('Triage (tria.ge sandbox)', 'https://tria.ge', 'site', 'en', false, ''),
-          ]),
-          ST('İleri: PE Injection & Anti-Analysis', 'Process / PE injection, packing/unpacking, anti-analiz (evasion) teknikleri. Malware’in kendini gizleme yöntemlerini öğren.', [
-            R('Malware Unicorn — PE Injection Workshop', 'https://malwareunicorn.org/workshops/peinjection.html', 'course', 'en', false, ''),
-            R('Unprotect Project (evasion teknikleri ansiklopedisi)', 'https://unprotect.it', 'site', 'en', false, ''),
-          ]),
-          ST('Kitaplar', 'Referans kitaplar. Başlangıç: Practical Malware Analysis, Practical Reverse Engineering. İleri: Windows Internals, Malware Analyst’s Cookbook.', [
-            R('Practical Malware Analysis', 'https://nostarch.com/malware', 'book', 'en', false, 'Alanın temel kitabı'),
-            R('Practical Reverse Engineering', 'https://www.goodreads.com/book/show/18933769-practical-reverse-engineering', 'book', 'en', false, ''),
-            R('Windows Internals', 'https://learn.microsoft.com/en-us/sysinternals/resources/windows-internals', 'book', 'en', true, ''),
-            R('Malware Analyst’s Cookbook', 'https://www.goodreads.com/book/show/9418194-malware-analyst-s-cookbook-and-dvd', 'book', 'en', true, ''),
-          ]),
-        ]
-      };
-    }
+    // ── LEARNING: DEFAULT (boş) ─────────────────────────────────────────
+    function defaultLearnState() { return { paths: [] }; }
 
     init();
   </script>
