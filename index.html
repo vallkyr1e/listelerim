@@ -1478,6 +1478,10 @@
       padding: 8px;
     }
 
+    .lp-path.collapsed .lp-steps { display: none; }
+    .lp-path-collapse svg { transition: transform .15s ease; }
+    .lp-path:not(.collapsed) .lp-path-collapse svg { transform: rotate(90deg); }
+
     .lp-step {
       border: 1px solid var(--border);
       border-radius: 10px;
@@ -3110,6 +3114,7 @@ create policy "own learning_state" on learning_state
     let lpEdit = null;           // active editor context
     let lpInited = false;        // first-step auto-open done
     const lpOpen = new Set();    // open step ids
+    const lpPathCollapsed = new Set();  // collapsed path ids
     let _lpc = 0;
     function lpId() { _lpc++; return 'lp' + Date.now().toString(36) + _lpc.toString(36); }
     function lpLSKey() { return 'listelerim-learning-' + (S.uid || 'anon'); }
@@ -3199,17 +3204,21 @@ create policy "own learning_state" on learning_state
 
     function lpPathHTML(p) {
       const st = lpStats(p);
+      const collapsed = lpPathCollapsed.has(p.id);
       const steps = (p.steps || []).map((s, i) => lpStepHTML(p, s, i)).join('') ||
         `<div class="lp-empty" style="padding:1.75rem;">Henüz adım yok. <button class="btn btn-xs" onclick="lpAddStep('${p.id}')">+ Adım ekle</button></div>`;
-      return `<div class="lp-path">
+      return `<div class="lp-path ${collapsed ? 'collapsed' : ''}" id="lp-path-${p.id}">
       <div class="lp-path-head">
         <div class="lp-path-top">
+          <button class="lp-res-btn lp-path-collapse" onclick="lpTogglePath('${p.id}')" title="Küçült / genişlet">${LP_IC.chev}</button>
           <div class="lp-path-icon">${LP_IC.path}</div>
           <div class="lp-path-meta">
             <div class="lp-path-title">${esc(p.title)}</div>
             ${p.desc ? `<div class="lp-path-desc">${esc(p.desc)}</div>` : ''}
           </div>
           <div class="lp-path-actions">
+            <button class="lp-res-btn" onclick="lpMovePath('${p.id}',-1)" title="Yukarı taşı">${LP_IC.up}</button>
+            <button class="lp-res-btn" onclick="lpMovePath('${p.id}',1)" title="Aşağı taşı">${LP_IC.down}</button>
             <button class="btn btn-xs" onclick="lpAddStep('${p.id}')">+ Adım</button>
             <button class="lp-res-btn" onclick="lpEditPath('${p.id}')" title="Yolu düzenle">${LP_IC.edit}</button>
             <button class="lp-res-btn del" onclick="lpDeletePath('${p.id}')" title="Yolu sil">${LP_IC.trash}</button>
@@ -3362,6 +3371,8 @@ create policy "own learning_state" on learning_state
     function lpEditStep(pid, sid) { openEditor('step', { pid, sid }); }
     async function lpDeleteStep(pid, sid) { if (!confirm('Bu adımı silmek istediğine emin misin?')) return; const p = lpFindPath(pid); if (p) p.steps = p.steps.filter(s => s.id !== sid); renderLearning(); renderStats(); await saveLearning(); toast('Adım silindi.', 'ok'); }
     async function lpMoveStep(pid, sid, dir) { const p = lpFindPath(pid); if (!p) return; const i = p.steps.findIndex(s => s.id === sid); const j = i + dir; if (j < 0 || j >= p.steps.length) return;[p.steps[i], p.steps[j]] = [p.steps[j], p.steps[i]]; renderLearning(); await saveLearning(); }
+    function lpTogglePath(pid) { if (lpPathCollapsed.has(pid)) lpPathCollapsed.delete(pid); else lpPathCollapsed.add(pid); const el = document.getElementById('lp-path-' + pid); if (el) el.classList.toggle('collapsed'); }
+    async function lpMovePath(pid, dir) { const arr = learnState && learnState.paths; if (!arr) return; const i = arr.findIndex(p => p.id === pid); const j = i + dir; if (i < 0 || j < 0 || j >= arr.length) return;[arr[i], arr[j]] = [arr[j], arr[i]]; renderLearning(); renderStats(); await saveLearning(); }
     function lpAddRes(pid, sid) { openEditor('resource', { pid, sid }); }
     function lpEditRes(pid, sid, rid) { openEditor('resource', { pid, sid, rid }); }
     async function lpDeleteRes(pid, sid, rid) { if (!confirm('Bu kaynağı silmek istediğine emin misin?')) return; const s = lpFindStep(pid, sid); if (s) s.resources = s.resources.filter(r => r.id !== rid); renderLearning(); renderStats(); await saveLearning(); toast('Kaynak silindi.', 'ok'); }
